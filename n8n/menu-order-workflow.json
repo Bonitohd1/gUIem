@@ -38,7 +38,7 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "DÁN_GOOGLE_SHEET_ID",
+          "value": "1vcDnySl6DbO0Ph58MQD2Ys6hapSCQVOCiS0aMxWvXR4",
           "mode": "id"
         },
         "sheetName": {
@@ -61,7 +61,7 @@
         680,
         300
       ],
-      "notes": "Nối credential Google Sheets OAuth2. Tab 'Orders', header hàng 1: at, shop, customerName, customerPhone, itemsText, count, total, note, zaloText"
+      "notes": "Đã gắn sẵn Sheet 'An Yên — Orders'. Chỉ cần nối credential Google. Mở node → ô Sheet chọn tab trong dropdown (đổi tên tab thành 'Orders' nếu muốn khớp). Header hàng 1 đã có đủ 9 cột."
     },
     {
       "parameters": {
