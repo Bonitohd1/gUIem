@@ -1,0 +1,13 @@
+{
+  "name": "anyen-zalo-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bot zca-js đẩy đơn An Yên vào nhóm Zalo (n8n gọi /send)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "express": "^4.19.2",
+    "zca-js": "latest"
+  }
+}
