@@ -1,5 +1,5 @@
 {
-  "name": "Menu Đặt Món → Sheet + Zalo nhóm",
+  "name": "An Yên — Đặt món → Sheet + Zalo nhóm",
   "nodes": [
     {
       "parameters": {
@@ -12,27 +12,33 @@
       "name": "Webhook nhận đơn",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "webhookId": "menu-order"
     },
     {
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Lấy đơn từ body webhook (app gửi JSON lên đây)\nconst order = ($input.first().json.body) || $input.first().json || {};\nconst vnd = n => (Number(n)||0).toLocaleString('vi-VN') + 'đ';\n\nconst lines = [];\nlines.push('🧾 ĐƠN MỚI — ' + (order.shop || ''));\nlines.push('');\n(order.items || []).forEach(it => {\n  lines.push('• ' + it.name + ' × ' + it.qty + '  (' + vnd(it.lineTotal) + ')');\n});\nlines.push('—');\nlines.push('Tổng: ' + vnd(order.total) + '  (' + (order.count || 0) + ' món)');\nconst cus = order.customer || {};\nif (cus.name || cus.phone) lines.push('Khách: ' + [cus.name, cus.phone].filter(Boolean).join(' · '));\nif (order.note) lines.push('Ghi chú: ' + order.note);\n\nconst zaloText = lines.join('\\n');\nconst itemsText = (order.items || []).map(i => i.name + ' x' + i.qty).join(', ');\n\nreturn [{ json: {\n  at: order.at || new Date().toISOString(),\n  shop: order.shop || '',\n  customerName: cus.name || '',\n  customerPhone: cus.phone || '',\n  itemsText: itemsText,\n  count: order.count || 0,\n  total: order.total || 0,\n  note: order.note || '',\n  zaloText: zaloText\n} }];"
+        "jsCode": "// Lấy đơn từ body webhook (app An Yên gửi lên)\nconst order = ($input.first().json.body) || $input.first().json || {};\nconst vnd = n => (Number(n)||0).toLocaleString('vi-VN') + 'đ';\nconst lines = [];\nlines.push('🧾 ĐƠN MỚI — ' + (order.shop || 'An Yên'));\nlines.push('');\n(order.items || []).forEach(it => {\n  const opt = it.opts ? '  (' + it.opts + ')' : '';\n  lines.push('• ' + it.name + ' × ' + it.qty + opt + '  ' + vnd(it.lineTotal));\n});\nlines.push('—');\nlines.push('Tổng: ' + vnd(order.total) + '  (' + (order.count || 0) + ' món)');\nconst cus = order.customer || {};\nif (cus.name || cus.phone) lines.push('Khách: ' + [cus.name, cus.phone].filter(Boolean).join(' · '));\nif (order.note) lines.push('Ghi chú: ' + order.note);\nconst zaloText = lines.join('\\n');\nconst itemsText = (order.items || []).map(i => i.name + (i.opts ? '('+i.opts+')' : '') + ' x' + i.qty).join(', ');\nreturn [{ json: {\n  at: order.at || new Date().toISOString(),\n  shop: order.shop || 'An Yên',\n  customerName: cus.name || '',\n  customerPhone: cus.phone || '',\n  itemsText: itemsText,\n  count: order.count || 0,\n  total: order.total || 0,\n  note: order.note || '',\n  zaloText: zaloText\n} }];"
       },
       "id": "code-format",
       "name": "Soạn đơn",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [460, 300]
+      "position": [
+        460,
+        300
+      ]
     },
     {
       "parameters": {
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "DÁN_GOOGLE_SHEET_ID_VÀO_ĐÂY",
+          "value": "DÁN_GOOGLE_SHEET_ID",
           "mode": "id"
         },
         "sheetName": {
@@ -51,13 +57,16 @@
       "name": "Ghi Google Sheet",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
-      "position": [680, 300],
-      "notes": "Credential Google Sheets OAuth2 anh tự nối. Header hàng 1 của sheet Orders đặt đúng: at, shop, customerName, customerPhone, itemsText, count, total, note, zaloText"
+      "position": [
+        680,
+        300
+      ],
+      "notes": "Nối credential Google Sheets OAuth2. Tab 'Orders', header hàng 1: at, shop, customerName, customerPhone, itemsText, count, total, note, zaloText"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "https://ĐỔI-THÀNH-ENDPOINT-ZALO-BOT-CỦA-ANH",
+        "url": "https://ĐỔI-THÀNH-ENDPOINT-BOT-ZALO",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"groupId\": \"DÁN_ID_NHÓM_ZALO\",\n  \"message\": {{ JSON.stringify($json.zaloText) }}\n}",
@@ -67,8 +76,11 @@
       "name": "Đẩy nhóm Zalo",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [900, 300],
-      "notes": "Zalo KHÔNG có API chính thức đẩy vào nhóm chat thường. Node này POST tới endpoint bot Zalo của anh (vd service chạy zca-js self-host). Dùng SĐT phụ để tránh rủi ro khóa số. Nếu dùng Telegram nhóm thay thế: đổi URL thành https://api.telegram.org/bot<TOKEN>/sendMessage và body { chat_id, text }."
+      "position": [
+        900,
+        300
+      ],
+      "notes": "Zalo không có API chính thức đẩy nhóm. Trỏ node này vào bot Zalo self-host (zca-js, dùng SĐT phụ). Muốn an toàn khỏi khóa số: đổi URL thành https://api.telegram.org/bot<TOKEN>/sendMessage và body { chat_id, text: {{$json.zaloText}} }."
     },
     {
       "parameters": {
@@ -80,23 +92,60 @@
       "name": "Trả về app",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1120, 300]
+      "position": [
+        1120,
+        300
+      ]
     }
   ],
   "connections": {
     "Webhook nhận đơn": {
-      "main": [[{ "node": "Soạn đơn", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Soạn đơn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Soạn đơn": {
-      "main": [[{ "node": "Ghi Google Sheet", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Ghi Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Ghi Google Sheet": {
-      "main": [[{ "node": "Đẩy nhóm Zalo", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Đẩy nhóm Zalo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Đẩy nhóm Zalo": {
-      "main": [[{ "node": "Trả về app", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Trả về app",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "pinData": {}
 }
