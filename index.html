@@ -309,16 +309,15 @@ button,[role="button"],a[data-path]{ touch-action:manipulation; }
 /* ===== desktop / PC interface ===== */
 .gu-pc-deco{ display:none; }
 @media (min-width:1024px){
-  /* hình cô gái làm nền full, app nổi 1 bên phải */
+  /* nền full hình cô gái (GPT 16:9), app nổi Ở GIỮA */
   html body{ background:
-     url("/desktop-bg.jpg?v=1") center center / cover no-repeat fixed,
+     url("/desktop-bg.jpg?v=2") center center / cover no-repeat fixed,
      linear-gradient(158deg,#fff4f7 0%, #ffe6ee 44%, #ffcfe0 100%) fixed !important; }
-  [id^="screen-"] > main{ margin-left:auto !important; margin-right:clamp(40px,6vw,130px) !important; max-width:36rem !important;
-     box-shadow:0 60px 150px -40px rgba(120,8,36,.55), 0 0 0 1px rgba(233,72,106,.08); }
-  header.fixed{ left:auto !important; right:clamp(40px,6vw,130px) !important; transform:none !important; width:36rem !important; }
-  nav.fixed{ left:auto !important; right:clamp(40px,6vw,130px) !important; transform:none !important; width:36rem !important; border-radius:22px 22px 0 0; overflow:hidden; }
-  .gu-bot-btn{ left:auto !important; right:calc(clamp(40px,6vw,130px) + 36rem + 16px) !important; bottom:150px !important; }
-  .gu-bot-panel{ left:auto !important; right:calc(clamp(40px,6vw,130px) + 36rem + 16px) !important; }
+  [id^="screen-"] > main{ box-shadow:0 60px 150px -40px rgba(120,8,36,.5), 0 0 0 1px rgba(233,72,106,.08); }
+  header.fixed{ left:50% !important; transform:translateX(-50%) !important; width:36rem !important; }
+  nav.fixed{ left:50% !important; transform:translateX(-50%) !important; width:36rem !important; border-radius:22px 22px 0 0; overflow:hidden; }
+  .gu-bot-btn{ left:auto !important; right:calc(50vw - 18rem - 66px) !important; bottom:150px !important; }
+  .gu-bot-panel{ left:auto !important; right:calc(50vw - 18rem - 66px) !important; }
   .gu-pc-deco{ display:none !important; }
 }
 /* ===== end step/pc layer ===== */
