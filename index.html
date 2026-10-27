@@ -3436,7 +3436,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 /* progress tracker */
 #gu-admin .ga-track{ display:flex; align-items:center; margin:13px 2px 3px; }
 #gu-admin .ga-step{ display:flex; flex-direction:column; align-items:center; gap:4px; position:relative; }
-#gu-admin .ga-dot{ width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,.1); border:1.5px solid rgba(255,255,255,.2); color:transparent;
+#gu-admin .ga-dot{ width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,.08); border:1.5px solid rgba(255,255,255,.2); color:rgba(255,255,255,.32);
   display:flex; align-items:center; justify-content:center; font-size:13px; transition:.2s; z-index:1; }
 #gu-admin .ga-dot .material-symbols-outlined{ font-size:14px; }
 #gu-admin .ga-step.done .ga-dot{ background:#2fae6a; border-color:#2fae6a; color:#06281a; }
@@ -3522,7 +3522,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 
   // Vòng đời đơn: (mới) → making → done → delivered → received(khách xác nhận = Hoàn tất)
   var STG=[{k:'making',t:'Đang pha',c:'#e9486a',ic:'local_cafe'},{k:'done',t:'Xong',c:'#f0a500',ic:'done'},{k:'delivered',t:'Đã giao',c:'#5b9cff',ic:'two_wheeler'}];
-  var STEPS=[{t:'Pha',ic:'local_cafe'},{t:'Xong',ic:'done'},{t:'Giao',ic:'two_wheeler'},{t:'Nhận',ic:'verified'}];
+  var STEPS=[{t:'Pha',ic:'local_cafe'},{t:'Xong',ic:'room_service'},{t:'Giao',ic:'two_wheeler'},{t:'Nhận',ic:'verified'}];
   var SIDX={'':0,making:1,done:2,delivered:3,received:4};
   var PILL={'':{t:'Chờ xử lý',c:'#f0a500'},making:{t:'Đang pha',c:'#e9486a'},done:{t:'Đã xong',c:'#f0a500'},delivered:{t:'Đã giao',c:'#5b9cff'},received:{t:'Hoàn tất',c:'#2fae6a'}};
   var FILTER='all';
