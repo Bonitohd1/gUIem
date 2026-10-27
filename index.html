@@ -228,6 +228,34 @@ header .w-11.h-11.rounded-full img{ width:100% !important; height:100% !importan
 .gu-bot-cta{ width:100%; margin-top:10px; padding:11px; border-radius:12px; border:0; background:#e9486a; color:#fff; font:700 13px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
 .gu-bot-x{ margin-left:auto; background:0; border:0; color:#b06a7e; cursor:pointer; display:flex; align-items:center; }
 /* ===== end care layer ===== */
+/* ===== zodiac (cung hoàng đạo) ===== */
+.gu-zbtn{ width:100%; margin-top:8px; padding:11px; border-radius:12px; border:0; background:#fff; color:#8a1e42; border:1.5px solid #f4d7e0; font:700 13px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+.gu-zod{ position:fixed; inset:0; z-index:1320; background:rgba(45,12,26,.55); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:20px; }
+.gu-zod.on{ display:flex; }
+.gu-zod-card{ width:100%; max-width:380px; max-height:88vh; overflow-y:auto; background:#fff7f9; border-radius:26px; box-shadow:0 30px 70px -20px rgba(180,40,90,.6); padding:22px 20px; position:relative; transform:scale(.92); opacity:0; transition:transform .4s var(--ease),opacity .3s; }
+.gu-zod.on .gu-zod-card{ transform:none; opacity:1; }
+.gu-zod-h{ font-family:'Fraunces',serif; font-weight:600; font-size:21px; color:#241019; text-align:center; }
+.gu-zod-sub{ font:500 12.5px 'Plus Jakarta Sans',sans-serif; color:#8a6673; text-align:center; margin-top:3px; }
+.gu-zod-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:16px; }
+.gu-zod-item{ background:#fff; border:1.5px solid #f4d7e0; border-radius:16px; padding:11px 6px; text-align:center; cursor:pointer; transition:transform .15s,border-color .2s; }
+.gu-zod-item:active{ transform:scale(.94); }
+.gu-zod-item .e{ font-size:27px; line-height:1; }
+.gu-zod-item .n{ font:600 11.5px 'Plus Jakarta Sans',sans-serif; color:#5a2a3a; margin-top:4px; display:block; }
+.gu-zod-item .d{ font:500 9px 'Plus Jakarta Sans',sans-serif; color:#b06a7e; display:block; }
+.gu-zod-res{ text-align:center; }
+.gu-zod-mascot{ font-size:66px; line-height:1; filter:drop-shadow(0 8px 14px rgba(233,72,106,.4)); }
+.gu-zod-name{ font-family:'Fraunces',serif; font-weight:700; font-size:25px; color:#e9486a; margin-top:8px; }
+.gu-zod-range{ font:600 11px 'Plus Jakarta Sans',sans-serif; color:#b06a7e; }
+.gu-zod-horo{ background:#ffe3ec; border-radius:16px; padding:14px; font:500 14px/1.6 'Plus Jakarta Sans',sans-serif; color:#5a2a3a; margin-top:14px; }
+.gu-zod-drink{ margin-top:12px; font:600 13.5px 'Plus Jakarta Sans',sans-serif; color:#8a1e42; }
+.gu-zod-actions{ display:flex; gap:10px; margin-top:16px; }
+.gu-zod-btn{ flex:1; padding:12px; border-radius:999px; border:0; font:700 13.5px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+.gu-zod-btn.pri{ background:#e9486a; color:#fff; box-shadow:0 10px 22px -8px rgba(233,72,106,.6); }
+.gu-zod-btn.sec{ background:#fff; color:#8a1e42; border:1.5px solid #f4d7e0; }
+.gu-zod-x{ position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:50%; background:#ffe3ec; color:#8a1e42; border:0; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; }
+.gu-zod-back{ font:600 12px 'Plus Jakarta Sans',sans-serif; color:#b06a7e; background:0; border:0; cursor:pointer; margin-top:14px; }
+/* ===== end zodiac layer ===== */
+
 
 
 
@@ -2976,6 +3004,56 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       requestAnimationFrame(function(){ t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
       setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ if(t.parentNode)t.parentNode.removeChild(t); },500); }, 5200);
     }, 70000);
+  });
+})();
+</script>
+<script>
+/* gUlEm: cung hoàng đạo — linh vật + lời hôm nay + đồ uống hợp cung + chia sẻ */
+(function(){
+  function ready(fn){ if(document.readyState!=='loading')fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  var Z=[
+   {e:'🐏',n:'Bạch Dương',d:'21/3–19/4',h:'Năng lượng hôm nay bùng nổ — làm ngay điều bạn đã trì hoãn nào!',dr:'Americano chanh vàng'},
+   {e:'🐂',n:'Kim Ngưu',d:'20/4–20/5',h:'Chậm lại một nhịp, tận hưởng những điều nhỏ xinh quanh mình.',dr:'Cà phê sữa'},
+   {e:'👯',n:'Song Tử',d:'21/5–20/6',h:'Một cuộc trò chuyện bất ngờ mang đến niềm vui — cứ mở lòng nhé!',dr:'Trà sữa xoài'},
+   {e:'🦀',n:'Cự Giải',d:'21/6–22/7',h:'Hôm nay hợp để tự chăm mình — ấm áp từ bên trong.',dr:'Trà nhài kem sữa'},
+   {e:'🦁',n:'Sư Tử',d:'23/7–22/8',h:'Toả sáng theo cách của bạn, mọi ánh nhìn đều hướng về!',dr:'Cà phê muối'},
+   {e:'🌾',n:'Xử Nữ',d:'23/8–22/9',h:'Mọi thứ vào guồng khi bạn tỉ mỉ — tin vào từng chi tiết nhỏ.',dr:'Trà Earl Grey kem sữa'},
+   {e:'⚖️',n:'Thiên Bình',d:'23/9–22/10',h:'Cân bằng là chìa khoá — dành chút thời gian cho riêng mình.',dr:'Trà nhài kem sữa'},
+   {e:'🦂',n:'Bọ Cạp',d:'23/10–21/11',h:'Trực giác đang rất mạnh — tin vào cảm nhận của chính bạn.',dr:'Cà phê muối'},
+   {e:'🏹',n:'Nhân Mã',d:'22/11–21/12',h:'Một chuyến đi nhỏ hay ý tưởng mới đang vẫy gọi bạn!',dr:'Hoa quả ép theo mùa'},
+   {e:'🐐',n:'Ma Kết',d:'22/12–19/1',h:'Kiên trì hôm nay, thành quả ngọt ngào đang chờ phía trước.',dr:'Cà phê sữa'},
+   {e:'🏺',n:'Bảo Bình',d:'20/1–18/2',h:'Ý tưởng khác biệt của bạn hôm nay sẽ khiến mọi người bất ngờ đấy!',dr:'Hoa quả ép theo mùa'},
+   {e:'🐟',n:'Song Ngư',d:'19/2–20/3',h:'Thả hồn mơ mộng một chút — cảm hứng sẽ tự tìm đến bạn.',dr:'Trà sữa xoài'}
+  ];
+  ready(function(){
+    var ov=document.createElement('div'); ov.className='gu-zod';
+    ov.innerHTML='<div class="gu-zod-card"><button class="gu-zod-x"><span class="material-symbols-outlined" style="font-size:19px">close</span></button><div class="gu-zod-body"></div></div>';
+    document.body.appendChild(ov);
+    var body=ov.querySelector('.gu-zod-body');
+    function close(){ ov.classList.remove('on'); }
+    ov.addEventListener('click',function(e){ if(e.target===ov||e.target.closest('.gu-zod-x')) close(); });
+    function picker(){
+      body.innerHTML='<div class="gu-zod-h">🔮 Cung hoàng đạo của bạn</div><div class="gu-zod-sub">Chọn cung để nhận linh vật & lời nhắn hôm nay</div><div class="gu-zod-grid"></div>';
+      var g=body.querySelector('.gu-zod-grid');
+      Z.forEach(function(z,i){ var it=document.createElement('div'); it.className='gu-zod-item'; it.innerHTML='<span class="e">'+z.e+'</span><span class="n">'+z.n+'</span><span class="d">'+z.d+'</span>'; it.addEventListener('click',function(){ try{localStorage.setItem('gu_zodiac',String(i));}catch(e){} result(i); }); g.appendChild(it); });
+    }
+    function result(i){
+      var z=Z[i];
+      body.innerHTML='<div class="gu-zod-res"><div class="gu-zod-mascot">'+z.e+'</div><div class="gu-zod-name">'+z.n+'</div><div class="gu-zod-range">'+z.d+'</div><div class="gu-zod-horo">'+z.h+'</div><div class="gu-zod-drink">☕ Đồ uống hợp cung hôm nay: <b>'+z.dr+'</b></div><div class="gu-zod-actions"><button class="gu-zod-btn sec" data-a="share">Chia sẻ</button><button class="gu-zod-btn pri" data-a="order">Đặt ngay</button></div><button class="gu-zod-back">← Chọn cung khác</button></div>';
+      body.querySelector('.gu-zod-back').addEventListener('click',picker);
+      body.querySelector('[data-a=order]').addEventListener('click',function(){ close(); if(window.__go)window.__go('screen-menu'); var el=document.getElementById('cat-tea'); if(el)el.scrollIntoView({behavior:'smooth'}); });
+      body.querySelector('[data-a=share]').addEventListener('click',function(){
+        var txt='🔮 Cung '+z.n+' '+z.e+' hôm nay: '+z.h+' · Đồ uống hợp vị: '+z.dr+' · Khám phá tại gUlEm ☕';
+        if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ miniToast('✓ Đã sao chép — dán chia sẻ nhé!'); },function(){ miniToast('Hãy chụp màn hình để chia sẻ nhé'); }); } else miniToast('Hãy chụp màn hình để chia sẻ nhé');
+      });
+    }
+    function miniToast(m){ var t=document.createElement('div'); t.textContent=m; t.style.cssText='position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:1340;background:#e9486a;color:#fff;font:600 13px "Plus Jakarta Sans",sans-serif;padding:10px 18px;border-radius:999px;box-shadow:0 10px 24px rgba(180,40,90,.4);max-width:86vw;text-align:center'; document.body.appendChild(t); setTimeout(function(){ if(t.parentNode)t.parentNode.removeChild(t); },2200); }
+    function open(){ var saved=null; try{saved=localStorage.getItem('gu_zodiac');}catch(e){} if(saved!==null && Z[+saved]) result(+saved); else picker(); ov.classList.add('on'); }
+
+    /* add a zodiac entry to the assistant bot panel */
+    var panel=document.querySelector('.gu-bot-panel');
+    if(panel){ var zb=document.createElement('button'); zb.className='gu-zbtn'; zb.textContent='🔮 Cung hoàng đạo hôm nay'; zb.addEventListener('click',open); panel.appendChild(zb); }
+    window.__guZodiac=open;
   });
 })();
 </script>
