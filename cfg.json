@@ -1,4 +1,4 @@
 {
-  "webhook": "",
-  "_note": "Dán URL public n8n vào webhook: https://<tunnel>/webhook/menu-order . Trống = app dùng fallback copy+Zalo."
+  "webhook": "https://raise-happened-valves-larry.trycloudflare.com/webhook/menu-order",
+  "_note": "URL public n8n qua Cloudflare Tunnel. Tunnel quick URL đổi mỗi lần chạy lại cloudflared -> cập nhật dòng webhook này rồi push."
 }
