@@ -137,7 +137,7 @@ body{ letter-spacing:-.004em; }
 /* ===== end global polish ===== */
 /* ===== item image lightbox + less-text ===== */
 #screen-menu .line-clamp-2{ -webkit-line-clamp:1 !important; }
-#screen-menu .w-24.h-24{ cursor:zoom-in; }
+#screen-menu .w-24.h-24{ cursor:pointer; }
 #screen-menu h3{ cursor:pointer; }
 .gu-lb{ position:fixed; inset:0; z-index:1001; background:rgba(45,12,26,.64); backdrop-filter:blur(5px); display:none; align-items:center; justify-content:center; padding:24px; }
 .gu-lb.on{ display:flex; }
@@ -2764,12 +2764,12 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     L.push('—','Tổng: '+money(c.t)+'  ('+c.n+' món)');
     var nm=val('cust-name'),ph=val('cust-contact'),nt=val('cust-notes');
     if(nm||ph)L.push('Khách: '+[nm,ph].filter(Boolean).join(' · ')); var ad=val('cust-address'); if(ad)L.push('📍 Địa chỉ: '+ad);
-    if(nt)L.push('Ghi chú: '+nt);
+    if(nt)L.push('Ghi chú: '+nt); if(window.guPay)L.push('💳 Thanh toán: '+window.guPay);
     return L.join('\n');
   }
   function payload(){ var c=totals(); return {shop:SHOP,at:new Date().toISOString(),count:c.n,total:c.t,
     items:cart.map(function(l){return{name:l.name,qty:l.qty,price:l.price,opts:l.opts||'',lineTotal:l.price*l.qty};}),
-    customer:{name:val('cust-name'),phone:val('cust-contact'),address:val('cust-address')},note:val('cust-notes')}; }
+    customer:{name:val('cust-name'),phone:val('cust-contact'),address:val('cust-address')},note:val('cust-notes'),payment:(window.guPay||'Chuyển khoản VietQR')}; }
   function copyText(){ var t=orderText(); if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('✓ Đã sao chép đơn — dán vào nhóm Zalo');},function(){toast('Không sao chép được — hãy chụp màn hình đơn');});}else toast('Không sao chép được'); }
 
   function renderConfirm(){
@@ -2965,7 +2965,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     lb.addEventListener('click',function(e){ if(e.target===lb || e.target.closest('.gu-lb-x')) close(); });
     addBtn.addEventListener('click',function(){ if(curBtn) curBtn.click(); close(); });
     document.addEventListener('click',function(e){
-      var w=e.target.closest('#screen-menu .w-24.h-24'); if(!w) return;
+      var w=e.target.closest('.gu-lb-disabled'); if(!w) return;
       var img=w.querySelector('img'); if(!img) return;
       var src=img.getAttribute('src')||img.src||''; if(!src) return;
       var row=w, guard=0; while(row && !(row.querySelector && row.querySelector('.btn-add')) && guard<8){ row=row.parentElement; guard++; }
@@ -3014,7 +3014,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 /* gUlEm: tap món name -> open customize (choose sugar/ice/topping) */
 (function(){
   document.addEventListener('click',function(e){
-    var h3=e.target.closest('#screen-menu h3'); if(!h3) return;
+    var h3=e.target.closest('#screen-menu h3, #screen-menu .w-24.h-24'); if(!h3) return;
     var row=h3, g=0; while(row && !(row.querySelector && row.querySelector('.btn-add')) && g<8){ row=row.parentElement; g++; }
     var btn=row && row.querySelector ? row.querySelector('.btn-add') : null; if(!btn) return;
     var name=btn.getAttribute('data-name')||h3.textContent.trim();
@@ -3225,4 +3225,22 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   });
 })();
 </script>
-
+<script>
+/* gUlEm: selectable payment method (Tiền mặt / VietQR) */
+(function(){
+  function ready(fn){ if(document.readyState!=='loading')fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    var cart=document.getElementById('screen-cart'); if(!cart) return;
+    var pays=Array.prototype.slice.call(cart.querySelectorAll('button')).filter(function(b){ return /Chuyển khoản VietQR|Tiền mặt/.test(b.textContent); });
+    if(pays.length<2) return;
+    pays.forEach(function(b){
+      b.style.position='relative';
+      Array.prototype.slice.call(b.querySelectorAll('.material-symbols-outlined')).forEach(function(ic){ if(ic.textContent.trim()==='check_circle'){ var p=ic.closest('div'); if(p)p.style.display='none'; } });
+      var chk=document.createElement('span'); chk.className='gu-paychk'; chk.innerHTML='<span class="material-symbols-outlined" style="font-size:20px">check_circle</span>'; chk.style.cssText='position:absolute;top:8px;right:8px;color:#e9486a;display:none;pointer-events:none;z-index:2'; b.appendChild(chk);
+    });
+    function sel(b){ pays.forEach(function(x){ x.classList.remove('ring-2','ring-secondary'); var k=x.querySelector('.gu-paychk'); if(k)k.style.display='none'; }); b.classList.add('ring-2','ring-secondary'); var k=b.querySelector('.gu-paychk'); if(k)k.style.display=''; window.guPay=/Tiền mặt/.test(b.textContent)?'Tiền mặt (khi nhận)':'Chuyển khoản VietQR'; }
+    pays.forEach(function(b){ b.addEventListener('click',function(e){ e.preventDefault(); sel(b); try{ if(window.GU_SFX&&window.GU_SFX.pop)window.GU_SFX.pop(); if(navigator.vibrate)navigator.vibrate(10); }catch(_){} }); });
+    sel(pays[0]);
+  });
+})();
+</script>
