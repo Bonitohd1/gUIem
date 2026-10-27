@@ -3358,3 +3358,187 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 })();
 </script>
 
+
+<style>
+/* ===== gUlEm · Admin console ===== */
+#gu-admin{ position:fixed; inset:0; z-index:100000; display:none; flex-direction:column;
+  background:#1a0f14; color:#fff; font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
+#gu-admin.on{ display:flex; animation:guAdmIn .25s ease; }
+@keyframes guAdmIn{ from{opacity:0} to{opacity:1} }
+#gu-admin .ga-top{ display:flex; align-items:center; gap:10px; padding:14px 16px calc(14px);
+  background:linear-gradient(135deg,#78082a,#b01945); box-shadow:0 6px 20px -8px rgba(0,0,0,.6); }
+#gu-admin .ga-top .ga-ttl{ font-family:Fraunces,serif; font-weight:700; font-size:18px; letter-spacing:.2px; }
+#gu-admin .ga-top .ga-sub{ font-size:11px; opacity:.8; margin-top:1px; }
+#gu-admin .ga-live{ width:9px;height:9px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.6);animation:guLive 1.6s infinite; }
+@keyframes guLive{ 0%{box-shadow:0 0 0 0 rgba(61,220,132,.55)} 70%{box-shadow:0 0 0 7px rgba(61,220,132,0)} 100%{box-shadow:0 0 0 0 rgba(61,220,132,0)} }
+#gu-admin .ga-ico{ width:38px;height:38px;border-radius:12px;border:none;background:rgba(255,255,255,.12);color:#fff;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s; }
+#gu-admin .ga-ico:active{ transform:scale(.92); } #gu-admin .ga-ico:hover{ background:rgba(255,255,255,.2); }
+#gu-admin .ga-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:14px 16px 4px; }
+#gu-admin .ga-stat{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; text-align:center; }
+#gu-admin .ga-stat b{ display:block; font-size:22px; font-weight:800; font-family:Fraunces,serif; color:#ffd7e2; line-height:1; }
+#gu-admin .ga-stat span{ font-size:10.5px; opacity:.75; text-transform:uppercase; letter-spacing:.05em; display:block; margin-top:5px; }
+#gu-admin .ga-list{ flex:1; overflow-y:auto; padding:12px 14px 30px; display:flex; flex-direction:column; gap:10px; }
+#gu-admin .ga-card{ background:#2a1a20; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px; transition:.2s; }
+#gu-admin .ga-card.new{ border-color:#3ddc84; box-shadow:0 0 0 1px #3ddc84, 0 8px 24px -10px rgba(61,220,132,.4); animation:guNewCard .5s ease; }
+@keyframes guNewCard{ 0%{transform:scale(.97);opacity:.4} 100%{transform:none;opacity:1} }
+#gu-admin .ga-ch{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+#gu-admin .ga-name{ font-weight:700; font-size:15px; color:#fff; }
+#gu-admin .ga-phone{ font-size:12.5px; color:#ffb3c6; text-decoration:none; }
+#gu-admin .ga-time{ font-size:11px; opacity:.6; white-space:nowrap; }
+#gu-admin .ga-badge-new{ font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:#06281a; background:#3ddc84; padding:2px 7px; border-radius:999px; margin-left:6px; vertical-align:middle; }
+#gu-admin .ga-items{ margin-top:8px; font-size:13px; color:#e9d4da; line-height:1.5; }
+#gu-admin .ga-row{ display:flex; align-items:center; gap:7px; margin-top:7px; font-size:12.5px; }
+#gu-admin .ga-row .material-symbols-outlined{ font-size:16px; color:#ff9db6; }
+#gu-admin .ga-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,.08); }
+#gu-admin .ga-total{ font-family:Fraunces,serif; font-weight:800; font-size:18px; color:#ffd7e2; }
+#gu-admin .ga-pay{ font-size:11px; padding:3px 9px; border-radius:999px; background:rgba(255,255,255,.1); }
+#gu-admin .ga-empty{ text-align:center; opacity:.6; padding:60px 20px; font-size:14px; }
+#gu-admin .ga-empty .material-symbols-outlined{ font-size:44px; display:block; margin:0 auto 10px; opacity:.5; }
+/* PIN gate */
+#gu-pin{ position:fixed; inset:0; z-index:100001; display:none; align-items:center; justify-content:center; background:rgba(26,15,20,.97); }
+#gu-pin.on{ display:flex; }
+#gu-pin .pin-box{ background:#2a1a20; border:1px solid rgba(255,255,255,.1); border-radius:22px; padding:28px 26px; width:min(340px,86vw); text-align:center; color:#fff; font-family:'Plus Jakarta Sans',sans-serif; }
+#gu-pin .pin-box h3{ font-family:Fraunces,serif; font-size:20px; font-weight:700; color:#ffd7e2; }
+#gu-pin .pin-box p{ font-size:12.5px; opacity:.7; margin-top:4px; }
+#gu-pin input{ width:100%; margin-top:16px; padding:13px; border-radius:13px; border:1.5px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.06); color:#fff; font-size:20px; text-align:center; letter-spacing:.4em; outline:none; }
+#gu-pin input:focus{ border-color:#e9486a; }
+#gu-pin .pin-btn{ width:100%; margin-top:14px; padding:13px; border:none; border-radius:13px; background:#e9486a; color:#fff; font-weight:700; font-size:15px; cursor:pointer; }
+#gu-pin .pin-x{ margin-top:12px; background:none; border:none; color:rgba(255,255,255,.55); font-size:13px; cursor:pointer; }
+</style>
+<div id="gu-pin"><div class="pin-box">
+  <h3>gUlEm · Quản trị</h3>
+  <p>Nhập mã PIN để vào bảng điều hành đơn</p>
+  <input id="gu-pin-inp" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off">
+  <button class="pin-btn" id="gu-pin-ok">Vào quản trị</button>
+  <button class="pin-x" id="gu-pin-cancel">Thoát</button>
+</div></div>
+<div id="gu-admin">
+  <div class="ga-top">
+    <span class="ga-live"></span>
+    <div style="flex:1;min-width:0"><div class="ga-ttl">Quản trị đơn gUlEm</div><div class="ga-sub" id="ga-status">Đang kết nối…</div></div>
+    <button class="ga-ico" id="ga-sound" title="Bật/tắt chuông"><span class="material-symbols-outlined">notifications_active</span></button>
+    <button class="ga-ico" id="ga-refresh" title="Làm mới"><span class="material-symbols-outlined">refresh</span></button>
+    <button class="ga-ico" id="ga-close" title="Đóng"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="ga-stats">
+    <div class="ga-stat"><b id="ga-cnt">0</b><span>Đơn hôm nay</span></div>
+    <div class="ga-stat"><b id="ga-rev">0đ</b><span>Doanh thu</span></div>
+    <div class="ga-stat"><b id="ga-new">0</b><span>Đơn mới</span></div>
+  </div>
+  <div class="ga-list" id="ga-list"><div class="ga-empty"><span class="material-symbols-outlined">hourglass_empty</span>Đang tải đơn…</div></div>
+</div>
+<script>
+/* ===== gUlEm · Admin console logic ===== */
+(function(){
+  var CFG={orders:'',pin:'2409'};
+  try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c){ if(c.orders)CFG.orders=c.orders; if(c.adminPin)CFG.pin=String(c.adminPin); } }).catch(function(){}); }catch(e){}
+
+  var $=function(id){return document.getElementById(id);};
+  var pollTimer=null, seenMax=0, soundOn=true;
+  try{ seenMax=parseInt(localStorage.getItem('gu_admin_seen')||'0',10)||0; }catch(e){}
+  try{ soundOn=localStorage.getItem('gu_admin_sound')!=='0'; }catch(e){}
+
+  function money(n){ return (Number(n)||0).toLocaleString('vi-VN')+'đ'; }
+  function tparse(at){ var d=new Date(at); return isNaN(d)?0:d.getTime(); }
+  function sameDay(ts){ var d=new Date(ts), n=new Date(); return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate(); }
+  function hhmm(ts){ var d=new Date(ts); return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
+
+  function chime(){ if(!soundOn)return; try{ if(window.GU_SFX&&window.GU_SFX.ding)return window.GU_SFX.ding(); var A=window.AudioContext||window.webkitAudioContext; if(!A)return; var c=new A(); [880,1320].forEach(function(f,i){ var o=c.createOscillator(),g=c.createGain(); o.frequency.value=f; o.connect(g); g.connect(c.destination); var t=c.currentTime+i*0.14; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.3); o.start(t); o.stop(t+0.32); }); }catch(e){} }
+  function toast(m){ var t=$('gu-toast')||(function(){var d=document.createElement('div');d.id='gu-toast';d.style.cssText='position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#3ddc84;color:#06281a;font-weight:700;padding:10px 16px;border-radius:999px;font-size:13px;z-index:100002;box-shadow:0 10px 30px -8px rgba(0,0,0,.5);transition:.3s;opacity:0;max-width:86vw;text-align:center';document.body.appendChild(d);return d;})(); t.style.background='#3ddc84';t.style.color='#06281a'; t.textContent=m; t.style.opacity='1'; clearTimeout(t.__h); t.__h=setTimeout(function(){t.style.opacity='0';},3000); }
+  function notify(title,body){ try{ if('Notification'in window && Notification.permission==='granted' && document.hidden){ new Notification(title,{body:body,icon:'/favicon.ico'}); } }catch(e){} }
+
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+
+  function render(list){
+    var box=$('ga-list'); if(!box)return;
+    if(!list || !list.length){ box.innerHTML='<div class="ga-empty"><span class="material-symbols-outlined">receipt_long</span>Chưa có đơn nào hôm nay</div>'; $('ga-cnt').textContent='0'; $('ga-rev').textContent='0đ'; $('ga-new').textContent='0'; return; }
+    // sort newest first
+    list.sort(function(a,b){ return tparse(b.at)-tparse(a.at); });
+    var todayCnt=0, rev=0, newCnt=0, html='';
+    list.forEach(function(o){
+      var ts=tparse(o.at); var isNew=ts>seenMax;
+      if(isNew)newCnt++;
+      if(sameDay(ts)){ todayCnt++; rev+=Number(o.total)||0; }
+      var addr=o.address?('<div class="ga-row"><span class="material-symbols-outlined">location_on</span>'+esc(o.address)+'</div>'):'';
+      var note=o.note?('<div class="ga-row"><span class="material-symbols-outlined">sticky_note_2</span>'+esc(o.note)+'</div>'):'';
+      html+='<div class="ga-card'+(isNew?' new':'')+'">'
+        +'<div class="ga-ch"><div style="min-width:0"><div class="ga-name">'+esc(o.customerName||'Khách')+(isNew?'<span class="ga-badge-new">Mới</span>':'')+'</div>'
+        +(o.customerPhone?'<a class="ga-phone" href="tel:'+esc(o.customerPhone)+'">'+esc(o.customerPhone)+'</a>':'')+'</div>'
+        +'<div class="ga-time">'+hhmm(ts)+'</div></div>'
+        +'<div class="ga-items">'+esc(o.itemsText||('('+(o.count||0)+' món)'))+'</div>'
+        +addr+note
+        +'<div class="ga-foot"><span class="ga-total">'+money(o.total)+'</span><span class="ga-pay">'+esc(o.payment||'Tiền mặt')+'</span></div>'
+        +'</div>';
+    });
+    box.innerHTML=html;
+    $('ga-cnt').textContent=todayCnt; $('ga-rev').textContent=money(rev); $('ga-new').textContent=newCnt;
+  }
+
+  function markSeen(list){
+    var mx=seenMax; list.forEach(function(o){ var t=tparse(o.at); if(t>mx)mx=t; });
+    seenMax=mx; try{ localStorage.setItem('gu_admin_seen',String(mx)); }catch(e){}
+  }
+
+  function poll(firstOpen){
+    if(!CFG.orders){ $('ga-status').textContent='Chưa cấu hình nguồn đơn (cfg.orders)'; render([]); return; }
+    fetch(CFG.orders+(CFG.orders.indexOf('?')>-1?'&':'?')+'t='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        var list = Array.isArray(j)?j:(j.orders||j.data||[]);
+        $('ga-status').textContent='Đã kết nối · cập nhật '+hhmm(Date.now());
+        // detect new since last seen (skip alert on very first open)
+        var prevSeen=seenMax;
+        var newest=list.filter(function(o){ return tparse(o.at)>prevSeen; });
+        render(list);
+        if(!firstOpen && newest.length){
+          chime();
+          var n=newest[0];
+          toast('🔔 Đơn mới từ '+(n.customerName||'khách')+' · '+money(n.total));
+          notify('🔔 Đơn mới gUlEm', (n.customerName||'Khách')+' · '+money(n.total)+' · '+(n.itemsText||''));
+        }
+        markSeen(list);
+      })
+      .catch(function(){ $('ga-status').textContent='Không kết nối được nguồn đơn'; });
+  }
+
+  function openAdmin(){
+    $('gu-admin').classList.add('on');
+    try{ if('Notification'in window && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
+    poll(true);
+    clearInterval(pollTimer); pollTimer=setInterval(function(){ poll(false); }, 12000);
+  }
+  function closeAdmin(){ $('gu-admin').classList.remove('on'); clearInterval(pollTimer); }
+
+  // PIN gate
+  function askPin(){
+    var p=$('gu-pin'); p.classList.add('on'); var inp=$('gu-pin-inp'); inp.value=''; setTimeout(function(){inp.focus();},100);
+  }
+  function tryPin(){
+    var v=($('gu-pin-inp').value||'').trim();
+    if(v===String(CFG.pin)){ $('gu-pin').classList.remove('on'); try{sessionStorage.setItem('gu_admin_ok','1');}catch(e){} openAdmin(); }
+    else { var b=$('gu-pin').querySelector('.pin-box'); b.style.animation='none'; void b.offsetWidth; b.style.animation='guMemIn .3s'; $('gu-pin-inp').value=''; $('gu-pin-inp').placeholder='Sai PIN'; }
+  }
+  function enter(){ var ok=false; try{ok=sessionStorage.getItem('gu_admin_ok')==='1';}catch(e){} if(ok)openAdmin(); else askPin(); }
+
+  function boot(){
+    $('ga-close').addEventListener('click',closeAdmin);
+    $('ga-refresh').addEventListener('click',function(){ poll(false); });
+    $('ga-sound').addEventListener('click',function(){ soundOn=!soundOn; try{localStorage.setItem('gu_admin_sound',soundOn?'1':'0');}catch(e){} this.querySelector('.material-symbols-outlined').textContent=soundOn?'notifications_active':'notifications_off'; if(soundOn)chime(); });
+    $('gu-pin-ok').addEventListener('click',tryPin);
+    $('gu-pin-inp').addEventListener('keydown',function(e){ if(e.key==='Enter')tryPin(); });
+    $('gu-pin-cancel').addEventListener('click',function(){ $('gu-pin').classList.remove('on'); });
+    // entry 1: ?admin=1
+    if(/[?&]admin=1/.test(location.search)) setTimeout(enter,500);
+    // entry 2: tap logo/header 5 lần nhanh
+    var taps=0,last=0;
+    document.addEventListener('click',function(e){
+      var hit=e.target.closest && e.target.closest('header, .gu-logo, [class*="logo"], #screen-menu h1, #screen-menu img[alt*="Logo"]');
+      if(!hit)return; var now=Date.now(); if(now-last<700)taps++; else taps=1; last=now; if(taps>=5){ taps=0; enter(); }
+    }, true);
+    window.guAdmin=enter; // cho phép gọi tay
+  }
+  if(document.readyState!=='loading')boot(); else document.addEventListener('DOMContentLoaded',boot);
+})();
+</script>
