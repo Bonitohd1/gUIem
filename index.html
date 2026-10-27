@@ -200,19 +200,38 @@ header .w-11.h-11.rounded-full img{ width:100% !important; height:100% !importan
 .gu-deal-cur{ color:#c25d7e !important; }
 
 /* ===== promo popup ===== */
-.gu-promo{ position:fixed; inset:0; z-index:1300; background:rgba(45,12,26,.55); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:24px; }
+.gu-promo{ position:fixed; inset:0; z-index:1300; background:rgba(45,12,26,.58); backdrop-filter:blur(5px); display:none; align-items:center; justify-content:center; padding:24px; }
 .gu-promo.on{ display:flex; }
-.gu-promo-card{ width:100%; max-width:360px; background:#fff7f9; border-radius:28px; overflow:hidden; box-shadow:0 30px 70px -20px rgba(180,40,90,.6); transform:scale(.9); opacity:0; transition:transform .42s var(--ease),opacity .3s; text-align:center; position:relative; }
+.gu-promo-card{ width:100%; max-width:366px; background:#fff7f9; border-radius:30px; overflow:hidden; box-shadow:0 34px 80px -22px rgba(180,40,90,.7); transform:scale(.88) translateY(10px); opacity:0; transition:transform .5s var(--ease),opacity .35s; text-align:center; position:relative; }
 .gu-promo.on .gu-promo-card{ transform:none; opacity:1; }
-.gu-promo-top{ background:linear-gradient(130deg,#d61f54,#e9486a 55%,#ff86ab); color:#fff; padding:26px 20px 20px; }
-.gu-promo-badge{ font-size:42px; line-height:1; }
-.gu-promo-h{ font-family:'Fraunces',serif; font-weight:600; font-size:23px; margin-top:8px; }
-.gu-promo-body{ padding:18px 20px 22px; }
-.gu-promo-sub{ font:500 14px/1.5 'Plus Jakarta Sans',sans-serif; color:#6b4a55; }
-.gu-promo-pick{ margin-top:12px; background:#ffe3ec; border-radius:14px; padding:10px 12px; font:600 13px 'Plus Jakarta Sans',sans-serif; color:#8a1e42; }
-.gu-promo-cta{ width:100%; margin-top:16px; padding:14px; border-radius:999px; border:0; background:#e9486a; color:#fff; font:700 15px 'Plus Jakarta Sans',sans-serif; box-shadow:0 12px 26px -10px rgba(233,72,106,.6); cursor:pointer; }
-.gu-promo-x{ position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.3); color:#fff; border:0; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; }
-
+.gu-promo-top{ position:relative; overflow:hidden; background:linear-gradient(135deg,#c81a4e 0%,#e9486a 50%,#ff8fb0 100%); color:#fff; padding:28px 20px 24px; }
+.gu-promo-top::before{ content:""; position:absolute; top:-40%; left:-20%; width:140%; height:130%; background:radial-gradient(circle at 30% 18%,rgba(255,255,255,.4),transparent 55%); pointer-events:none; }
+.gu-promo-leaf{ position:absolute; font-size:46px; opacity:.45; top:2px; filter:saturate(.6) brightness(1.4); }
+.gu-promo-leaf.l{ left:4px; transform:rotate(-24deg); }
+.gu-promo-leaf.r{ right:4px; transform:scaleX(-1) rotate(-24deg); }
+.gu-spark{ position:absolute; font-size:14px; opacity:.9; animation:guTwinkle 2.2s ease-in-out infinite; pointer-events:none; }
+@keyframes guTwinkle{ 0%,100%{ opacity:.25; transform:scale(.7); } 50%{ opacity:1; transform:scale(1.3); } }
+.gu-cup{ position:relative; display:inline-block; font-size:50px; line-height:1; animation:guCupIn .9s var(--ease) both, guCupFloat 3s ease-in-out .9s infinite; }
+@keyframes guCupIn{ 0%{ transform:translateY(46px) scale(.4) rotate(-14deg); opacity:0; } 60%{ transform:translateY(-8px) scale(1.12) rotate(6deg); opacity:1; } 100%{ transform:translateY(0) scale(1) rotate(0); opacity:1; } }
+@keyframes guCupFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+.gu-steam{ position:absolute; top:-4px; left:50%; width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.8); filter:blur(1.5px); opacity:0; animation:guSteam 2.6s ease-out infinite; }
+.gu-steam.s2{ left:40%; animation-delay:.6s; } .gu-steam.s3{ left:60%; animation-delay:1.2s; }
+@keyframes guSteam{ 0%{ opacity:0; transform:translate(-50%,0) scale(.7); } 25%{ opacity:.75; } 100%{ opacity:0; transform:translate(-50%,-26px) scale(1.6); } }
+.gu-promo-welcome{ font:700 11px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:.3em; text-transform:uppercase; opacity:.92; margin-top:14px; animation:guUp .6s ease .25s both; }
+.gu-promo-h{ font-family:'Fraunces',serif; font-weight:600; font-size:34px; letter-spacing:-.01em; margin-top:4px; text-shadow:0 2px 16px rgba(120,8,36,.4); animation:guUp .6s ease .35s both; }
+.gu-promo-div{ display:flex; align-items:center; justify-content:center; gap:9px; margin-top:8px; opacity:.9; animation:guUp .6s ease .45s both; }
+.gu-promo-div::before,.gu-promo-div::after{ content:""; height:1px; width:42px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.85)); }
+.gu-promo-div span{ font-size:13px; }
+.gu-promo-body{ padding:20px 20px 22px; }
+.gu-promo-sub{ font:500 14px/1.55 'Plus Jakarta Sans',sans-serif; color:#6b4a55; animation:guUp .5s ease .55s both; }
+.gu-promo-sub b{ color:#e9486a; }
+.gu-promo-pick{ margin-top:13px; background:linear-gradient(135deg,#ffe3ec,#fff0f4); border:1px solid #ffd0dc; border-radius:15px; padding:11px 13px; font:600 13px 'Plus Jakarta Sans',sans-serif; color:#8a1e42; animation:guUp .5s ease .65s both; }
+.gu-promo-cta{ position:relative; overflow:hidden; width:100%; margin-top:18px; padding:15px; border-radius:999px; border:0; background:linear-gradient(120deg,#e9486a,#ff7aa0); color:#fff; font:700 15px 'Plus Jakarta Sans',sans-serif; box-shadow:0 14px 30px -10px rgba(233,72,106,.7); cursor:pointer; animation:guUp .5s ease .75s both; }
+.gu-promo-cta::after{ content:""; position:absolute; inset:0; background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.5) 50%,transparent 65%); transform:translateX(-130%); animation:guShine 3s ease-in-out 1.2s infinite; }
+@keyframes guUp{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
+.gu-promo-x{ position:absolute; top:14px; right:14px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.3); color:#fff; border:0; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:3; }
+.gu-petal{ position:absolute; top:-18px; pointer-events:none; z-index:2; animation:guPetal linear forwards; }
+@keyframes guPetal{ 0%{ transform:translateY(-18px) rotate(0); opacity:0; } 12%{ opacity:.95; } 100%{ transform:translateY(470px) rotate(430deg); opacity:0; } }
 /* ===== assistant bot ===== */
 .gu-bot-btn{ position:fixed; right:14px; bottom:150px; z-index:1150; width:54px; height:54px; border-radius:50%; background:linear-gradient(135deg,#e9486a,#ff86ab); color:#fff; border:0; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 26px -8px rgba(233,72,106,.7); cursor:pointer; animation:guFloat 3s ease-in-out infinite; }
 @keyframes guFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
@@ -2965,12 +2984,12 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     try{
       if(!sessionStorage.getItem('gu_promo_seen')){
         var p=document.createElement('div'); p.className='gu-promo';
-        p.innerHTML='<div class="gu-promo-card"><button class="gu-promo-x"><span class="material-symbols-outlined" style="font-size:19px">close</span></button><div class="gu-promo-top"><div class="gu-promo-badge">🎁</div><div class="gu-promo-h">Chào mừng đến gUlEm!</div></div><div class="gu-promo-body"><div class="gu-promo-sub">Tất cả đồ uống <b>đồng giá 50K</b> mỗi ly — thỏa sức chọn ✨</div><div class="gu-promo-pick">🧂 Được yêu thích: <b>Cà phê muối</b> — Hương vị tình thân</div><button class="gu-promo-cta">Khám phá thực đơn →</button></div></div>';
+        p.innerHTML='<div class="gu-promo-card"><button class="gu-promo-x"><span class="material-symbols-outlined" style="font-size:19px">close</span></button>'+'<div class="gu-promo-top"><span class="gu-promo-leaf l">🌿</span><span class="gu-promo-leaf r">🌿</span>'+'<span class="gu-spark" style="top:18px;left:46px">✨</span><span class="gu-spark" style="top:60px;right:44px;animation-delay:.8s">✦</span><span class="gu-spark" style="bottom:40px;left:36px;animation-delay:1.3s">✨</span>'+'<div class="gu-cup">☕<span class="gu-steam"></span><span class="gu-steam s2"></span><span class="gu-steam s3"></span></div>'+'<div class="gu-promo-welcome">Chào mừng đến</div><div class="gu-promo-h">gUlEm</div>'+'<div class="gu-promo-div"><span>❦</span></div></div>'+'<div class="gu-promo-body"><div class="gu-promo-sub">Tất cả đồ uống <b>đồng giá 50K</b> mỗi ly — thỏa sức chọn ✨</div>'+'<div class="gu-promo-pick">🧂 Được yêu thích: <b>Cà phê muối</b> — Hương vị tình thân</div>'+'<button class="gu-promo-cta">Khám phá thực đơn →</button></div></div>';
         document.body.appendChild(p);
         var closeP=function(){ p.classList.remove('on'); };
         p.addEventListener('click',function(e){ if(e.target===p || e.target.closest('.gu-promo-x')) closeP(); });
         p.querySelector('.gu-promo-cta').addEventListener('click',function(){ closeP(); var el=document.getElementById('cat-tea'); if(el) el.scrollIntoView({behavior:'smooth'}); });
-        setTimeout(function(){ p.classList.add('on'); try{sessionStorage.setItem('gu_promo_seen','1');}catch(e){} }, 1400);
+        setTimeout(function(){ p.classList.add('on'); try{sessionStorage.setItem('gu_promo_seen','1');}catch(e){} try{ var pc=p.querySelector('.gu-promo-card'), PET=['🌸','🌷','🌺']; for(var i=0;i<7;i++){ (function(){ var pt=document.createElement('span'); pt.className='gu-petal'; pt.textContent=PET[i%3]; pt.style.left=(6+Math.random()*86)+'%'; pt.style.animationDuration=(3.2+Math.random()*2.3)+'s'; pt.style.animationDelay=(Math.random()*1.6)+'s'; pt.style.fontSize=(12+Math.random()*8)+'px'; pc.appendChild(pt); setTimeout(function(){ if(pt.parentNode)pt.parentNode.removeChild(pt); },7200); })(); } }catch(e){} }, 1400);
       }
     }catch(e){}
 
