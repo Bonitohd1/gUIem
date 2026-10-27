@@ -2749,9 +2749,13 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     var root=document.getElementById('screen-customize'); if(!root)return;
     var h=root.querySelector('h2'); var name=h?h.textContent.trim():'Món tuỳ chọn';
     var qd=root.querySelector('#qty-display'); var qty=qd?parseInt(qd.textContent,10)||1:1;
-    var add=0, names=[];
-    root.querySelectorAll('.topping-checkbox').forEach(function(cb){ if(cb.checked){ add+=parseInt(cb.value,10)||0; var lbl=cb.closest('.topping-item'); if(lbl){var s=lbl.querySelector('.font-label-md'); if(s)names.push(s.textContent.trim());} } });
-    addToCart(name, 50000+add, qty, names.join(' • '));
+    var add=0, parts=[];
+    function selOpt(cls){ var b=root.querySelector('.'+cls+'.ring-secondary'); if(!b)b=root.querySelector('.'+cls+'[class*="ring-secondary"]'); if(!b)return ''; var l=b.querySelector('.font-label-md'); return l?l.textContent.trim():''; }
+    var tmp=selOpt('temp-btn'); if(tmp)parts.push(tmp);
+    var sug=selOpt('sugar-btn'); if(sug)parts.push('Đường '+sug);
+    var ice=selOpt('ice-btn'); if(ice)parts.push(ice);
+    root.querySelectorAll('.topping-checkbox').forEach(function(cb){ if(cb.checked){ add+=parseInt(cb.value,10)||0; var lbl=cb.closest('.topping-item'); if(lbl){var s=lbl.querySelector('.font-label-md'); if(s)parts.push(s.textContent.trim());} } });
+    addToCart(name, 50000+add, qty, parts.join(' • '));
   }
 
   function orderText(){
@@ -3192,7 +3196,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     function build(){
       var pluses=document.querySelectorAll('#screen-menu .btn-add');
       for(var i=0;i<pluses.length;i++){ (function(plus){
-        if(plus.__stepped) return; plus.__stepped=true;
+        if(plus.__stepped) return; var clean=plus.cloneNode(true); if(plus.parentNode){plus.parentNode.replaceChild(clean,plus);} plus=clean; plus.__stepped=true;
         var nm=plus.getAttribute('data-name');
         var wrap=document.createElement('div'); wrap.className='gu-step';
         var minus=document.createElement('button'); minus.className='gu-minus'; minus.type='button'; minus.setAttribute('aria-label','Bớt'); minus.innerHTML='<span class="material-symbols-outlined">remove</span>';
@@ -3205,6 +3209,14 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     }
     window.guOnRender=sync;
     build();
+    /* customize option selection (temp/sugar/ice) — ensure the ring moves */
+    document.addEventListener('click',function(e){
+      var opt=e.target.closest('#screen-customize .temp-btn, #screen-customize .sugar-btn, #screen-customize .ice-btn'); if(!opt)return;
+      var m=(opt.className.match(/temp-btn|sugar-btn|ice-btn/)||[])[0]; if(!m)return;
+      var grp=document.querySelectorAll('#screen-customize .'+m);
+      for(var i=0;i<grp.length;i++){ grp[i].classList.remove('ring-2','ring-secondary','text-secondary','bg-surface-container-low'); if(!grp[i].classList.contains('bg-surface-container'))grp[i].classList.add('bg-surface-container'); }
+      opt.classList.add('ring-2','ring-secondary','text-secondary','bg-surface-container-low'); opt.classList.remove('bg-surface-container');
+    }, false);
 
     /* desktop brand deco */
     var L=document.createElement('div'); L.className='gu-pc-deco l'; L.innerHTML='<div class="gu-pc-mark">gUlEm</div><div class="gu-pc-tag">Tiệm nhà chị em Thùy<br>Trà & Cà Phê thủ công</div>';
