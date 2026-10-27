@@ -1156,6 +1156,11 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <input class="w-full bg-surface-container-low text-on-surface px-4 py-3 rounded-xl font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-0 placeholder:text-outline-variant shadow-inner transition-colors" id="cust-contact" placeholder="VD: 0912345678 hoặc Bàn số 04" type="text" value="">
 <span class="absolute right-3 top-3 text-outline text-[18px] material-symbols-outlined pointer-events-none">table_restaurant</span>
 </div>
+<!-- Delivery Address -->
+<div class="relative">
+<input class="w-full bg-surface-container-low text-on-surface px-4 py-3 rounded-xl font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-0 placeholder:text-outline-variant shadow-inner transition-colors" id="cust-address" placeholder="Địa chỉ giao hàng (nếu ship) — VD: Số 12, ngõ 34, P. Hoàng Mai" type="text" value="">
+<span class="absolute right-3 top-3 text-outline text-[18px] material-symbols-outlined pointer-events-none">location_on</span>
+</div>
 <!-- Notes -->
 <div class="relative">
 <textarea class="w-full bg-surface-container-low text-on-surface px-4 py-2.5 rounded-xl font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-0 placeholder:text-outline-variant shadow-inner resize-none transition-colors" id="cust-notes" placeholder="VD: Trà nhài ít ngọt, cà phê muối nhiều đá..." rows="2"></textarea>
@@ -2723,13 +2728,13 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     cart.forEach(function(l){ L.push('• '+l.name+' × '+l.qty+(l.opts?' ('+l.opts+')':'')+'  '+money(l.price*l.qty)); });
     L.push('—','Tổng: '+money(c.t)+'  ('+c.n+' món)');
     var nm=val('cust-name'),ph=val('cust-contact'),nt=val('cust-notes');
-    if(nm||ph)L.push('Khách: '+[nm,ph].filter(Boolean).join(' · '));
+    if(nm||ph)L.push('Khách: '+[nm,ph].filter(Boolean).join(' · ')); var ad=val('cust-address'); if(ad)L.push('📍 Địa chỉ: '+ad);
     if(nt)L.push('Ghi chú: '+nt);
     return L.join('\n');
   }
   function payload(){ var c=totals(); return {shop:SHOP,at:new Date().toISOString(),count:c.n,total:c.t,
     items:cart.map(function(l){return{name:l.name,qty:l.qty,price:l.price,opts:l.opts||'',lineTotal:l.price*l.qty};}),
-    customer:{name:val('cust-name'),phone:val('cust-contact')},note:val('cust-notes')}; }
+    customer:{name:val('cust-name'),phone:val('cust-contact'),address:val('cust-address')},note:val('cust-notes')}; }
   function copyText(){ var t=orderText(); if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('✓ Đã sao chép đơn — dán vào nhóm Zalo');},function(){toast('Không sao chép được — hãy chụp màn hình đơn');});}else toast('Không sao chép được'); }
 
   function renderConfirm(){
@@ -3132,4 +3137,14 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   });
 })();
 </script>
-
+<script>
+/* gUlEm: remember delivery address */
+(function(){
+  function ready(fn){ if(document.readyState!=='loading')fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    var a=document.getElementById('cust-address'); if(!a) return;
+    try{ var sv=localStorage.getItem('gu_address'); if(sv && !a.value) a.value=sv; }catch(e){}
+    a.addEventListener('change',function(){ try{ if(a.value.trim()) localStorage.setItem('gu_address',a.value.trim()); }catch(e){} });
+  });
+})();
+</script>
