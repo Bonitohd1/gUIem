@@ -188,6 +188,47 @@ body{ letter-spacing:-.004em; }
 #screen-loyalty .flex.items-center.gap-3 p{ overflow:hidden; text-overflow:ellipsis; }
 #screen-loyalty .flex.flex-col.items-end{ flex:0 0 auto; }
 /* ===== end loyalty fix ===== */
+/* ===== logo: clean white circle badge (hết lòi nền trắng) ===== */
+header .w-11.h-11.rounded-full{ background:#fff !important; padding:3px !important; box-shadow:0 3px 10px -2px rgba(130,10,40,.4), 0 0 0 2px rgba(255,255,255,.55) !important; }
+header .w-11.h-11.rounded-full img{ width:100% !important; height:100% !important; object-fit:contain !important; }
+/* ===== bolder món names ===== */
+#screen-menu h3{ font-weight:700 !important; color:#2a131d !important; }
+/* ===== 50K stylized white chip ===== */
+.gu-deal-price{ background:#fff !important; border:0 !important; border-radius:16px !important; padding:6px 15px !important; box-shadow:0 10px 20px -6px rgba(130,10,40,.5) !important; }
+.gu-deal-num, .gu-deal-num small{ color:#e9486a !important; }
+.gu-deal-num{ font-size:34px !important; }
+.gu-deal-cur{ color:#c25d7e !important; }
+
+/* ===== promo popup ===== */
+.gu-promo{ position:fixed; inset:0; z-index:1300; background:rgba(45,12,26,.55); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:24px; }
+.gu-promo.on{ display:flex; }
+.gu-promo-card{ width:100%; max-width:360px; background:#fff7f9; border-radius:28px; overflow:hidden; box-shadow:0 30px 70px -20px rgba(180,40,90,.6); transform:scale(.9); opacity:0; transition:transform .42s var(--ease),opacity .3s; text-align:center; position:relative; }
+.gu-promo.on .gu-promo-card{ transform:none; opacity:1; }
+.gu-promo-top{ background:linear-gradient(130deg,#d61f54,#e9486a 55%,#ff86ab); color:#fff; padding:26px 20px 20px; }
+.gu-promo-badge{ font-size:42px; line-height:1; }
+.gu-promo-h{ font-family:'Fraunces',serif; font-weight:600; font-size:23px; margin-top:8px; }
+.gu-promo-body{ padding:18px 20px 22px; }
+.gu-promo-sub{ font:500 14px/1.5 'Plus Jakarta Sans',sans-serif; color:#6b4a55; }
+.gu-promo-pick{ margin-top:12px; background:#ffe3ec; border-radius:14px; padding:10px 12px; font:600 13px 'Plus Jakarta Sans',sans-serif; color:#8a1e42; }
+.gu-promo-cta{ width:100%; margin-top:16px; padding:14px; border-radius:999px; border:0; background:#e9486a; color:#fff; font:700 15px 'Plus Jakarta Sans',sans-serif; box-shadow:0 12px 26px -10px rgba(233,72,106,.6); cursor:pointer; }
+.gu-promo-x{ position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.3); color:#fff; border:0; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; }
+
+/* ===== assistant bot ===== */
+.gu-bot-btn{ position:fixed; right:14px; bottom:150px; z-index:1150; width:54px; height:54px; border-radius:50%; background:linear-gradient(135deg,#e9486a,#ff86ab); color:#fff; border:0; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 26px -8px rgba(233,72,106,.7); cursor:pointer; animation:guFloat 3s ease-in-out infinite; }
+@keyframes guFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
+.gu-bot-btn .material-symbols-outlined{ font-size:27px; font-variation-settings:'FILL' 1; }
+.gu-bot-dot{ position:absolute; top:-1px; right:-1px; width:13px; height:13px; border-radius:50%; background:#fff; border:3px solid #e9486a; }
+.gu-bot-panel{ position:fixed; right:14px; bottom:214px; z-index:1150; width:272px; max-width:82vw; background:#fff; border-radius:20px; box-shadow:0 24px 50px -16px rgba(180,40,90,.55); padding:16px; transform:translateY(12px) scale(.95); opacity:0; pointer-events:none; transition:all .3s var(--ease); transform-origin:bottom right; }
+.gu-bot-panel.on{ transform:none; opacity:1; pointer-events:auto; }
+.gu-bot-head{ display:flex; align-items:center; gap:10px; }
+.gu-bot-ava{ width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#e9486a,#ff86ab); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:700; font-size:19px; flex:0 0 auto; }
+.gu-bot-name{ font-family:'Fraunces',serif; font-weight:600; font-size:16px; color:#241019; }
+.gu-bot-status{ font:600 11px 'Plus Jakarta Sans',sans-serif; color:#3bb27a; }
+.gu-bot-msg{ margin-top:12px; background:#fff2f6; border-radius:14px; padding:12px 13px; font:500 13.5px/1.5 'Plus Jakarta Sans',sans-serif; color:#5a2a3a; min-height:58px; }
+.gu-bot-cta{ width:100%; margin-top:10px; padding:11px; border-radius:12px; border:0; background:#e9486a; color:#fff; font:700 13px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+.gu-bot-x{ margin-left:auto; background:0; border:0; color:#b06a7e; cursor:pointer; display:flex; align-items:center; }
+/* ===== end care layer ===== */
+
 
 
 
@@ -2884,6 +2925,58 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     if(img && cimg){ var sc=img.getAttribute('src')||img.src||''; if(sc) cimg.setAttribute('src', sc); }
     if(window.__go) window.__go('screen-customize');
   }, false);
+})();
+</script>
+<script>
+/* gUlEm: welcome promo popup + caring assistant bot (+water reminder) */
+(function(){
+  function ready(fn){ if(document.readyState!=='loading')fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    /* promo popup — once per session */
+    try{
+      if(!sessionStorage.getItem('gu_promo_seen')){
+        var p=document.createElement('div'); p.className='gu-promo';
+        p.innerHTML='<div class="gu-promo-card"><button class="gu-promo-x"><span class="material-symbols-outlined" style="font-size:19px">close</span></button><div class="gu-promo-top"><div class="gu-promo-badge">🎁</div><div class="gu-promo-h">Chào mừng đến gUlEm!</div></div><div class="gu-promo-body"><div class="gu-promo-sub">Tất cả đồ uống <b>đồng giá 50K</b> mỗi ly — thỏa sức chọn ✨</div><div class="gu-promo-pick">🧂 Được yêu thích: <b>Cà phê muối</b> — Hương vị tình thân</div><button class="gu-promo-cta">Khám phá thực đơn →</button></div></div>';
+        document.body.appendChild(p);
+        var closeP=function(){ p.classList.remove('on'); };
+        p.addEventListener('click',function(e){ if(e.target===p || e.target.closest('.gu-promo-x')) closeP(); });
+        p.querySelector('.gu-promo-cta').addEventListener('click',function(){ closeP(); var el=document.getElementById('cat-tea'); if(el) el.scrollIntoView({behavior:'smooth'}); });
+        setTimeout(function(){ p.classList.add('on'); try{sessionStorage.setItem('gu_promo_seen','1');}catch(e){} }, 1400);
+      }
+    }catch(e){}
+
+    /* caring assistant bot */
+    var tips=[
+      'Nhớ uống đủ nước mỗi ngày nha 💧',
+      'Ngồi lâu rồi đó — đứng dậy vươn vai một cái nào 🌿',
+      'Hôm nay bạn đã cố gắng rồi, tự thưởng một ly nhé 🍵',
+      'Hít thở sâu, thả lỏng vai một chút nào ☁️',
+      'Một ly trà ấm giúp buổi chiều nhẹ nhàng hơn đấy 🫖',
+      'Uống nước ấm buổi sáng tốt cho cơ thể lắm 💛',
+      'Gợi ý hôm nay: Cà phê muối — Hương vị tình thân 🧂'
+    ];
+    var btn=document.createElement('button'); btn.className='gu-bot-btn'; btn.setAttribute('aria-label','Trợ lý gUlEm'); btn.innerHTML='<span class="material-symbols-outlined">favorite</span><span class="gu-bot-dot"></span>';
+    var panel=document.createElement('div'); panel.className='gu-bot-panel';
+    panel.innerHTML='<div class="gu-bot-head"><div class="gu-bot-ava">g</div><div><div class="gu-bot-name">gUlEm chăm bạn</div><div class="gu-bot-status">● Đang trực tuyến</div></div><button class="gu-bot-x"><span class="material-symbols-outlined" style="font-size:20px">close</span></button></div><div class="gu-bot-msg"></div><button class="gu-bot-cta">Gợi ý món cho mình →</button>';
+    document.body.appendChild(btn); document.body.appendChild(panel);
+    var msgEl=panel.querySelector('.gu-bot-msg'), idx=Math.floor(Math.random()*tips.length), rot=null;
+    function showTip(){ msgEl.textContent=tips[idx%tips.length]; idx++; }
+    function openB(){ showTip(); panel.classList.add('on'); var d=btn.querySelector('.gu-bot-dot'); if(d)d.style.display='none'; clearInterval(rot); rot=setInterval(showTip,4500); }
+    function closeB(){ panel.classList.remove('on'); clearInterval(rot); }
+    btn.addEventListener('click',function(){ panel.classList.contains('on')?closeB():openB(); });
+    panel.querySelector('.gu-bot-x').addEventListener('click',closeB);
+    panel.querySelector('.gu-bot-cta').addEventListener('click',function(){ closeB(); if(window.__go)window.__go('screen-menu'); var el=document.getElementById('cat-coffee')||document.getElementById('cat-tea'); if(el) el.scrollIntoView({behavior:'smooth'}); });
+
+    /* gentle one-time water reminder after 70s */
+    setTimeout(function(){
+      if(panel.classList.contains('on')) return;
+      var t=document.createElement('div'); t.textContent='💧 gUlEm nhắc nhẹ: uống một ngụm nước nha!';
+      t.style.cssText='position:fixed;left:50%;bottom:150px;transform:translateX(-50%) translateY(10px);z-index:1140;background:#fff;color:#8a1e42;font:600 13px "Plus Jakarta Sans",sans-serif;padding:12px 18px;border-radius:999px;box-shadow:0 14px 30px -8px rgba(180,40,90,.4);opacity:0;transition:all .4s;max-width:86vw;text-align:center';
+      document.body.appendChild(t);
+      requestAnimationFrame(function(){ t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
+      setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ if(t.parentNode)t.parentNode.removeChild(t); },500); }, 5200);
+    }, 70000);
+  });
 })();
 </script>
 
