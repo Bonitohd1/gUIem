@@ -1,0 +1,13 @@
+{
+  "name": "gUlEm — Tiệm nhà chị em Thùy",
+  "short_name": "gUlEm",
+  "description": "Đặt trà & cà phê gUlEm — đồng giá 50k",
+  "start_url": "/?pwa=1",
+  "display": "standalone",
+  "background_color": "#fff7f9",
+  "theme_color": "#e9486a",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
