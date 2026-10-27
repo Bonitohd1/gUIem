@@ -84,6 +84,31 @@ a:focus-visible,button:focus-visible{ outline:2px solid #e9486a; outline-offset:
 
 @media (prefers-reduced-motion: reduce){ .gu-deal-shine{ display:none; } }
 /* ===== end rich layer ===== */
+/* ===== Account / login (Benadep-style) ===== */
+.gu-acct-btn{ width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.4); color:#fff; display:flex; align-items:center; justify-content:center; font:700 14px 'Plus Jakarta Sans',sans-serif; cursor:pointer; flex:0 0 auto; transition:transform .14s var(--ease),background .2s; }
+.gu-acct-btn:active{ transform:scale(.92); }
+.gu-acct-btn .material-symbols-outlined{ font-size:20px; }
+.gu-ov{ position:fixed; inset:0; z-index:1000; background:rgba(45,12,26,.5); backdrop-filter:blur(3px); display:none; align-items:flex-end; justify-content:center; }
+.gu-ov.on{ display:flex; }
+.gu-sheet{ width:100%; max-width:560px; background:#fff7f9; border-radius:28px 28px 0 0; padding:24px 20px calc(24px + env(safe-area-inset-bottom)); box-shadow:0 -20px 50px -18px rgba(180,40,90,.5); transform:translateY(100%); transition:transform .42s var(--ease); position:relative; }
+.gu-ov.on .gu-sheet{ transform:none; }
+@media(min-width:560px){ .gu-ov{ align-items:center; } .gu-sheet{ border-radius:26px; } }
+.gu-x{ position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; background:#ffe3ec; color:#8a1e42; border:0; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.gu-acct-h{ font-family:'Fraunces',serif; font-weight:600; font-size:23px; color:#241019; letter-spacing:-.015em; }
+.gu-acct-sub{ font:400 13px/1.45 'Plus Jakarta Sans',sans-serif; color:#8a6673; margin-top:5px; max-width:90%; }
+.gu-field{ margin-top:15px; }
+.gu-field label{ font:700 12px/1 'Plus Jakarta Sans',sans-serif; color:#8a1e42; }
+.gu-field input{ width:100%; margin-top:7px; padding:13px 15px; border-radius:14px; border:1.5px solid #f4d7e0; background:#fff; font:500 15px 'Plus Jakarta Sans',sans-serif; color:#241019; outline:none; transition:border-color .2s,box-shadow .2s; }
+.gu-field input:focus{ border-color:#e9486a; box-shadow:0 0 0 3px rgba(233,72,106,.14); }
+.gu-err{ font:600 12px 'Plus Jakarta Sans',sans-serif; color:#e9486a; margin-top:8px; min-height:14px; }
+.gu-btn{ width:100%; margin-top:16px; padding:14px; border-radius:999px; border:0; background:#e9486a; color:#fff; font:700 15px 'Plus Jakarta Sans',sans-serif; box-shadow:0 12px 26px -10px rgba(233,72,106,.6); cursor:pointer; transition:transform .14s var(--ease); }
+.gu-btn:active{ transform:scale(.97); }
+.gu-btn.sec{ background:#fff; color:#8a1e42; box-shadow:none; border:1.5px solid #f4d7e0; margin-top:10px; }
+.gu-prof{ display:flex; align-items:center; gap:14px; margin-bottom:4px; }
+.gu-avatar{ width:58px; height:58px; border-radius:50%; background:linear-gradient(135deg,#e9486a,#ff86ab); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:700; font-size:25px; flex:0 0 auto; box-shadow:0 8px 18px -8px rgba(233,72,106,.6); }
+.gu-note{ font:500 12px/1.4 'Plus Jakarta Sans',sans-serif; color:#b98a99; margin-top:14px; text-align:center; }
+/* ===== end account layer ===== */
+
 
 
 
@@ -2606,6 +2631,99 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       rows.forEach(function(r){ io.observe(r); });
     } else { rows.forEach(function(r){ r.classList.add('in'); }); }
     setTimeout(function(){ rows.forEach(function(r){ r.classList.add('in'); }); },1600);
+  });
+})();
+</script>
+<script>
+/* gUlEm account/login — device-stored, no backend */
+(function(){
+  var KEY='gu_account';
+  function get(){ try{return JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){return null;} }
+  function put(a){ try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){} }
+  function del(){ try{localStorage.removeItem(KEY);}catch(e){} }
+  var E=function(s,r){return (r||document).querySelector(s);};
+  var A=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+  function ready(fn){ if(document.readyState!=='loading')fn(); else document.addEventListener('DOMContentLoaded',fn); }
+
+  ready(function(){
+    // ---- overlay + sheet ----
+    var ov=document.createElement('div'); ov.className='gu-ov';
+    ov.innerHTML='<div class="gu-sheet" role="dialog" aria-modal="true"><button class="gu-x" aria-label="Đóng"><span class="material-symbols-outlined" style="font-size:20px">close</span></button><div class="gu-body"></div></div>';
+    document.body.appendChild(ov);
+    var body=E('.gu-body',ov);
+    function open(){ render(); ov.classList.add('on'); }
+    function close(){ ov.classList.remove('on'); }
+    ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+    E('.gu-x',ov).addEventListener('click',close);
+
+    function initials(n){ n=(n||'').trim(); if(!n) return '👤'; var p=n.split(/\s+/); return (p[p.length-1][0]||'').toUpperCase(); }
+    function esc(s){ return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+    function render(){
+      var a=get();
+      if(a && a.name){
+        body.innerHTML=
+          '<div class="gu-prof"><div class="gu-avatar">'+esc(initials(a.name))+'</div>'+
+          '<div><div class="gu-acct-h" style="font-size:20px">Xin chào, '+esc(a.name)+'</div>'+
+          '<div class="gu-acct-sub" style="margin-top:2px">'+esc(a.phone||'')+'</div></div></div>'+
+          '<button class="gu-btn" data-act="orders"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:-4px;margin-right:6px">receipt_long</span>Đơn đã đặt của tôi</button>'+
+          '<button class="gu-btn sec" data-act="logout">Đăng xuất</button>'+
+          '<div class="gu-note">Tài khoản lưu trên thiết bị này để đặt món nhanh hơn.</div>';
+        E('[data-act=orders]',body).addEventListener('click',function(){ close(); if(window.__go)window.__go('screen-history'); });
+        E('[data-act=logout]',body).addEventListener('click',function(){ del(); syncBtns(); render(); });
+      } else {
+        body.innerHTML=
+          '<div class="gu-acct-h">Đăng nhập gUlEm</div>'+
+          '<div class="gu-acct-sub">Tạo tài khoản nhanh để đặt món, tự điền thông tin và xem lại đơn đã đặt.</div>'+
+          '<div class="gu-field"><label>Tên của bạn</label><input id="gu-in-name" type="text" placeholder="VD: Chị Thùy" autocomplete="name"></div>'+
+          '<div class="gu-field"><label>Số điện thoại</label><input id="gu-in-phone" type="tel" inputmode="numeric" placeholder="VD: 0963 240 972" autocomplete="tel"></div>'+
+          '<div class="gu-err" id="gu-err"></div>'+
+          '<button class="gu-btn" data-act="save">Lưu & Đăng nhập</button>'+
+          '<div class="gu-note">Thông tin chỉ lưu trên máy bạn, dùng để đặt món tiện hơn.</div>';
+        E('[data-act=save]',body).addEventListener('click',function(){
+          var nm=(E('#gu-in-name').value||'').trim();
+          var ph=(E('#gu-in-phone').value||'').trim();
+          var digits=ph.replace(/\D/g,'');
+          if(nm.length<2){ E('#gu-err').textContent='Vui lòng nhập tên.'; return; }
+          if(digits.length<9){ E('#gu-err').textContent='Số điện thoại chưa hợp lệ.'; return; }
+          put({name:nm,phone:ph}); prefill(); syncBtns(); render();
+        });
+        var inp=E('#gu-in-name'); if(inp) setTimeout(function(){inp.focus();},300);
+      }
+    }
+
+    // ---- prefill order form ----
+    function prefill(){
+      var a=get(); if(!a) return;
+      var n=E('#cust-name'), p=E('#cust-contact');
+      if(n && !n.value) n.value=a.name;
+      if(p && !p.value) p.value=a.phone;
+    }
+
+    // ---- header buttons on every screen ----
+    function syncBtns(){
+      var a=get();
+      A('.gu-acct-btn').forEach(function(b){
+        b.innerHTML = a&&a.name ? esc(initials(a.name)) : '<span class="material-symbols-outlined">person</span>';
+        b.setAttribute('title', a&&a.name ? a.name : 'Đăng nhập');
+      });
+    }
+    function injectButtons(){
+      A('header').forEach(function(h){
+        if(E('.gu-acct-btn',h)) return;
+        var btn=document.createElement('button'); btn.className='gu-acct-btn'; btn.type='button';
+        btn.addEventListener('click',open);
+        // place before the "Nhóm Zalo" link if present, else append to the flex row
+        var zalo=A('a',h).filter(function(x){return /Nhóm Zalo/.test(x.textContent);})[0];
+        if(zalo && zalo.parentElement){ zalo.parentElement.insertBefore(btn, zalo); }
+        else { var row=h.firstElementChild||h; row.appendChild(btn); }
+      });
+      syncBtns();
+    }
+    injectButtons();
+    prefill();
+    // re-run prefill when navigating to cart/confirm (fields may render later)
+    document.addEventListener('click',function(){ setTimeout(prefill,120); }, true);
   });
 })();
 </script>
