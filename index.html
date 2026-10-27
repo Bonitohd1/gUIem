@@ -309,32 +309,17 @@ button,[role="button"],a[data-path]{ touch-action:manipulation; }
 /* ===== desktop / PC interface ===== */
 .gu-pc-deco{ display:none; }
 @media (min-width:1024px){
+  /* hình cô gái làm nền full, app nổi 1 bên phải */
   html body{ background:
-     radial-gradient(1100px 640px at 6% -8%, rgba(255,214,228,.65), transparent 60%),
-     radial-gradient(1000px 560px at 106% 108%, rgba(214,55,107,.42), transparent 55%),
+     url("/desktop-bg.jpg?v=1") center center / cover no-repeat fixed,
      linear-gradient(158deg,#fff4f7 0%, #ffe6ee 44%, #ffcfe0 100%) fixed !important; }
-  [id^="screen-"] > main{ box-shadow:0 50px 130px -42px rgba(120,8,36,.42), 0 0 0 1px rgba(233,72,106,.06); }
-  header.fixed{ left:50% !important; transform:translateX(-50%); width:36rem !important; }
-  nav.fixed{ left:50% !important; transform:translateX(-50%); width:36rem !important; border-radius:22px 22px 0 0; overflow:hidden; }
-  .gu-bot-btn{ left:auto !important; right:calc(50vw - 18rem - 66px) !important; bottom:150px !important; }
-  .gu-bot-panel{ right:calc(50vw - 18rem - 66px) !important; }
-  .gu-pc-deco{ display:flex; position:fixed; z-index:0; top:0; height:100vh; width:calc(50vw - 18.5rem); box-sizing:border-box; flex-direction:column; justify-content:center; padding:0 clamp(28px,3.4vw,60px); }
-  .gu-pc-deco.l{ left:0; align-items:flex-start; }
-  .gu-pc-deco.r{ right:0; align-items:center; text-align:center; }
-  .gu-pc-logo{ width:88px; height:88px; border-radius:50%; object-fit:contain; background:#fff; box-shadow:0 16px 36px -12px rgba(120,8,36,.4), 0 0 0 1px rgba(201,154,62,.35); }
-  .gu-pc-brand{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(46px,4.2vw,72px); color:#8a1e42; line-height:.95; letter-spacing:-.025em; margin-top:22px; }
-  .gu-pc-sub{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:clamp(18px,1.5vw,23px); color:#c2335a; margin-top:8px; }
-  .gu-pc-lead{ font:400 15px/1.65 'Plus Jakarta Sans',sans-serif; color:#9a5c6c; margin-top:18px; max-width:38ch; }
-  .gu-pc-feats{ margin-top:28px; display:flex; flex-direction:column; gap:15px; }
-  .gu-pc-feat{ display:flex; align-items:center; gap:13px; color:#78082a; font:600 14.5px 'Plus Jakarta Sans',sans-serif; }
-  .gu-pc-feat .gu-fi{ width:42px; height:42px; border-radius:13px; background:#fff; color:#e9486a; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px -10px rgba(194,51,90,.5); flex:0 0 auto; }
-  .gu-pc-feat .gu-fi .material-symbols-outlined{ font-size:22px; }
-  .gu-pc-qr{ background:#fff; border-radius:26px; padding:26px 26px 22px; box-shadow:0 34px 80px -28px rgba(120,8,36,.4); width:clamp(222px,19vw,266px); }
-  .gu-pc-qr .gu-qh{ font-family:'Fraunces',serif; font-weight:600; font-size:20px; color:#8a1e42; }
-  .gu-pc-qr .gu-qs{ font:400 12.5px/1.5 'Plus Jakarta Sans',sans-serif; color:#9a5c6c; margin:4px 0 16px; }
-  .gu-pc-qr img{ width:100%; border-radius:14px; display:block; box-shadow:0 0 0 1px #ffe0e9; }
-  .gu-pc-phone{ margin-top:20px; color:#78082a; font:700 21px 'Plus Jakarta Sans',sans-serif; }
-  .gu-pc-phone small{ display:block; font-weight:500; font-size:12px; color:#b06a7e; margin-bottom:3px; }
+  [id^="screen-"] > main{ margin-left:auto !important; margin-right:clamp(40px,6vw,130px) !important; max-width:36rem !important;
+     box-shadow:0 60px 150px -40px rgba(120,8,36,.55), 0 0 0 1px rgba(233,72,106,.08); }
+  header.fixed{ left:auto !important; right:clamp(40px,6vw,130px) !important; transform:none !important; width:36rem !important; }
+  nav.fixed{ left:auto !important; right:clamp(40px,6vw,130px) !important; transform:none !important; width:36rem !important; border-radius:22px 22px 0 0; overflow:hidden; }
+  .gu-bot-btn{ left:auto !important; right:calc(clamp(40px,6vw,130px) + 36rem + 16px) !important; bottom:150px !important; }
+  .gu-bot-panel{ left:auto !important; right:calc(clamp(40px,6vw,130px) + 36rem + 16px) !important; }
+  .gu-pc-deco{ display:none !important; }
 }
 /* ===== end step/pc layer ===== */
 
@@ -1248,7 +1233,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 </div>
 <div class="flex flex-col gap-3" id="confirm-items"></div><div class="h-px bg-surface-container-high my-1"></div>
 <div class="flex flex-col gap-2 pt-1"><div class="flex items-center justify-between text-body-sm"><span class="text-on-surface-variant">Tiền nước (3 ly)</span><span class="text-on-surface font-medium">150.000đ</span></div><div class="flex items-center justify-between text-body-sm"><span class="text-on-surface-variant">Topping thêm (2 phần)</span><span class="text-secondary font-medium">+20.000đ</span></div><div class="h-px bg-surface-container-high my-0.5"></div><div class="flex items-center justify-between"><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-bold">Tổng thanh toán</span><span class="font-body-sm text-body-sm text-secondary">Đã áp dụng ưu đãi</span></div><span class="confirm-total font-price-display text-price-display text-primary font-extrabold text-right text-[20px]">0đ</span></div></div>
-<div class="rounded-xl bg-secondary-container/20 p-3 flex items-center gap-3">
+<div class="rounded-xl bg-secondary-container/20 p-3 flex flex-col gap-3">
+<div class="flex items-center gap-3">
 <div id="gu-st-ring" class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0 animate-spin" style="animation-duration: 4s;">
 <span id="gu-st-icon" class="material-symbols-outlined text-[18px]">hourglass_top</span>
 </div>
@@ -1256,6 +1242,10 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <span id="gu-st-title" class="font-label-md text-label-md text-on-secondary-container font-semibold">Đang chuẩn bị món</span>
 <span id="gu-st-sub" class="font-body-sm text-body-sm text-on-surface-variant">Dự kiến mang ra bàn sau 5 - 8 phút</span>
 </div>
+</div>
+<button id="gu-st-receive" type="button" class="hidden w-full items-center justify-center gap-2 py-3 rounded-xl bg-secondary text-on-secondary font-label-md text-label-md font-bold shadow-[0_8px_20px_-8px_rgba(47,174,106,0.7)] active:scale-[.97] transition-transform">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>Tôi đã nhận đơn
+</button>
 </div>
 </div>
 <div class="h-4 bg-surface-container-lowest relative overflow-hidden flex justify-between px-2">
@@ -3389,40 +3379,76 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 
 
 <style>
-/* ===== gUlEm · Admin console ===== */
+/* ===== gUlEm · Admin console (bản điều hành chuyên nghiệp) ===== */
 #gu-admin{ position:fixed; inset:0; z-index:100000; display:none; flex-direction:column;
-  background:#1a0f14; color:#fff; font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
+  background:radial-gradient(1200px 500px at 50% -10%, #241219, #130a0e 60%); color:#fff; font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
 #gu-admin.on{ display:flex; animation:guAdmIn .25s ease; }
 @keyframes guAdmIn{ from{opacity:0} to{opacity:1} }
-#gu-admin .ga-top{ display:flex; align-items:center; gap:10px; padding:14px 16px calc(14px);
-  background:linear-gradient(135deg,#78082a,#b01945); box-shadow:0 6px 20px -8px rgba(0,0,0,.6); }
-#gu-admin .ga-top .ga-ttl{ font-family:Fraunces,serif; font-weight:700; font-size:18px; letter-spacing:.2px; }
-#gu-admin .ga-top .ga-sub{ font-size:11px; opacity:.8; margin-top:1px; }
-#gu-admin .ga-live{ width:9px;height:9px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.6);animation:guLive 1.6s infinite; }
+#gu-admin *{ box-sizing:border-box; }
+#gu-admin .ga-wrap{ width:100%; max-width:720px; margin:0 auto; display:flex; flex-direction:column; flex:1; min-height:0; }
+/* ---- top bar ---- */
+#gu-admin .ga-top{ display:flex; align-items:center; gap:11px; padding:16px 18px;
+  background:linear-gradient(135deg,#8a0b31,#c21f4f 85%); box-shadow:0 10px 30px -14px rgba(0,0,0,.75); }
+#gu-admin .ga-brand{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
+#gu-admin .ga-seal{ width:40px; height:40px; border-radius:12px; object-fit:cover; box-shadow:0 0 0 2px rgba(255,255,255,.35); background:#fff; }
+#gu-admin .ga-top .ga-ttl{ font-family:Fraunces,serif; font-weight:700; font-size:18px; letter-spacing:.2px; line-height:1.05; }
+#gu-admin .ga-top .ga-sub{ display:flex; align-items:center; gap:6px; font-size:11px; opacity:.9; margin-top:3px; }
+#gu-admin .ga-live{ width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.6);animation:guLive 1.6s infinite; flex:none; }
 @keyframes guLive{ 0%{box-shadow:0 0 0 0 rgba(61,220,132,.55)} 70%{box-shadow:0 0 0 7px rgba(61,220,132,0)} 100%{box-shadow:0 0 0 0 rgba(61,220,132,0)} }
-#gu-admin .ga-ico{ width:38px;height:38px;border-radius:12px;border:none;background:rgba(255,255,255,.12);color:#fff;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s; }
-#gu-admin .ga-ico:active{ transform:scale(.92); } #gu-admin .ga-ico:hover{ background:rgba(255,255,255,.2); }
-#gu-admin .ga-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:14px 16px 4px; }
-#gu-admin .ga-stat{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; text-align:center; }
-#gu-admin .ga-stat b{ display:block; font-size:22px; font-weight:800; font-family:Fraunces,serif; color:#ffd7e2; line-height:1; }
-#gu-admin .ga-stat span{ font-size:10.5px; opacity:.75; text-transform:uppercase; letter-spacing:.05em; display:block; margin-top:5px; }
-#gu-admin .ga-list{ flex:1; overflow-y:auto; padding:12px 14px 30px; display:flex; flex-direction:column; gap:10px; }
-#gu-admin .ga-card{ background:#2a1a20; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px; transition:.2s; }
-#gu-admin .ga-card.new{ border-color:#3ddc84; box-shadow:0 0 0 1px #3ddc84, 0 8px 24px -10px rgba(61,220,132,.4); animation:guNewCard .5s ease; }
+#gu-admin .ga-ico{ width:38px;height:38px;border-radius:11px;border:none;background:rgba(255,255,255,.14);color:#fff;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s; flex:none; }
+#gu-admin .ga-ico:active{ transform:scale(.92); } #gu-admin .ga-ico:hover{ background:rgba(255,255,255,.26); }
+/* ---- stats ---- */
+#gu-admin .ga-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:9px; padding:16px 18px 6px; }
+#gu-admin .ga-stat{ position:relative; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09); border-radius:15px; padding:13px 10px; text-align:center; overflow:hidden; }
+#gu-admin .ga-stat::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--sc,#e9486a); opacity:.9; }
+#gu-admin .ga-stat b{ display:block; font-size:21px; font-weight:800; font-family:Fraunces,serif; color:#fff; line-height:1; font-variant-numeric:tabular-nums; }
+#gu-admin .ga-stat.rev b{ font-size:15px; color:#ffd7e2; }
+#gu-admin .ga-stat span{ font-size:10px; opacity:.7; letter-spacing:.02em; display:block; margin-top:6px; }
+/* ---- filter tabs ---- */
+#gu-admin .ga-filters{ display:flex; gap:6px; padding:10px 18px 4px; overflow-x:auto; -ms-overflow-style:none; scrollbar-width:none; }
+#gu-admin .ga-filters::-webkit-scrollbar{ display:none; }
+#gu-admin .ga-ftab{ flex:none; display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.04); color:#e9d4da; font-size:12.5px; font-weight:600; cursor:pointer; transition:.18s; font-family:inherit; white-space:nowrap; }
+#gu-admin .ga-ftab:active{ transform:scale(.96); }
+#gu-admin .ga-ftab.on{ background:#fff; color:#8a0b31; border-color:#fff; font-weight:800; }
+#gu-admin .ga-ftab .ga-fct{ font-size:11px; font-weight:800; opacity:.65; }
+#gu-admin .ga-ftab.on .ga-fct{ opacity:.85; }
+/* ---- list + cards ---- */
+#gu-admin .ga-list{ flex:1; overflow-y:auto; padding:12px 16px 36px; display:flex; flex-direction:column; gap:12px; }
+#gu-admin .ga-card{ background:linear-gradient(180deg,#2b181f,#241319); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:15px; transition:.25s; }
+#gu-admin .ga-card.new{ border-color:#3ddc84; box-shadow:0 0 0 1px #3ddc84, 0 10px 30px -12px rgba(61,220,132,.45); animation:guNewCard .5s ease; }
+#gu-admin .ga-card.closed{ opacity:.62; filter:saturate(.75); }
 @keyframes guNewCard{ 0%{transform:scale(.97);opacity:.4} 100%{transform:none;opacity:1} }
 #gu-admin .ga-ch{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-#gu-admin .ga-name{ font-weight:700; font-size:15px; color:#fff; }
+#gu-admin .ga-codeline{ display:flex; align-items:center; gap:8px; }
+#gu-admin .ga-code{ font-size:11px; font-weight:800; letter-spacing:.04em; color:#ffb3c6; background:rgba(233,72,106,.14); padding:3px 8px; border-radius:7px; font-variant-numeric:tabular-nums; }
+#gu-admin .ga-name{ font-weight:700; font-size:15.5px; color:#fff; margin-top:7px; }
 #gu-admin .ga-phone{ font-size:12.5px; color:#ffb3c6; text-decoration:none; }
-#gu-admin .ga-time{ font-size:11px; opacity:.6; white-space:nowrap; }
-#gu-admin .ga-badge-new{ font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:#06281a; background:#3ddc84; padding:2px 7px; border-radius:999px; margin-left:6px; vertical-align:middle; }
-#gu-admin .ga-items{ margin-top:8px; font-size:13px; color:#e9d4da; line-height:1.5; }
-#gu-admin .ga-row{ display:flex; align-items:center; gap:7px; margin-top:7px; font-size:12.5px; }
-#gu-admin .ga-row .material-symbols-outlined{ font-size:16px; color:#ff9db6; }
-#gu-admin .ga-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,.08); }
-#gu-admin .ga-total{ font-family:Fraunces,serif; font-weight:800; font-size:18px; color:#ffd7e2; }
-#gu-admin .ga-pay{ font-size:11px; padding:3px 9px; border-radius:999px; background:rgba(255,255,255,.1); }
-#gu-admin .ga-empty{ text-align:center; opacity:.6; padding:60px 20px; font-size:14px; }
+#gu-admin .ga-time{ font-size:11px; opacity:.6; white-space:nowrap; text-align:right; }
+#gu-admin .ga-badge-new{ font-size:9px; font-weight:800; letter-spacing:.04em; color:#06281a; background:#3ddc84; padding:2px 7px; border-radius:999px; }
+/* status pill */
+#gu-admin .ga-pill{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; white-space:nowrap; }
+#gu-admin .ga-pill i{ width:7px; height:7px; border-radius:50%; background:currentColor; display:block; }
+#gu-admin .ga-items{ margin-top:9px; font-size:13px; color:#ecd6dc; line-height:1.5; }
+#gu-admin .ga-row{ display:flex; align-items:center; gap:7px; margin-top:7px; font-size:12.5px; color:#d9bfc7; }
+#gu-admin .ga-row .material-symbols-outlined{ font-size:16px; color:#ff9db6; flex:none; }
+/* progress tracker */
+#gu-admin .ga-track{ display:flex; align-items:center; margin:13px 2px 3px; }
+#gu-admin .ga-step{ display:flex; flex-direction:column; align-items:center; gap:4px; position:relative; }
+#gu-admin .ga-dot{ width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,.1); border:1.5px solid rgba(255,255,255,.2); color:transparent;
+  display:flex; align-items:center; justify-content:center; font-size:13px; transition:.2s; z-index:1; }
+#gu-admin .ga-dot .material-symbols-outlined{ font-size:14px; }
+#gu-admin .ga-step.done .ga-dot{ background:#2fae6a; border-color:#2fae6a; color:#06281a; }
+#gu-admin .ga-step.cur .ga-dot{ background:#e9486a; border-color:#e9486a; color:#fff; box-shadow:0 0 0 4px rgba(233,72,106,.22); }
+#gu-admin .ga-step span{ font-size:9.5px; font-weight:700; color:rgba(255,255,255,.5); }
+#gu-admin .ga-step.done span, #gu-admin .ga-step.cur span{ color:#fff; }
+#gu-admin .ga-bar{ flex:1; height:2px; background:rgba(255,255,255,.14); margin-top:-16px; border-radius:2px; }
+#gu-admin .ga-bar.fill{ background:#2fae6a; }
+#gu-admin .ga-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; padding-top:11px; border-top:1px solid rgba(255,255,255,.08); }
+#gu-admin .ga-total{ font-family:Fraunces,serif; font-weight:800; font-size:19px; color:#ffd7e2; font-variant-numeric:tabular-nums; }
+#gu-admin .ga-pay{ font-size:11px; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.1); color:#e9d4da; }
+#gu-admin .ga-empty{ text-align:center; opacity:.6; padding:56px 20px; font-size:14px; }
 #gu-admin .ga-empty .material-symbols-outlined{ font-size:44px; display:block; margin:0 auto 10px; opacity:.5; }
 /* PIN gate */
 #gu-pin{ position:fixed; inset:0; z-index:100001; display:none; align-items:center; justify-content:center; background:rgba(26,15,20,.97); }
@@ -3444,19 +3470,33 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   <button class="pin-x" id="gu-pin-cancel">Thoát</button>
 </div></div>
 <div id="gu-admin">
+ <div class="ga-wrap">
   <div class="ga-top">
-    <span class="ga-live"></span>
-    <div style="flex:1;min-width:0"><div class="ga-ttl">Quản trị đơn gUlEm</div><div class="ga-sub" id="ga-status">Đang kết nối…</div></div>
+    <div class="ga-brand">
+      <img class="ga-seal" src="/logo.png?v=1" alt="gUlEm">
+      <div style="min-width:0">
+        <div class="ga-ttl">Điều hành đơn</div>
+        <div class="ga-sub"><span class="ga-live"></span><span id="ga-status">Đang kết nối…</span></div>
+      </div>
+    </div>
     <button class="ga-ico" id="ga-sound" title="Bật/tắt chuông"><span class="material-symbols-outlined">notifications_active</span></button>
     <button class="ga-ico" id="ga-refresh" title="Làm mới"><span class="material-symbols-outlined">refresh</span></button>
     <button class="ga-ico" id="ga-close" title="Đóng"><span class="material-symbols-outlined">close</span></button>
   </div>
   <div class="ga-stats">
-    <div class="ga-stat"><b id="ga-cnt">0</b><span>Đơn hôm nay</span></div>
-    <div class="ga-stat"><b id="ga-rev">0đ</b><span>Doanh thu</span></div>
-    <div class="ga-stat"><b id="ga-new">0</b><span>Đơn mới</span></div>
+    <div class="ga-stat" style="--sc:#e9486a"><b id="ga-cnt">0</b><span>Đơn hôm nay</span></div>
+    <div class="ga-stat rev" style="--sc:#ffd7e2"><b id="ga-rev">0đ</b><span>Doanh thu</span></div>
+    <div class="ga-stat" style="--sc:#f0a500"><b id="ga-active">0</b><span>Đang xử lý</span></div>
+    <div class="ga-stat" style="--sc:#2fae6a"><b id="ga-done">0</b><span>Hoàn tất</span></div>
+  </div>
+  <div class="ga-filters" id="ga-filters">
+    <button class="ga-ftab on" data-f="all">Tất cả <span class="ga-fct" id="fc-all">0</span></button>
+    <button class="ga-ftab" data-f="new">Mới <span class="ga-fct" id="fc-new">0</span></button>
+    <button class="ga-ftab" data-f="active">Đang xử lý <span class="ga-fct" id="fc-active">0</span></button>
+    <button class="ga-ftab" data-f="done">Hoàn tất <span class="ga-fct" id="fc-done">0</span></button>
   </div>
   <div class="ga-list" id="ga-list"><div class="ga-empty"><span class="material-symbols-outlined">hourglass_empty</span>Đang tải đơn…</div></div>
+ </div>
 </div>
 <script>
 /* ===== gUlEm · Admin console logic ===== */
@@ -3465,7 +3505,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c){ if(c.orders)CFG.orders=c.orders; if(c.ntfy)CFG.ntfy=c.ntfy; if(c.adminPin)CFG.pin=String(c.adminPin); } }).catch(function(){}); }catch(e){}
 
   var $=function(id){return document.getElementById(id);};
-  var pollTimer=null, seenMax=0, soundOn=true, ORDERS=[], seenIds=Object.create(null), es=null;
+  var pollTimer=null, seenMax=0, soundOn=true, ORDERS=[], seenIds=Object.create(null), es=null, esSt=null;
   try{ seenMax=parseInt(localStorage.getItem('gu_admin_seen')||'0',10)||0; }catch(e){}
   try{ soundOn=localStorage.getItem('gu_admin_sound')!=='0'; }catch(e){}
 
@@ -3480,40 +3520,83 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
 
-  var STG=[{k:'making',t:'Đang pha',c:'#e9486a'},{k:'done',t:'Xong',c:'#f0a500'},{k:'delivered',t:'Đã giao',c:'#3ddc84'}];
+  // Vòng đời đơn: (mới) → making → done → delivered → received(khách xác nhận = Hoàn tất)
+  var STG=[{k:'making',t:'Đang pha',c:'#e9486a',ic:'local_cafe'},{k:'done',t:'Xong',c:'#f0a500',ic:'done'},{k:'delivered',t:'Đã giao',c:'#5b9cff',ic:'two_wheeler'}];
+  var STEPS=[{t:'Pha',ic:'local_cafe'},{t:'Xong',ic:'done'},{t:'Giao',ic:'two_wheeler'},{t:'Nhận',ic:'verified'}];
+  var SIDX={'':0,making:1,done:2,delivered:3,received:4};
+  var PILL={'':{t:'Chờ xử lý',c:'#f0a500'},making:{t:'Đang pha',c:'#e9486a'},done:{t:'Đã xong',c:'#f0a500'},delivered:{t:'Đã giao',c:'#5b9cff'},received:{t:'Hoàn tất',c:'#2fae6a'}};
+  var FILTER='all';
   var statusMap={}; try{ statusMap=JSON.parse(localStorage.getItem('gu_ostatus')||'{}'); }catch(e){}
   function getStatus(code){ return statusMap[code]||''; }
-  function setStatus(code,k){
+  function setStatus(code,k,publish){
     if(!code) return;
     statusMap[code]=k; try{ localStorage.setItem('gu_ostatus',JSON.stringify(statusMap)); }catch(e){}
-    if(CFG.ntfy){ fetch('https://ntfy.sh/'+CFG.ntfy+'-st',{method:'POST',body:JSON.stringify({code:code,status:k}),headers:{'Tags':'gear'}}).catch(function(){}); }
+    if(publish!==false && CFG.ntfy){ fetch('https://ntfy.sh/'+CFG.ntfy+'-st',{method:'POST',body:JSON.stringify({code:code,status:k}),headers:{'Tags':'gear'}}).catch(function(){}); }
     refresh();
   }
 
+  function trackHtml(st){
+    var idx=SIDX[st]||0; var h='<div class="ga-track">';
+    STEPS.forEach(function(s,i){
+      var step=i+1; var cls = (st==='received'||idx>step)?'done':(idx===step?'cur':'');
+      if(i>0) h+='<div class="ga-bar'+((st==='received'||idx>=step)?' fill':'')+'"></div>';
+      h+='<div class="ga-step '+cls+'"><div class="ga-dot"><span class="material-symbols-outlined">'+(cls==='done'?'check':s.ic)+'</span></div><span>'+s.t+'</span></div>';
+    });
+    return h+'</div>';
+  }
+  function actionsHtml(code){
+    var st=getStatus(code);
+    if(st==='received') return '<div class="ga-closedtag"><span class="material-symbols-outlined">verified</span>Đơn đã hoàn tất · khách đã nhận</div>';
+    var nextK = st===''?'making':(st==='making'?'done':(st==='done'?'delivered':''));
+    var btns='<div class="ga-strow">'+STG.map(function(s){
+      var on=st===s.k, isNext=s.k===nextK;
+      var style=on?(' style="background:'+s.c+';border-color:'+s.c+';color:#140a0e"'):'';
+      return '<button class="ga-stbtn'+(on?' on':'')+(isNext?' next':'')+'" data-code="'+esc(code)+'" data-k="'+s.k+'"'+style+'><span class="material-symbols-outlined">'+s.ic+'</span>'+s.t+'</button>';
+    }).join('')+'</div>';
+    if(st==='delivered'){
+      btns+='<div class="ga-await"><span class="material-symbols-outlined">hourglass_top</span>Đang chờ khách bấm “Đã nhận”. '
+        +'<a href="#" class="ga-forcedone" data-code="'+esc(code)+'" style="color:#ffd58a;font-weight:800;text-decoration:underline;margin-left:4px">Đánh dấu đã nhận</a></div>';
+    }
+    return btns;
+  }
   function render(list){
     var box=$('ga-list'); if(!box)return;
-    if(!list || !list.length){ box.innerHTML='<div class="ga-empty"><span class="material-symbols-outlined">receipt_long</span>Chưa có đơn nào hôm nay</div>'; $('ga-cnt').textContent='0'; $('ga-rev').textContent='0đ'; $('ga-new').textContent='0'; return; }
-    // sort newest first
+    list = list||[];
     list.sort(function(a,b){ return tparse(b.at)-tparse(a.at); });
-    var todayCnt=0, rev=0, newCnt=0, html='';
+    var todayCnt=0, rev=0, newCnt=0, activeCnt=0, doneCnt=0;
+    var shown='';
     list.forEach(function(o){
-      var ts=tparse(o.at); var isNew=ts>seenMax;
+      var ts=tparse(o.at); var isNew=ts>seenMax; var st=getStatus(o.code);
+      var closed = st==='received';
       if(isNew)newCnt++;
-      if(sameDay(ts)){ todayCnt++; rev+=Number(o.total)||0; }
+      if(sameDay(ts)){ todayCnt++; rev+=Number(o.total)||0; if(closed)doneCnt++; else activeCnt++; }
+      // filter
+      var pass = FILTER==='all' || (FILTER==='new'&&isNew) || (FILTER==='active'&&!closed) || (FILTER==='done'&&closed);
+      if(!pass) return;
+      var pill=PILL[st]||PILL[''];
       var addr=o.address?('<div class="ga-row"><span class="material-symbols-outlined">location_on</span>'+esc(o.address)+'</div>'):'';
       var note=o.note?('<div class="ga-row"><span class="material-symbols-outlined">sticky_note_2</span>'+esc(o.note)+'</div>'):'';
-      html+='<div class="ga-card'+(isNew?' new':'')+'">'
-        +'<div class="ga-ch"><div style="min-width:0"><div class="ga-name">'+esc(o.customerName||'Khách')+(isNew?'<span class="ga-badge-new">Mới</span>':'')+'</div>'
+      shown+='<div class="ga-card'+(isNew&&!closed?' new':'')+(closed?' closed':'')+'">'
+        +'<div class="ga-ch"><div style="min-width:0">'
+        +'<div class="ga-codeline"><span class="ga-code">'+esc(o.code||'—')+'</span>'+(isNew&&!closed?'<span class="ga-badge-new">MỚI</span>':'')+'</div>'
+        +'<div class="ga-name">'+esc(o.customerName||'Khách')+'</div>'
         +(o.customerPhone?'<a class="ga-phone" href="tel:'+esc(o.customerPhone)+'">'+esc(o.customerPhone)+'</a>':'')+'</div>'
-        +'<div class="ga-time">'+hhmm(ts)+'</div></div>'
+        +'<div style="text-align:right"><span class="ga-pill" style="color:'+pill.c+';background:'+pill.c+'22"><i></i>'+pill.t+'</span><div class="ga-time" style="margin-top:6px">'+hhmm(ts)+'</div></div></div>'
         +'<div class="ga-items">'+esc(o.itemsText||('('+(o.count||0)+' món)'))+'</div>'
         +addr+note
+        +trackHtml(st)
         +'<div class="ga-foot"><span class="ga-total">'+money(o.total)+'</span><span class="ga-pay">'+esc(o.payment||'Tiền mặt')+'</span></div>'
-        +(o.code?('<div class="ga-strow">'+STG.map(function(s){var on=getStatus(o.code)===s.k;return '<button class="ga-stbtn'+(on?' on':'')+'" data-code="'+esc(o.code)+'" data-k="'+s.k+'"'+(on?' style="background:'+s.c+';border-color:'+s.c+';color:#1a0f14"':'')+'>'+s.t+'</button>';}).join('')+'</div>'):'')
+        +(o.code?actionsHtml(o.code):'')
         +'</div>';
     });
-    box.innerHTML=html;
-    $('ga-cnt').textContent=todayCnt; $('ga-rev').textContent=money(rev); $('ga-new').textContent=newCnt;
+    if(!shown){
+      var msg = list.length ? 'Không có đơn trong mục này' : 'Chưa có đơn nào hôm nay';
+      box.innerHTML='<div class="ga-empty"><span class="material-symbols-outlined">receipt_long</span>'+msg+'</div>';
+    } else box.innerHTML=shown;
+    $('ga-cnt').textContent=todayCnt; $('ga-rev').textContent=money(rev);
+    $('ga-active').textContent=activeCnt; $('ga-done').textContent=doneCnt;
+    var fa=$('fc-all'),fn=$('fc-new'),fac=$('fc-active'),fd=$('fc-done');
+    if(fa)fa.textContent=list.length; if(fn)fn.textContent=newCnt; if(fac)fac.textContent=activeCnt; if(fd)fd.textContent=doneCnt;
   }
 
   function markSeen(list){
@@ -3566,6 +3649,15 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       es.onmessage=function(ev){ try{ var m=JSON.parse(ev.data); if(m.event==='message' && m.message){ ingest(JSON.parse(m.message), m.id, true); $('ga-status').textContent='🟢 Đang nhận trực tiếp · '+hhmm(Date.now()); } }catch(e){} };
       es.onerror=function(){ $('ga-status').textContent='Kết nối lại trực tiếp…'; };
     }catch(e){}
+    // kênh trạng thái: nhận xác nhận "Đã nhận" từ khách để đóng đơn
+    if(!esSt) try{
+      esSt=new EventSource('https://ntfy.sh/'+CFG.ntfy+'-st/sse');
+      esSt.onmessage=function(ev){ try{ var mm=JSON.parse(ev.data); if(mm.event==='message'&&mm.message){ var d=JSON.parse(mm.message); if(d.code&&d.status){
+        var prev=getStatus(d.code);
+        setStatus(d.code, d.status, false); // không phát lại, tránh vòng lặp
+        if(d.status==='received' && prev!=='received'){ chime(); toast('✅ Khách đã nhận đơn '+d.code+' — hoàn tất'); }
+      } } }catch(e){} }; }
+    catch(e){}
   }
 
   function openAdmin(){
@@ -3576,7 +3668,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     subscribe();
     clearInterval(pollTimer); pollTimer=setInterval(loadHistory, 30000);
   }
-  function closeAdmin(){ $('gu-admin').classList.remove('on'); clearInterval(pollTimer); if(es){try{es.close();}catch(e){} es=null;} }
+  function closeAdmin(){ $('gu-admin').classList.remove('on'); clearInterval(pollTimer); if(es){try{es.close();}catch(e){} es=null;} if(esSt){try{esSt.close();}catch(e){} esSt=null;} }
 
   // PIN gate
   function askPin(){
@@ -3592,7 +3684,13 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function boot(){
     $('ga-close').addEventListener('click',closeAdmin);
     $('ga-refresh').addEventListener('click',function(){ loadHistory(); });
-    $('ga-list').addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('.ga-stbtn'); if(b){ e.stopPropagation(); setStatus(b.getAttribute('data-code'), b.getAttribute('data-k')); } });
+    $('ga-list').addEventListener('click',function(e){
+      var fd=e.target.closest&&e.target.closest('.ga-forcedone');
+      if(fd){ e.preventDefault(); e.stopPropagation(); setStatus(fd.getAttribute('data-code'),'received'); toast('✅ Đã đánh dấu hoàn tất'); return; }
+      var b=e.target.closest&&e.target.closest('.ga-stbtn'); if(b){ e.stopPropagation(); setStatus(b.getAttribute('data-code'), b.getAttribute('data-k')); }
+    });
+    var fbar=$('ga-filters'); if(fbar) fbar.addEventListener('click',function(e){ var t=e.target.closest&&e.target.closest('.ga-ftab'); if(!t)return;
+      FILTER=t.getAttribute('data-f'); Array.prototype.forEach.call(fbar.querySelectorAll('.ga-ftab'),function(x){x.classList.toggle('on',x===t);}); refresh(); });
     $('ga-sound').addEventListener('click',function(){ soundOn=!soundOn; try{localStorage.setItem('gu_admin_sound',soundOn?'1':'0');}catch(e){} this.querySelector('.material-symbols-outlined').textContent=soundOn?'notifications_active':'notifications_off'; if(soundOn)chime(); });
     $('gu-pin-ok').addEventListener('click',tryPin);
     $('gu-pin-inp').addEventListener('keydown',function(e){ if(e.key==='Enter')tryPin(); });
@@ -3632,11 +3730,18 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 </script>
 
 <style>
-#gu-admin .ga-strow{ display:flex; gap:7px; margin-top:10px; }
-#gu-admin .ga-stbtn{ flex:1; padding:7px 4px; border-radius:10px; border:1.5px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.06); color:#e9d4da; font-size:12px; font-weight:700; cursor:pointer; transition:.15s; font-family:inherit; }
+#gu-admin .ga-strow{ display:flex; gap:8px; margin-top:12px; }
+#gu-admin .ga-stbtn{ flex:1; display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:10px 4px; border-radius:12px; border:1.5px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.05); color:#e9d4da; font-size:12.5px; font-weight:700; cursor:pointer; transition:.15s; font-family:inherit; }
+#gu-admin .ga-stbtn .material-symbols-outlined{ font-size:16px; }
 #gu-admin .ga-stbtn:active{ transform:scale(.95); }
 #gu-admin .ga-stbtn.on{ font-weight:800; }
+#gu-admin .ga-stbtn.next{ background:#e9486a; border-color:#e9486a; color:#fff; box-shadow:0 8px 20px -10px rgba(233,72,106,.8); }
+#gu-admin .ga-stbtn.ghost{ opacity:.55; }
+#gu-admin .ga-await{ margin-top:12px; display:flex; align-items:center; gap:8px; font-size:12px; color:#ffd58a; background:rgba(240,165,0,.1); border:1px solid rgba(240,165,0,.25); border-radius:12px; padding:9px 12px; }
+#gu-admin .ga-await .material-symbols-outlined{ font-size:17px; }
+#gu-admin .ga-closedtag{ margin-top:12px; display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:#8ff0bf; background:rgba(47,174,106,.12); border:1px solid rgba(47,174,106,.3); border-radius:12px; padding:9px 12px; }
+#gu-admin .ga-closedtag .material-symbols-outlined{ font-size:18px; }
 </style>
 <script>
 /* gUlEm: khách nhận cập nhật trạng thái đơn realtime (ntfy status channel) */
@@ -3647,22 +3752,32 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   var MAP={
     making:{t:'Đang pha chế',s:'Nhân viên đang chuẩn bị đồ uống cho bạn',ic:'local_cafe',col:'#e9486a'},
     done:{t:'Đồ uống đã sẵn sàng',s:'Đơn đã pha xong, đang chuẩn bị mang ra / giao',ic:'check_circle',col:'#f0a500'},
-    delivered:{t:'Đã giao — cảm ơn bạn 🤎',s:'Chúc bạn ngon miệng. Hẹn gặp lại ở gUlEm!',ic:'done_all',col:'#2fae6a'}
+    delivered:{t:'Đơn đang đến tay bạn',s:'Nhận được rồi thì bấm “Tôi đã nhận đơn” giúp quán nhé 🤎',ic:'two_wheeler',col:'#5b9cff'},
+    received:{t:'Đã nhận — cảm ơn bạn 🤎',s:'Chúc bạn ngon miệng. Hẹn gặp lại ở gUlEm!',ic:'verified',col:'#2fae6a'}
   };
   function apply(k){
     var m=MAP[k]; if(!m)return;
     var ti=document.getElementById('gu-st-title'), su=document.getElementById('gu-st-sub'),
-        ic=document.getElementById('gu-st-icon'), rg=document.getElementById('gu-st-ring');
+        ic=document.getElementById('gu-st-icon'), rg=document.getElementById('gu-st-ring'),
+        rc=document.getElementById('gu-st-receive');
     if(ti)ti.textContent=m.t; if(su)su.textContent=m.s; if(ic)ic.textContent=m.ic;
     if(rg){ rg.classList.remove('animate-spin'); rg.style.background=m.col; }
+    if(rc){ if(k==='delivered'){ rc.classList.remove('hidden'); rc.classList.add('flex'); } else { rc.classList.add('hidden'); rc.classList.remove('flex'); } }
+  }
+  function confirmReceived(){
+    if(!myCode) { try{ myCode=window.__GU_ORDER_CODE||sessionStorage.getItem('gu_order_code')||''; }catch(e){} }
+    apply('received');
+    if(TOPIC && myCode){ fetch('https://ntfy.sh/'+TOPIC+'-st',{method:'POST',body:JSON.stringify({code:myCode,status:'received'}),headers:{'Tags':'tada'}}).catch(function(){}); }
+    try{ if(window.GU_SFX&&window.GU_SFX.celebrate)window.GU_SFX.celebrate(); else if(window.GU_SFX&&window.GU_SFX.success)window.GU_SFX.success(); if(navigator.vibrate)navigator.vibrate([12,40,18]); }catch(_){ }
   }
   function subscribe(){
     if(!TOPIC || es) return;
     try{
       es=new EventSource('https://ntfy.sh/'+TOPIC+'-st/sse');
-      es.onmessage=function(ev){ try{ var mm=JSON.parse(ev.data); if(mm.event==='message' && mm.message){ var d=JSON.parse(mm.message); if(d.code && d.code===myCode){ apply(d.status); try{ if(window.GU_SFX&&window.GU_SFX.pop)window.GU_SFX.pop(); if(navigator.vibrate)navigator.vibrate(12); }catch(_){ } } } }catch(e){} };
+      es.onmessage=function(ev){ try{ var mm=JSON.parse(ev.data); if(mm.event==='message' && mm.message){ var d=JSON.parse(mm.message); if(d.code && d.code===myCode && d.status!=='received'){ apply(d.status); try{ if(window.GU_SFX&&window.GU_SFX.pop)window.GU_SFX.pop(); if(navigator.vibrate)navigator.vibrate(12); }catch(_){ } } } }catch(e){} };
     }catch(e){}
   }
+  document.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('#gu-st-receive'); if(b){ e.preventDefault(); confirmReceived(); } });
   var _go=window.__go;
   if(typeof _go==='function'){ window.__go=function(x){ var r=_go.apply(this,arguments); if(x==='screen-confirm'){ try{ myCode=window.__GU_ORDER_CODE||sessionStorage.getItem('gu_order_code')||''; }catch(e){} subscribe(); } return r; }; }
 })();
