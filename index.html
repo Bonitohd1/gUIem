@@ -283,6 +283,10 @@ header .w-11.h-11.rounded-full img{ width:100% !important; height:100% !importan
 .gu-zod-x{ position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:50%; background:#ffe3ec; color:#8a1e42; border:0; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; }
 .gu-zod-back{ font:600 12px 'Plus Jakarta Sans',sans-serif; color:#b06a7e; background:0; border:0; cursor:pointer; margin-top:14px; }
 /* ===== end zodiac layer ===== */
+.gu-mute{ margin-left:auto; background:0; border:0; color:#b06a7e; cursor:pointer; display:flex; align-items:center; padding:2px; }
+.gu-mute + .gu-bot-x{ margin-left:6px; }
+/* ===== end sfx layer ===== */
+
 
 
 
@@ -3091,6 +3095,40 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     var panel=document.querySelector('.gu-bot-panel');
     if(panel){ var zb=document.createElement('button'); zb.className='gu-zbtn'; zb.textContent='🔮 Chọn cung hoàng đạo — gợi ý đồ uống'; zb.addEventListener('click',open); var cta=panel.querySelector('.gu-bot-cta'); if(cta) panel.insertBefore(zb,cta); else panel.appendChild(zb); }
     window.__guZodiac=open;
+  });
+})();
+</script>
+<script>
+/* gUlEm: sound effects (Web Audio) + haptics + +1 + order confetti */
+(function(){
+  function ready(fn){ if(document.readyState!=='loading')fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  var AC=null, muted=false;
+  try{ muted=localStorage.getItem('gu_muted')==='1'; }catch(e){}
+  function ctx(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC&&AC.state==='suspended'){ try{AC.resume();}catch(e){} } return AC; }
+  function tone(freq,dur,type,vol,when){ var ac=ctx(); if(!ac||muted) return; var t=ac.currentTime+(when||0); var o=ac.createOscillator(), g=ac.createGain(); o.type=type||'sine'; o.frequency.setValueAtTime(freq,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||0.15,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+dur+0.03); }
+  function ting(){ tone(880,0.16,'sine',0.2); tone(1320,0.22,'sine',0.15,0.07); tone(1760,0.3,'sine',0.11,0.15); }
+  function pop(){ tone(540,0.08,'triangle',0.18); tone(840,0.12,'sine',0.13,0.04); }
+  function success(){ tone(660,0.14,'sine',0.18); tone(880,0.14,'sine',0.18,0.1); tone(1175,0.28,'sine',0.15,0.21); }
+  function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+  function plusOne(x,y){ var el=document.createElement('div'); el.textContent='+1'; el.style.cssText='position:fixed;left:'+x+'px;top:'+y+'px;z-index:1180;color:#fff;background:#e9486a;font:800 12px "Plus Jakarta Sans",sans-serif;padding:3px 9px;border-radius:999px;box-shadow:0 8px 18px -6px rgba(233,72,106,.7);pointer-events:none;transform:translate(-50%,-50%);transition:top .8s cubic-bezier(.3,0,.2,1),opacity .8s;opacity:1'; document.body.appendChild(el); requestAnimationFrame(function(){ el.style.top=(y-46)+'px'; el.style.opacity='0'; }); setTimeout(function(){ if(el.parentNode)el.parentNode.removeChild(el); },860); }
+  function burst(cx,cy){ var cl=['#e9486a','#ff86ab','#ffd166','#ffb3c8','#ff5c8a','#7ed9a8']; for(var i=0;i<42;i++){ (function(){ var c=document.createElement('span'); var a=Math.random()*6.283, d=80+Math.random()*230, dx=Math.cos(a)*d, dy=Math.sin(a)*d; c.style.cssText='position:fixed;left:'+cx+'px;top:'+cy+'px;width:9px;height:9px;z-index:1400;pointer-events:none;background:'+cl[i%cl.length]+';border-radius:'+(Math.random()>.5?'50%':'2px')+';opacity:1;transition:transform 1.3s cubic-bezier(.2,.6,.2,1),opacity 1.3s'; document.body.appendChild(c); requestAnimationFrame(function(){ c.style.transform='translate('+dx+'px,'+(dy+190)+'px) rotate('+(Math.random()*720)+'deg)'; c.style.opacity='0'; }); setTimeout(function(){ if(c.parentNode)c.parentNode.removeChild(c); },1400); })(); } }
+  window.GU_SFX={ ting:ting, pop:pop, success:success, burst:burst };
+  document.addEventListener('pointerdown',function u(){ ctx(); document.removeEventListener('pointerdown',u); });
+
+  document.addEventListener('click',function(e){
+    if(e.target.closest('.gu-open')){ ting(); haptic(20); return; }
+    var add=e.target.closest('#screen-menu .btn-add, .gu-lb-add'); if(add){ pop(); haptic(14); var r=add.getBoundingClientRect(); plusOne(r.left+r.width/2, r.top+r.height/2); return; }
+    if(e.target.closest('#screen-cart #place-order, #place-order')){ success(); haptic(30); burst(window.innerWidth/2, window.innerHeight*0.42); return; }
+  }, true);
+
+  /* mute toggle in bot header */
+  ready(function(){
+    var head=document.querySelector('.gu-bot-head'); if(!head) return;
+    var b=document.createElement('button'); b.className='gu-mute'; b.setAttribute('aria-label','Bật/tắt âm thanh');
+    function paint(){ b.innerHTML='<span class="material-symbols-outlined" style="font-size:20px">'+(muted?'volume_off':'volume_up')+'</span>'; }
+    paint();
+    b.addEventListener('click',function(ev){ ev.stopPropagation(); muted=!muted; try{localStorage.setItem('gu_muted',muted?'1':'0');}catch(e){} paint(); if(!muted){ ctx(); pop(); } });
+    var x=head.querySelector('.gu-bot-x'); if(x) head.insertBefore(b,x); else head.appendChild(b);
   });
 })();
 </script>
