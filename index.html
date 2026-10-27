@@ -3432,11 +3432,11 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <script>
 /* ===== gUlEm · Admin console logic ===== */
 (function(){
-  var CFG={orders:'',pin:'2409'};
-  try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c){ if(c.orders)CFG.orders=c.orders; if(c.adminPin)CFG.pin=String(c.adminPin); } }).catch(function(){}); }catch(e){}
+  var CFG={orders:'',ntfy:'',pin:'2409'};
+  try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c){ if(c.orders)CFG.orders=c.orders; if(c.ntfy)CFG.ntfy=c.ntfy; if(c.adminPin)CFG.pin=String(c.adminPin); } }).catch(function(){}); }catch(e){}
 
   var $=function(id){return document.getElementById(id);};
-  var pollTimer=null, seenMax=0, soundOn=true;
+  var pollTimer=null, seenMax=0, soundOn=true, ORDERS=[], seenIds=Object.create(null), es=null;
   try{ seenMax=parseInt(localStorage.getItem('gu_admin_seen')||'0',10)||0; }catch(e){}
   try{ soundOn=localStorage.getItem('gu_admin_sound')!=='0'; }catch(e){}
 
@@ -3481,35 +3481,62 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     seenMax=mx; try{ localStorage.setItem('gu_admin_seen',String(mx)); }catch(e){}
   }
 
-  function poll(firstOpen){
-    if(!CFG.orders){ $('ga-status').textContent='Chưa cấu hình nguồn đơn (cfg.orders)'; render([]); return; }
-    fetch(CFG.orders+(CFG.orders.indexOf('?')>-1?'&':'?')+'t='+Date.now(),{cache:'no-store'})
-      .then(function(r){ return r.json(); })
-      .then(function(j){
-        var list = Array.isArray(j)?j:(j.orders||j.data||[]);
-        $('ga-status').textContent='Đã kết nối · cập nhật '+hhmm(Date.now());
-        // detect new since last seen (skip alert on very first open)
-        var prevSeen=seenMax;
-        var newest=list.filter(function(o){ return tparse(o.at)>prevSeen; });
-        render(list);
-        if(!firstOpen && newest.length){
-          chime();
-          var n=newest[0];
-          toast('🔔 Đơn mới từ '+(n.customerName||'khách')+' · '+money(n.total));
-          notify('🔔 Đơn mới gUlEm', (n.customerName||'Khách')+' · '+money(n.total)+' · '+(n.itemsText||''));
-        }
-        markSeen(list);
+  function normalize(p){
+    if(!p || typeof p!=='object') return null;
+    var cus=p.customer||{};
+    var itemsText=(p.items||[]).map(function(i){return i.name+(i.opts?'('+i.opts+')':'')+' x'+i.qty;}).join(', ');
+    return { at:p.at||new Date().toISOString(), customerName:cus.name||p.customerName||'', customerPhone:cus.phone||p.customerPhone||'',
+      address:cus.address||p.address||'', itemsText:itemsText||p.itemsText||'', count:p.count||0, total:p.total||0,
+      payment:p.payment||'', note:p.note||'' };
+  }
+  function refresh(){ render(ORDERS.slice()); }
+  function ingest(order, id, isLive){
+    if(id && seenIds[id]) return;
+    if(id) seenIds[id]=1;
+    var o=normalize(order); if(!o) return;
+    ORDERS.push(o);
+    refresh();
+    var ts=tparse(o.at);
+    if(isLive && ts>seenMax){
+      chime();
+      toast('🔔 Đơn mới từ '+(o.customerName||'khách')+' · '+money(o.total));
+      notify('🔔 Đơn mới gUlEm', (o.customerName||'Khách')+' · '+money(o.total)+' · '+(o.itemsText||''));
+      seenMax=ts; try{ localStorage.setItem('gu_admin_seen',String(seenMax)); }catch(e){}
+    }
+  }
+  function loadHistory(){
+    if(!CFG.ntfy){ $('ga-status').textContent='Chưa cấu hình kênh đơn (cfg.ntfy)'; render([]); return; }
+    fetch('https://ntfy.sh/'+CFG.ntfy+'/json?poll=1&since=3d',{cache:'no-store'})
+      .then(function(r){ return r.text(); })
+      .then(function(txt){
+        (txt.split('\n').filter(Boolean)).forEach(function(ln){
+          try{ var m=JSON.parse(ln); if(m.event==='message' && m.message){ ingest(JSON.parse(m.message), m.id, false); } }catch(e){}
+        });
+        ORDERS.forEach(function(o){ var t=tparse(o.at); if(t>seenMax)seenMax=t; });
+        try{ localStorage.setItem('gu_admin_seen',String(seenMax)); }catch(e){}
+        $('ga-status').textContent=(es?'🟢 Đang nhận trực tiếp · ':'Đã kết nối · ')+hhmm(Date.now());
+        refresh();
       })
-      .catch(function(){ $('ga-status').textContent='Không kết nối được nguồn đơn'; });
+      .catch(function(){ $('ga-status').textContent='Không tải được lịch sử đơn'; });
+  }
+  function subscribe(){
+    if(!CFG.ntfy || es) return;
+    try{
+      es=new EventSource('https://ntfy.sh/'+CFG.ntfy+'/sse');
+      es.onmessage=function(ev){ try{ var m=JSON.parse(ev.data); if(m.event==='message' && m.message){ ingest(JSON.parse(m.message), m.id, true); $('ga-status').textContent='🟢 Đang nhận trực tiếp · '+hhmm(Date.now()); } }catch(e){} };
+      es.onerror=function(){ $('ga-status').textContent='Kết nối lại trực tiếp…'; };
+    }catch(e){}
   }
 
   function openAdmin(){
     $('gu-admin').classList.add('on');
     try{ if('Notification'in window && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
-    poll(true);
-    clearInterval(pollTimer); pollTimer=setInterval(function(){ poll(false); }, 12000);
+    ORDERS=[]; seenIds=Object.create(null);
+    loadHistory();
+    subscribe();
+    clearInterval(pollTimer); pollTimer=setInterval(loadHistory, 30000);
   }
-  function closeAdmin(){ $('gu-admin').classList.remove('on'); clearInterval(pollTimer); }
+  function closeAdmin(){ $('gu-admin').classList.remove('on'); clearInterval(pollTimer); if(es){try{es.close();}catch(e){} es=null;} }
 
   // PIN gate
   function askPin(){
@@ -3524,7 +3551,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 
   function boot(){
     $('ga-close').addEventListener('click',closeAdmin);
-    $('ga-refresh').addEventListener('click',function(){ poll(false); });
+    $('ga-refresh').addEventListener('click',function(){ loadHistory(); });
     $('ga-sound').addEventListener('click',function(){ soundOn=!soundOn; try{localStorage.setItem('gu_admin_sound',soundOn?'1':'0');}catch(e){} this.querySelector('.material-symbols-outlined').textContent=soundOn?'notifications_active':'notifications_off'; if(soundOn)chime(); });
     $('gu-pin-ok').addEventListener('click',tryPin);
     $('gu-pin-inp').addEventListener('keydown',function(e){ if(e.key==='Enter')tryPin(); });
@@ -3540,5 +3567,22 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     window.guAdmin=enter; // cho phép gọi tay
   }
   if(document.readyState!=='loading')boot(); else document.addEventListener('DOMContentLoaded',boot);
+})();
+</script>
+
+<script>
+/* gUlEm: phát đơn lên ntfy.sh để màn Admin nhận realtime */
+(function(){
+  var TOPIC='';
+  try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy)TOPIC=c.ntfy; }).catch(function(){}); }catch(e){}
+  var of=window.fetch;
+  window.fetch=function(u,o){
+    try{
+      if(TOPIC && o && String(o.method||'').toUpperCase()==='POST' && typeof o.body==='string' && /trycloudflare|\/webhook\/menu-order/.test(String(u))){
+        of('https://ntfy.sh/'+TOPIC,{method:'POST',body:o.body,headers:{'Title':'Don moi gUlEm','Tags':'bell','Priority':'high'}}).catch(function(){});
+      }
+    }catch(e){}
+    return of.apply(this,arguments);
+  };
 })();
 </script>
