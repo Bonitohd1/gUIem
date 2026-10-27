@@ -229,7 +229,8 @@ header .w-11.h-11.rounded-full img{ width:100% !important; height:100% !importan
 .gu-bot-x{ margin-left:auto; background:0; border:0; color:#b06a7e; cursor:pointer; display:flex; align-items:center; }
 /* ===== end care layer ===== */
 /* ===== zodiac (cung hoàng đạo) ===== */
-.gu-zbtn{ width:100%; margin-top:8px; padding:11px; border-radius:12px; border:0; background:#fff; color:#8a1e42; border:1.5px solid #f4d7e0; font:700 13px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+.gu-zbtn{ width:100%; margin-top:10px; padding:12px; border-radius:12px; border:0; background:#e9486a; color:#fff; font:700 13px 'Plus Jakarta Sans',sans-serif; cursor:pointer; box-shadow:0 10px 22px -8px rgba(233,72,106,.6); }
+.gu-bot-panel .gu-bot-cta{ background:#fff !important; color:#8a1e42 !important; border:1.5px solid #f4d7e0 !important; box-shadow:none !important; }
 .gu-zod{ position:fixed; inset:0; z-index:1320; background:rgba(45,12,26,.55); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:20px; }
 .gu-zod.on{ display:flex; }
 .gu-zod-card{ width:100%; max-width:380px; max-height:88vh; overflow-y:auto; background:#fff7f9; border-radius:26px; box-shadow:0 30px 70px -20px rgba(180,40,90,.6); padding:22px 20px; position:relative; transform:scale(.92); opacity:0; transition:transform .4s var(--ease),opacity .3s; }
@@ -3052,7 +3053,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 
     /* add a zodiac entry to the assistant bot panel */
     var panel=document.querySelector('.gu-bot-panel');
-    if(panel){ var zb=document.createElement('button'); zb.className='gu-zbtn'; zb.textContent='🔮 Cung hoàng đạo hôm nay'; zb.addEventListener('click',open); panel.appendChild(zb); }
+    if(panel){ var zb=document.createElement('button'); zb.className='gu-zbtn'; zb.textContent='🔮 Chọn cung hoàng đạo — gợi ý đồ uống'; zb.addEventListener('click',open); var cta=panel.querySelector('.gu-bot-cta'); if(cta) panel.insertBefore(zb,cta); else panel.appendChild(zb); }
     window.__guZodiac=open;
   });
 })();
