@@ -3380,58 +3380,88 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <style>
 /* ===== gUlEm · Admin console (bản điều hành chuyên nghiệp) ===== */
 #gu-admin{ position:fixed; inset:0; z-index:100000; display:none; flex-direction:column;
-  background:radial-gradient(1200px 500px at 50% -10%, #241219, #130a0e 60%); color:#fff; font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
+  background:radial-gradient(1200px 560px at 50% -16%, #2c1e28, #140f14 60%); color:#f3e9ee; font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
 #gu-admin.on{ display:flex; animation:guAdmIn .25s ease; }
 @keyframes guAdmIn{ from{opacity:0} to{opacity:1} }
 #gu-admin *{ box-sizing:border-box; }
-#gu-admin .ga-wrap{ width:100%; max-width:720px; margin:0 auto; display:flex; flex-direction:column; flex:1; min-height:0; }
+#gu-admin .ga-wrap{ width:100%; max-width:760px; margin:0 auto; display:flex; flex-direction:column; flex:1; min-height:0; }
 /* ---- top bar ---- */
-#gu-admin .ga-top{ display:flex; align-items:center; gap:11px; padding:16px 18px;
-  background:linear-gradient(135deg,#8a0b31,#c21f4f 85%); box-shadow:0 10px 30px -14px rgba(0,0,0,.75); }
-#gu-admin .ga-brand{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
-#gu-admin .ga-seal{ width:40px; height:40px; border-radius:12px; object-fit:cover; box-shadow:0 0 0 2px rgba(255,255,255,.35); background:#fff; }
-#gu-admin .ga-top .ga-ttl{ font-family:Fraunces,serif; font-weight:700; font-size:18px; letter-spacing:.2px; line-height:1.05; }
-#gu-admin .ga-top .ga-sub{ display:flex; align-items:center; gap:6px; font-size:11px; opacity:.9; margin-top:3px; }
+#gu-admin .ga-top{ display:flex; align-items:center; gap:12px; padding:15px 18px;
+  background:linear-gradient(135deg,#3a2531 0%,#271a23 100%); box-shadow:0 12px 34px -16px rgba(0,0,0,.8), inset 0 -1px 0 rgba(231,196,138,.28); }
+#gu-admin .ga-brand{ display:flex; align-items:center; gap:11px; flex:1; min-width:0; }
+#gu-admin .ga-seal{ width:42px; height:42px; border-radius:13px; object-fit:cover; box-shadow:0 0 0 1.5px rgba(231,196,138,.6), 0 6px 16px -6px rgba(0,0,0,.6); background:#fff; }
+#gu-admin .ga-top .ga-ttl{ font-family:Fraunces,serif; font-weight:700; font-size:18.5px; letter-spacing:.2px; line-height:1.05; color:#f0d9a8; }
+#gu-admin .ga-top .ga-sub{ display:flex; align-items:center; gap:6px; font-size:11px; color:#cdb6c0; margin-top:3px; }
+#gu-admin .ga-clock{ font-variant-numeric:tabular-nums; font-weight:700; color:#e7c48a; }
 #gu-admin .ga-live{ width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.6);animation:guLive 1.6s infinite; flex:none; }
 @keyframes guLive{ 0%{box-shadow:0 0 0 0 rgba(61,220,132,.55)} 70%{box-shadow:0 0 0 7px rgba(61,220,132,0)} 100%{box-shadow:0 0 0 0 rgba(61,220,132,0)} }
-#gu-admin .ga-ico{ width:38px;height:38px;border-radius:11px;border:none;background:rgba(255,255,255,.14);color:#fff;
+#gu-admin .ga-ico{ width:38px;height:38px;border-radius:11px;border:1px solid rgba(231,196,138,.18);background:rgba(255,255,255,.06);color:#f0d9a8;
   display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s; flex:none; }
-#gu-admin .ga-ico:active{ transform:scale(.92); } #gu-admin .ga-ico:hover{ background:rgba(255,255,255,.26); }
-/* ---- stats ---- */
-#gu-admin .ga-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:9px; padding:16px 18px 6px; }
-#gu-admin .ga-stat{ position:relative; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09); border-radius:15px; padding:13px 10px; text-align:center; overflow:hidden; }
-#gu-admin .ga-stat::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--sc,#e9486a); opacity:.9; }
-#gu-admin .ga-stat b{ display:block; font-size:21px; font-weight:800; font-family:Fraunces,serif; color:#fff; line-height:1; font-variant-numeric:tabular-nums; }
-#gu-admin .ga-stat.rev b{ font-size:15px; color:#ffd7e2; }
-#gu-admin .ga-stat span{ font-size:10px; opacity:.7; letter-spacing:.02em; display:block; margin-top:6px; }
+#gu-admin .ga-ico:active{ transform:scale(.92); } #gu-admin .ga-ico:hover{ background:rgba(231,196,138,.16); }
+/* ---- KPI stats ---- */
+#gu-admin .ga-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:9px; padding:15px 18px 4px; }
+#gu-admin .ga-stat{ position:relative; background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025)); border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:13px 11px 12px; overflow:hidden; }
+#gu-admin .ga-stat::before{ content:''; position:absolute; left:0; top:12px; bottom:12px; width:3px; border-radius:3px; background:var(--sc,#e9486a); }
+#gu-admin .ga-stat b{ display:block; font-size:22px; font-weight:800; font-family:Fraunces,serif; color:#f3e3c4; line-height:1; font-variant-numeric:tabular-nums; }
+#gu-admin .ga-stat.rev b{ font-size:16px; color:#f0d9a8; }
+#gu-admin .ga-stat span{ font-size:10px; color:#b8a1ab; letter-spacing:.02em; display:block; margin-top:6px; }
+#gu-admin .ga-stat small{ display:block; font-size:9.5px; color:#8f7a84; margin-top:3px; font-variant-numeric:tabular-nums; }
+/* ---- toolbar: search + sort ---- */
+#gu-admin .ga-tools{ display:flex; gap:9px; padding:10px 18px 2px; align-items:center; }
+#gu-admin .ga-search{ flex:1; display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:0 12px; height:40px; }
+#gu-admin .ga-search .material-symbols-outlined{ font-size:18px; color:#9c8690; }
+#gu-admin .ga-search input{ flex:1; background:none; border:none; outline:none; color:#f3e9ee; font:500 13.5px 'Plus Jakarta Sans',sans-serif; }
+#gu-admin .ga-search input::placeholder{ color:#8f7a84; }
+#gu-admin .ga-sort{ height:40px; display:inline-flex; align-items:center; gap:6px; padding:0 13px; border-radius:12px; border:1px solid rgba(231,196,138,.2); background:rgba(231,196,138,.08); color:#f0d9a8; font:700 12.5px 'Plus Jakarta Sans',sans-serif; cursor:pointer; white-space:nowrap; }
+#gu-admin .ga-sort .material-symbols-outlined{ font-size:17px; }
+#gu-admin .ga-sort:active{ transform:scale(.96); }
+/* ---- alert banner ---- */
+#gu-admin .ga-alert{ margin:10px 18px 0; display:none; align-items:center; gap:9px; padding:11px 14px; border-radius:13px; font-size:12.5px; font-weight:700;
+  color:#ffd9d6; background:linear-gradient(135deg,rgba(255,90,82,.22),rgba(255,90,82,.1)); border:1px solid rgba(255,90,82,.4); }
+#gu-admin .ga-alert.on{ display:flex; animation:guPulseA 2s infinite; }
+@keyframes guPulseA{ 0%,100%{box-shadow:0 0 0 0 rgba(255,90,82,0)} 50%{box-shadow:0 0 0 4px rgba(255,90,82,.14)} }
+#gu-admin .ga-alert .material-symbols-outlined{ font-size:19px; }
 /* ---- filter tabs ---- */
-#gu-admin .ga-filters{ display:flex; gap:6px; padding:10px 18px 4px; overflow-x:auto; -ms-overflow-style:none; scrollbar-width:none; }
+#gu-admin .ga-filters{ display:flex; gap:6px; padding:12px 18px 4px; overflow-x:auto; -ms-overflow-style:none; scrollbar-width:none; }
 #gu-admin .ga-filters::-webkit-scrollbar{ display:none; }
-#gu-admin .ga-ftab{ flex:none; display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:999px;
-  border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.04); color:#e9d4da; font-size:12.5px; font-weight:600; cursor:pointer; transition:.18s; font-family:inherit; white-space:nowrap; }
+#gu-admin .ga-ftab{ flex:none; display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); color:#cdb6c0; font-size:12.5px; font-weight:600; cursor:pointer; transition:.18s; font-family:inherit; white-space:nowrap; }
 #gu-admin .ga-ftab:active{ transform:scale(.96); }
-#gu-admin .ga-ftab.on{ background:#fff; color:#8a0b31; border-color:#fff; font-weight:800; }
-#gu-admin .ga-ftab .ga-fct{ font-size:11px; font-weight:800; opacity:.65; }
-#gu-admin .ga-ftab.on .ga-fct{ opacity:.85; }
+#gu-admin .ga-ftab.on{ background:linear-gradient(135deg,#e7c48a,#d9ad6f); color:#2a1a10; border-color:transparent; font-weight:800; box-shadow:0 6px 16px -8px rgba(231,196,138,.7); }
+#gu-admin .ga-ftab .ga-fct{ font-size:11px; font-weight:800; opacity:.6; }
+#gu-admin .ga-ftab.on .ga-fct{ opacity:.8; }
 /* ---- list + cards ---- */
 #gu-admin .ga-list{ flex:1; overflow-y:auto; padding:12px 16px 36px; display:flex; flex-direction:column; gap:12px; }
-#gu-admin .ga-card{ background:linear-gradient(180deg,#2b181f,#241319); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:15px; transition:.25s; }
-#gu-admin .ga-card.new{ border-color:#3ddc84; box-shadow:0 0 0 1px #3ddc84, 0 10px 30px -12px rgba(61,220,132,.45); animation:guNewCard .5s ease; }
-#gu-admin .ga-card.closed{ opacity:.62; filter:saturate(.75); }
+#gu-admin .ga-card{ position:relative; background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:15px; transition:.25s; backdrop-filter:blur(6px); }
+#gu-admin .ga-card.new{ border-color:rgba(61,220,132,.7); box-shadow:0 0 0 1px rgba(61,220,132,.6), 0 12px 32px -14px rgba(61,220,132,.45); animation:guNewCard .5s ease; }
+#gu-admin .ga-card.late{ border-color:rgba(255,90,82,.55); box-shadow:0 0 0 1px rgba(255,90,82,.3), 0 12px 30px -16px rgba(255,90,82,.4); }
+#gu-admin .ga-card.closed{ opacity:.6; filter:saturate(.7); }
 @keyframes guNewCard{ 0%{transform:scale(.97);opacity:.4} 100%{transform:none;opacity:1} }
 #gu-admin .ga-ch{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-#gu-admin .ga-codeline{ display:flex; align-items:center; gap:8px; }
-#gu-admin .ga-code{ font-size:11px; font-weight:800; letter-spacing:.04em; color:#ffb3c6; background:rgba(233,72,106,.14); padding:3px 8px; border-radius:7px; font-variant-numeric:tabular-nums; }
+#gu-admin .ga-codeline{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+#gu-admin .ga-code{ font-size:11px; font-weight:800; letter-spacing:.04em; color:#f0d9a8; background:rgba(231,196,138,.14); padding:3px 8px; border-radius:7px; font-variant-numeric:tabular-nums; }
 #gu-admin .ga-name{ font-weight:700; font-size:15.5px; color:#fff; margin-top:7px; }
-#gu-admin .ga-phone{ font-size:12.5px; color:#ffb3c6; text-decoration:none; }
-#gu-admin .ga-time{ font-size:11px; opacity:.6; white-space:nowrap; text-align:right; }
+#gu-admin .ga-phone{ font-size:12.5px; color:#e7c48a; text-decoration:none; }
+#gu-admin .ga-time{ font-size:11px; color:#9c8690; white-space:nowrap; text-align:right; }
 #gu-admin .ga-badge-new{ font-size:9px; font-weight:800; letter-spacing:.04em; color:#06281a; background:#3ddc84; padding:2px 7px; border-radius:999px; }
+/* elapsed badge */
+#gu-admin .ga-elapsed{ display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:999px; white-space:nowrap; margin-top:6px; }
+#gu-admin .ga-elapsed .material-symbols-outlined{ font-size:13px; }
+#gu-admin .ga-elapsed.fresh{ color:#8ff0bf; background:rgba(47,174,106,.16); }
+#gu-admin .ga-elapsed.warn{ color:#ffd58a; background:rgba(240,165,0,.16); }
+#gu-admin .ga-elapsed.late{ color:#ff9d97; background:rgba(255,90,82,.18); }
 /* status pill */
 #gu-admin .ga-pill{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; white-space:nowrap; }
 #gu-admin .ga-pill i{ width:7px; height:7px; border-radius:50%; background:currentColor; display:block; }
 #gu-admin .ga-items{ margin-top:9px; font-size:13px; color:#ecd6dc; line-height:1.5; }
-#gu-admin .ga-row{ display:flex; align-items:center; gap:7px; margin-top:7px; font-size:12.5px; color:#d9bfc7; }
-#gu-admin .ga-row .material-symbols-outlined{ font-size:16px; color:#ff9db6; flex:none; }
+#gu-admin .ga-row{ display:flex; align-items:center; gap:7px; margin-top:7px; font-size:12.5px; color:#cbb3bc; }
+#gu-admin .ga-row .material-symbols-outlined{ font-size:16px; color:#e7c48a; flex:none; }
+/* quick actions */
+#gu-admin .ga-qa{ display:flex; gap:8px; margin-top:11px; }
+#gu-admin .ga-qbtn{ display:inline-flex; align-items:center; gap:6px; padding:8px 13px; border-radius:11px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:#e6d3db; font:700 12px 'Plus Jakarta Sans',sans-serif; cursor:pointer; text-decoration:none; }
+#gu-admin .ga-qbtn:active{ transform:scale(.95); }
+#gu-admin .ga-qbtn.call{ color:#8ff0bf; border-color:rgba(47,174,106,.3); background:rgba(47,174,106,.1); }
+#gu-admin .ga-qbtn .material-symbols-outlined{ font-size:16px; }
 /* progress tracker */
 #gu-admin .ga-track{ display:flex; align-items:center; margin:13px 2px 3px; }
 #gu-admin .ga-step{ display:flex; flex-direction:column; align-items:center; gap:4px; position:relative; }
@@ -3439,15 +3469,15 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   display:flex; align-items:center; justify-content:center; font-size:13px; transition:.2s; z-index:1; }
 #gu-admin .ga-dot .material-symbols-outlined{ font-size:14px; }
 #gu-admin .ga-step.done .ga-dot{ background:#2fae6a; border-color:#2fae6a; color:#06281a; }
-#gu-admin .ga-step.cur .ga-dot{ background:#e9486a; border-color:#e9486a; color:#fff; box-shadow:0 0 0 4px rgba(233,72,106,.22); }
-#gu-admin .ga-step span{ font-size:9.5px; font-weight:700; color:rgba(255,255,255,.5); }
-#gu-admin .ga-step.done span, #gu-admin .ga-step.cur span{ color:#fff; }
+#gu-admin .ga-step.cur .ga-dot{ background:#e7c48a; border-color:#e7c48a; color:#2a1a10; box-shadow:0 0 0 4px rgba(231,196,138,.22); }
+#gu-admin .ga-step span{ font-size:9.5px; font-weight:700; color:rgba(255,255,255,.45); }
+#gu-admin .ga-step.done span, #gu-admin .ga-step.cur span{ color:#f3e9ee; }
 #gu-admin .ga-bar{ flex:1; height:2px; background:rgba(255,255,255,.14); margin-top:-16px; border-radius:2px; }
 #gu-admin .ga-bar.fill{ background:#2fae6a; }
 #gu-admin .ga-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; padding-top:11px; border-top:1px solid rgba(255,255,255,.08); }
-#gu-admin .ga-total{ font-family:Fraunces,serif; font-weight:800; font-size:19px; color:#ffd7e2; font-variant-numeric:tabular-nums; }
-#gu-admin .ga-pay{ font-size:11px; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.1); color:#e9d4da; }
-#gu-admin .ga-empty{ text-align:center; opacity:.6; padding:56px 20px; font-size:14px; }
+#gu-admin .ga-total{ font-family:Fraunces,serif; font-weight:800; font-size:19px; color:#f3e3c4; font-variant-numeric:tabular-nums; }
+#gu-admin .ga-pay{ font-size:11px; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.08); color:#cbb3bc; }
+#gu-admin .ga-empty{ text-align:center; color:#9c8690; padding:56px 20px; font-size:14px; }
 #gu-admin .ga-empty .material-symbols-outlined{ font-size:44px; display:block; margin:0 auto 10px; opacity:.5; }
 /* PIN gate */
 #gu-pin{ position:fixed; inset:0; z-index:100001; display:none; align-items:center; justify-content:center; background:rgba(26,15,20,.97); }
@@ -3474,8 +3504,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     <div class="ga-brand">
       <img class="ga-seal" src="/logo.png?v=1" alt="gUlEm">
       <div style="min-width:0">
-        <div class="ga-ttl">Điều hành đơn</div>
-        <div class="ga-sub"><span class="ga-live"></span><span id="ga-status">Đang kết nối…</span></div>
+        <div class="ga-ttl">gUlEm · Bảng vận hành</div>
+        <div class="ga-sub"><span class="ga-live"></span><span id="ga-status">Đang kết nối…</span> <span class="ga-clock" id="ga-clock"></span></div>
       </div>
     </div>
     <button class="ga-ico" id="ga-sound" title="Bật/tắt chuông"><span class="material-symbols-outlined">notifications_active</span></button>
@@ -3483,11 +3513,18 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     <button class="ga-ico" id="ga-close" title="Đóng"><span class="material-symbols-outlined">close</span></button>
   </div>
   <div class="ga-stats">
-    <div class="ga-stat" style="--sc:#e9486a"><b id="ga-cnt">0</b><span>Đơn hôm nay</span></div>
-    <div class="ga-stat rev" style="--sc:#ffd7e2"><b id="ga-rev">0đ</b><span>Doanh thu</span></div>
+    <div class="ga-stat" style="--sc:#e7c48a"><b id="ga-cnt">0</b><span>Đơn hôm nay</span></div>
+    <div class="ga-stat rev" style="--sc:#2fae6a"><b id="ga-rev">0đ</b><span>Doanh thu</span><small id="ga-rev-split">TM 0 · CK 0</small></div>
     <div class="ga-stat" style="--sc:#f0a500"><b id="ga-active">0</b><span>Đang xử lý</span></div>
-    <div class="ga-stat" style="--sc:#2fae6a"><b id="ga-done">0</b><span>Hoàn tất</span></div>
+    <div class="ga-stat" style="--sc:#5b9cff"><b id="ga-done">0</b><span>Hoàn tất</span></div>
   </div>
+  <div class="ga-tools">
+    <label class="ga-search"><span class="material-symbols-outlined">search</span>
+      <input id="ga-search" type="text" placeholder="Tìm theo tên, SĐT hoặc mã đơn…" autocomplete="off">
+    </label>
+    <button class="ga-sort" id="ga-sort"><span class="material-symbols-outlined">swap_vert</span><span id="ga-sort-lbl">Mới nhất</span></button>
+  </div>
+  <div class="ga-alert" id="ga-alert"><span class="material-symbols-outlined">warning</span><span id="ga-alert-txt"></span></div>
   <div class="ga-filters" id="ga-filters">
     <button class="ga-ftab on" data-f="all">Tất cả <span class="ga-fct" id="fc-all">0</span></button>
     <button class="ga-ftab" data-f="new">Mới <span class="ga-fct" id="fc-new">0</span></button>
@@ -3512,6 +3549,12 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function tparse(at){ var d=new Date(at); return isNaN(d)?0:d.getTime(); }
   function sameDay(ts){ var d=new Date(ts), n=new Date(); return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate(); }
   function hhmm(ts){ var d=new Date(ts); return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
+  var WARN_MIN=8, LATE_MIN=15, SORT='new', SEARCH='';
+  function elapsedMin(ts){ return Math.max(0, Math.floor((Date.now()-ts)/60000)); }
+  function elapsedLabel(m){ if(m<1)return 'vừa xong'; if(m<60)return m+' phút trước'; var h=Math.floor(m/60); return h+' giờ '+(m%60)+'′ trước'; }
+  function payIsCK(o){ return /chuyển khoản|ck|vietqr|bank|momo/i.test(o.payment||''); }
+  function tickClock(){ var el=$('ga-clock'); if(!el)return; var d=new Date(); var days=['CN','T2','T3','T4','T5','T6','T7'];
+    el.textContent='· '+days[d.getDay()]+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
 
   function chime(){ if(!soundOn)return; try{ if(window.GU_SFX&&window.GU_SFX.ding)return window.GU_SFX.ding(); var A=window.AudioContext||window.webkitAudioContext; if(!A)return; var c=new A(); [880,1320].forEach(function(f,i){ var o=c.createOscillator(),g=c.createGain(); o.frequency.value=f; o.connect(g); g.connect(c.destination); var t=c.currentTime+i*0.14; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.3); o.start(t); o.stop(t+0.32); }); }catch(e){} }
   function toast(m){ var t=$('gu-toast')||(function(){var d=document.createElement('div');d.id='gu-toast';d.style.cssText='position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#3ddc84;color:#06281a;font-weight:700;padding:10px 16px;border-radius:999px;font-size:13px;z-index:100002;box-shadow:0 10px 30px -8px rgba(0,0,0,.5);transition:.3s;opacity:0;max-width:86vw;text-align:center';document.body.appendChild(d);return d;})(); t.style.background='#3ddc84';t.style.color='#06281a'; t.textContent=m; t.style.opacity='1'; clearTimeout(t.__h); t.__h=setTimeout(function(){t.style.opacity='0';},3000); }
@@ -3561,41 +3604,58 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function render(list){
     var box=$('ga-list'); if(!box)return;
     list = list||[];
-    list.sort(function(a,b){ return tparse(b.at)-tparse(a.at); });
-    var todayCnt=0, rev=0, newCnt=0, activeCnt=0, doneCnt=0;
+    // sort
+    list.sort(function(a,b){ return SORT==='old' ? tparse(a.at)-tparse(b.at) : tparse(b.at)-tparse(a.at); });
+    var todayCnt=0, rev=0, revCK=0, revTM=0, newCnt=0, activeCnt=0, doneCnt=0, lateCnt=0;
+    var q=SEARCH.trim().toLowerCase();
     var shown='';
     list.forEach(function(o){
       var ts=tparse(o.at); var isNew=ts>seenMax; var st=getStatus(o.code);
       var closed = st==='received';
+      var em=elapsedMin(ts); var isLate = !closed && st!=='delivered' && em>=LATE_MIN;
       if(isNew)newCnt++;
-      if(sameDay(ts)){ todayCnt++; rev+=Number(o.total)||0; if(closed)doneCnt++; else activeCnt++; }
-      // filter
+      if(sameDay(ts)){ todayCnt++; rev+=Number(o.total)||0; if(payIsCK(o))revCK+=Number(o.total)||0; else revTM+=Number(o.total)||0; if(closed)doneCnt++; else activeCnt++; if(isLate)lateCnt++; }
+      // filter tab
       var pass = FILTER==='all' || (FILTER==='new'&&isNew) || (FILTER==='active'&&!closed) || (FILTER==='done'&&closed);
       if(!pass) return;
+      // search
+      if(q){ var hay=((o.customerName||'')+' '+(o.customerPhone||'')+' '+(o.code||'')+' '+(o.itemsText||'')).toLowerCase(); if(hay.indexOf(q)<0) return; }
       var pill=PILL[st]||PILL[''];
+      var ecls = closed?'fresh':(em>=LATE_MIN?'late':(em>=WARN_MIN?'warn':'fresh'));
+      var eicon = ecls==='late'?'running_with_errors':'schedule';
       var addr=o.address?('<div class="ga-row"><span class="material-symbols-outlined">location_on</span>'+esc(o.address)+'</div>'):'';
       var note=o.note?('<div class="ga-row"><span class="material-symbols-outlined">sticky_note_2</span>'+esc(o.note)+'</div>'):'';
-      shown+='<div class="ga-card'+(isNew&&!closed?' new':'')+(closed?' closed':'')+'">'
+      var qa='<div class="ga-qa">'
+        +(o.customerPhone?'<a class="ga-qbtn call" href="tel:'+esc(o.customerPhone)+'"><span class="material-symbols-outlined">call</span>Gọi khách</a>':'')
+        +(o.address?'<button class="ga-qbtn ga-copyaddr" data-addr="'+esc(o.address)+'"><span class="material-symbols-outlined">content_copy</span>Chép địa chỉ</button>':'')
+        +'</div>';
+      shown+='<div class="ga-card'+(isNew&&!closed?' new':'')+(isLate?' late':'')+(closed?' closed':'')+'">'
         +'<div class="ga-ch"><div style="min-width:0">'
         +'<div class="ga-codeline"><span class="ga-code">'+esc(o.code||'—')+'</span>'+(isNew&&!closed?'<span class="ga-badge-new">MỚI</span>':'')+'</div>'
         +'<div class="ga-name">'+esc(o.customerName||'Khách')+'</div>'
         +(o.customerPhone?'<a class="ga-phone" href="tel:'+esc(o.customerPhone)+'">'+esc(o.customerPhone)+'</a>':'')+'</div>'
-        +'<div style="text-align:right"><span class="ga-pill" style="color:'+pill.c+';background:'+pill.c+'22"><i></i>'+pill.t+'</span><div class="ga-time" style="margin-top:6px">'+hhmm(ts)+'</div></div></div>'
+        +'<div style="text-align:right"><span class="ga-pill" style="color:'+pill.c+';background:'+pill.c+'22"><i></i>'+pill.t+'</span>'
+        +'<div class="ga-time" style="margin-top:6px">'+hhmm(ts)+'</div>'
+        +(closed?'':'<span class="ga-elapsed '+ecls+'"><span class="material-symbols-outlined">'+eicon+'</span>'+elapsedLabel(em)+'</span>')
+        +'</div></div>'
         +'<div class="ga-items">'+esc(o.itemsText||('('+(o.count||0)+' món)'))+'</div>'
         +addr+note
         +trackHtml(st)
         +'<div class="ga-foot"><span class="ga-total">'+money(o.total)+'</span><span class="ga-pay">'+esc(o.payment||'Tiền mặt')+'</span></div>'
+        +qa
         +(o.code?actionsHtml(o.code):'')
         +'</div>';
     });
     if(!shown){
-      var msg = list.length ? 'Không có đơn trong mục này' : 'Chưa có đơn nào hôm nay';
+      var msg = q ? 'Không tìm thấy đơn khớp "'+esc(SEARCH)+'"' : (list.length ? 'Không có đơn trong mục này' : 'Chưa có đơn nào hôm nay');
       box.innerHTML='<div class="ga-empty"><span class="material-symbols-outlined">receipt_long</span>'+msg+'</div>';
     } else box.innerHTML=shown;
     $('ga-cnt').textContent=todayCnt; $('ga-rev').textContent=money(rev);
+    var rs=$('ga-rev-split'); if(rs)rs.textContent='TM '+money(revTM).replace('đ','')+' · CK '+money(revCK).replace('đ','');
     $('ga-active').textContent=activeCnt; $('ga-done').textContent=doneCnt;
     var fa=$('fc-all'),fn=$('fc-new'),fac=$('fc-active'),fd=$('fc-done');
     if(fa)fa.textContent=list.length; if(fn)fn.textContent=newCnt; if(fac)fac.textContent=activeCnt; if(fd)fd.textContent=doneCnt;
+    var al=$('ga-alert'); if(al){ if(lateCnt>0){ al.classList.add('on'); $('ga-alert-txt').textContent=lateCnt+' đơn đang chờ quá '+LATE_MIN+' phút — cần xử lý gấp'; } else al.classList.remove('on'); }
   }
 
   function markSeen(list){
@@ -3659,6 +3719,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     catch(e){}
   }
 
+  var clockTimer=null, elapTimer=null;
   function openAdmin(){
     $('gu-admin').classList.add('on');
     try{ if('Notification'in window && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
@@ -3666,8 +3727,10 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     loadHistory();
     subscribe();
     clearInterval(pollTimer); pollTimer=setInterval(loadHistory, 30000);
+    tickClock(); clearInterval(clockTimer); clockTimer=setInterval(tickClock, 20000);
+    clearInterval(elapTimer); elapTimer=setInterval(function(){ if($('gu-admin').classList.contains('on')) refresh(); }, 60000);
   }
-  function closeAdmin(){ $('gu-admin').classList.remove('on'); clearInterval(pollTimer); if(es){try{es.close();}catch(e){} es=null;} if(esSt){try{esSt.close();}catch(e){} esSt=null;} }
+  function closeAdmin(){ $('gu-admin').classList.remove('on'); clearInterval(pollTimer); clearInterval(clockTimer); clearInterval(elapTimer); if(es){try{es.close();}catch(e){} es=null;} if(esSt){try{esSt.close();}catch(e){} esSt=null;} }
 
   // PIN gate
   function askPin(){
@@ -3686,10 +3749,14 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     $('ga-list').addEventListener('click',function(e){
       var fd=e.target.closest&&e.target.closest('.ga-forcedone');
       if(fd){ e.preventDefault(); e.stopPropagation(); setStatus(fd.getAttribute('data-code'),'received'); toast('✅ Đã đánh dấu hoàn tất'); return; }
+      var cp=e.target.closest&&e.target.closest('.ga-copyaddr');
+      if(cp){ e.preventDefault(); e.stopPropagation(); var ad=cp.getAttribute('data-addr')||''; try{ navigator.clipboard.writeText(ad); }catch(_){ } toast('📋 Đã chép địa chỉ'); return; }
       var b=e.target.closest&&e.target.closest('.ga-stbtn'); if(b){ e.stopPropagation(); setStatus(b.getAttribute('data-code'), b.getAttribute('data-k')); }
     });
     var fbar=$('ga-filters'); if(fbar) fbar.addEventListener('click',function(e){ var t=e.target.closest&&e.target.closest('.ga-ftab'); if(!t)return;
       FILTER=t.getAttribute('data-f'); Array.prototype.forEach.call(fbar.querySelectorAll('.ga-ftab'),function(x){x.classList.toggle('on',x===t);}); refresh(); });
+    var sInp=$('ga-search'); if(sInp) sInp.addEventListener('input',function(){ SEARCH=this.value||''; refresh(); });
+    var sBtn=$('ga-sort'); if(sBtn) sBtn.addEventListener('click',function(){ SORT=SORT==='new'?'old':'new'; $('ga-sort-lbl').textContent=SORT==='new'?'Mới nhất':'Cũ nhất'; refresh(); });
     $('ga-sound').addEventListener('click',function(){ soundOn=!soundOn; try{localStorage.setItem('gu_admin_sound',soundOn?'1':'0');}catch(e){} this.querySelector('.material-symbols-outlined').textContent=soundOn?'notifications_active':'notifications_off'; if(soundOn)chime(); });
     $('gu-pin-ok').addEventListener('click',tryPin);
     $('gu-pin-inp').addEventListener('keydown',function(e){ if(e.key==='Enter')tryPin(); });
