@@ -138,6 +138,7 @@ body{ letter-spacing:-.004em; }
 /* ===== item image lightbox + less-text ===== */
 #screen-menu .line-clamp-2{ -webkit-line-clamp:1 !important; }
 #screen-menu .w-24.h-24{ cursor:zoom-in; }
+#screen-menu h3{ cursor:pointer; }
 .gu-lb{ position:fixed; inset:0; z-index:1001; background:rgba(45,12,26,.64); backdrop-filter:blur(5px); display:none; align-items:center; justify-content:center; padding:24px; }
 .gu-lb.on{ display:flex; }
 .gu-lb-card{ width:100%; max-width:360px; background:#fff7f9; border-radius:26px; overflow:hidden; box-shadow:0 30px 70px -20px rgba(180,40,90,.6); transform:scale(.9); opacity:0; transition:transform .4s var(--ease),opacity .3s; position:relative; }
@@ -2868,3 +2869,21 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   }, false);
 })();
 </script>
+<script>
+/* gUlEm: tap món name -> open customize (choose sugar/ice/topping) */
+(function(){
+  document.addEventListener('click',function(e){
+    var h3=e.target.closest('#screen-menu h3'); if(!h3) return;
+    var row=h3, g=0; while(row && !(row.querySelector && row.querySelector('.btn-add')) && g<8){ row=row.parentElement; g++; }
+    var btn=row && row.querySelector ? row.querySelector('.btn-add') : null; if(!btn) return;
+    var name=btn.getAttribute('data-name')||h3.textContent.trim();
+    var cust=document.getElementById('screen-customize'); if(!cust) return;
+    var h2=cust.querySelector('h2'); if(h2) h2.textContent=name;
+    var img=row.querySelector('.w-24.h-24 img');
+    var cimg=cust.querySelector('img.rounded-2xl, .h-28 img, .w-14 img, .w-16 img');
+    if(img && cimg){ var sc=img.getAttribute('src')||img.src||''; if(sc) cimg.setAttribute('src', sc); }
+    if(window.__go) window.__go('screen-customize');
+  }, false);
+})();
+</script>
+
