@@ -286,6 +286,35 @@ header .w-11.h-11.rounded-full img{ width:100% !important; height:100% !importan
 .gu-mute{ margin-left:auto; background:0; border:0; color:#b06a7e; cursor:pointer; display:flex; align-items:center; padding:2px; }
 .gu-mute + .gu-bot-x{ margin-left:6px; }
 /* ===== end sfx layer ===== */
+/* ===== quantity stepper on each món ===== */
+button,[role="button"],a[data-path]{ touch-action:manipulation; }
+#screen-menu .gu-step{ display:inline-flex; align-items:center; gap:0; flex:0 0 auto; }
+#screen-menu .gu-step .gu-minus, #screen-menu .gu-step .gu-qty{ width:0; opacity:0; overflow:hidden; transform:scale(.6); transition:width .26s var(--ease),opacity .22s,transform .26s var(--ease); }
+#screen-menu .gu-step.expanded .gu-minus{ width:40px; opacity:1; transform:scale(1); }
+#screen-menu .gu-step.expanded .gu-qty{ width:30px; opacity:1; transform:scale(1); }
+#screen-menu .gu-minus{ height:40px; border-radius:50%; background:#ffe3ec; color:#8a1e42; border:0; display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto; }
+#screen-menu .gu-minus:active{ transform:scale(.9); }
+#screen-menu .gu-minus .material-symbols-outlined{ font-size:22px; }
+#screen-menu .gu-qty{ text-align:center; font:800 17px 'Plus Jakarta Sans',sans-serif; color:#241019; font-variant-numeric:tabular-nums; }
+
+/* ===== desktop / PC interface ===== */
+.gu-pc-deco{ display:none; }
+@media (min-width:1024px){
+  body{ background:radial-gradient(circle at 20% 22%,rgba(255,176,202,.9),transparent 42%),radial-gradient(circle at 84% 76%,rgba(255,202,216,.85),transparent 44%),linear-gradient(140deg,#d4305f,#e9486a 48%,#ff9cbb) fixed; }
+  [id^="screen-"] > main{ box-shadow:0 44px 120px -34px rgba(80,6,32,.72); }
+  header.fixed{ left:50% !important; transform:translateX(-50%); width:36rem !important; }
+  nav.fixed{ left:50% !important; transform:translateX(-50%); width:36rem !important; border-radius:22px 22px 0 0; overflow:hidden; }
+  .gu-bot-btn{ right:calc(50vw - 18rem - 66px) !important; }
+  .gu-bot-panel{ right:calc(50vw - 18rem - 66px) !important; }
+  .gu-pc-deco{ display:block; position:fixed; z-index:0; pointer-events:none; top:50%; transform:translateY(-50%); width:calc(50vw - 19rem); text-align:center; padding:0 26px; }
+  .gu-pc-deco.l{ left:0; } .gu-pc-deco.r{ right:0; }
+  .gu-pc-mark{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(40px,4.6vw,78px); color:#fff; opacity:.95; text-shadow:0 8px 34px rgba(110,6,32,.45); letter-spacing:-.02em; line-height:1; }
+  .gu-pc-tag{ color:rgba(255,255,255,.9); font:600 15px/1.5 'Plus Jakarta Sans',sans-serif; margin-top:14px; }
+  .gu-pc-cup{ font-size:clamp(50px,6vw,96px); line-height:1; filter:drop-shadow(0 10px 24px rgba(110,6,32,.4)); animation:guCupFloat 3.4s ease-in-out infinite; }
+  .gu-pc-50{ margin-top:14px; display:inline-block; background:#fff; color:#e9486a; font:800 16px 'Plus Jakarta Sans',sans-serif; padding:8px 18px; border-radius:999px; box-shadow:0 12px 26px -8px rgba(110,6,32,.4); }
+}
+/* ===== end step/pc layer ===== */
+
 
 
 
@@ -2686,7 +2715,9 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   }
   function setQty(i,d){ if(!cart[i])return; cart[i].qty+=d; if(cart[i].qty<=0)cart.splice(i,1); render(); }
 
-  function render(){ renderBar(); renderCart(); }
+  function render(){ renderBar(); renderCart(); if(window.guOnRender){try{window.guOnRender();}catch(e){}} }
+  window.guGetQty=function(nm){ var q=0; for(var i=0;i<cart.length;i++){ if(cart[i].name===nm && !cart[i].opts) q+=cart[i].qty; } return q; };
+  window.guDec=function(nm){ for(var i=0;i<cart.length;i++){ if(cart[i].name===nm && !cart[i].opts){ cart[i].qty-=1; if(cart[i].qty<=0)cart.splice(i,1); render(); return; } } };
   function renderBar(){
     var c=totals(), bar=document.getElementById('menu-cart-bar');
     if(bar) bar.style.display=c.n>0?'':'none';
@@ -3148,3 +3179,38 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   });
 })();
 </script>
+<script>
+/* gUlEm: quantity stepper + desktop brand deco */
+(function(){
+  function ready(fn){ if(document.readyState!=='loading')fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    /* quantity stepper */
+    function sync(){
+      var steps=document.querySelectorAll('#screen-menu .gu-step');
+      for(var i=0;i<steps.length;i++){ var st=steps[i], plus=st.querySelector('.btn-add'); if(!plus)continue; var nm=plus.getAttribute('data-name'); var q=window.guGetQty?window.guGetQty(nm):0; var qs=st.querySelector('.gu-qty'); if(qs)qs.textContent=q; st.classList.toggle('expanded', q>0); }
+    }
+    function build(){
+      var pluses=document.querySelectorAll('#screen-menu .btn-add');
+      for(var i=0;i<pluses.length;i++){ (function(plus){
+        if(plus.__stepped) return; plus.__stepped=true;
+        var nm=plus.getAttribute('data-name');
+        var wrap=document.createElement('div'); wrap.className='gu-step';
+        var minus=document.createElement('button'); minus.className='gu-minus'; minus.type='button'; minus.setAttribute('aria-label','Bớt'); minus.innerHTML='<span class="material-symbols-outlined">remove</span>';
+        var qty=document.createElement('span'); qty.className='gu-qty'; qty.textContent='0';
+        var parent=plus.parentNode; parent.insertBefore(wrap, plus);
+        wrap.appendChild(minus); wrap.appendChild(qty); wrap.appendChild(plus);
+        minus.addEventListener('click',function(e){ e.stopPropagation(); if(window.guDec)window.guDec(nm); try{ if(window.GU_SFX&&window.GU_SFX.pop)window.GU_SFX.pop(); if(navigator.vibrate)navigator.vibrate(12); }catch(_){} });
+      })(pluses[i]); }
+      sync();
+    }
+    window.guOnRender=sync;
+    build();
+
+    /* desktop brand deco */
+    var L=document.createElement('div'); L.className='gu-pc-deco l'; L.innerHTML='<div class="gu-pc-mark">gUlEm</div><div class="gu-pc-tag">Tiệm nhà chị em Thùy<br>Trà & Cà Phê thủ công</div>';
+    var R=document.createElement('div'); R.className='gu-pc-deco r'; R.innerHTML='<div class="gu-pc-cup">🧋</div><div class="gu-pc-tag">Tất cả đồ uống</div><div class="gu-pc-50">Đồng giá 50K / ly</div>';
+    document.body.appendChild(L); document.body.appendChild(R);
+  });
+})();
+</script>
+
