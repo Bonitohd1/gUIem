@@ -150,6 +150,20 @@ body{ letter-spacing:-.004em; }
 .gu-lb-add:active{ transform:scale(.97); }
 .gu-lb-x{ position:absolute; top:12px; right:12px; width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,.92); color:#8a1e42; border:0; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; }
 /* ===== end lightbox layer ===== */
+/* ===== food-app patterns: minimal text, bold + button, standout icons, fly-to-cart ===== */
+/* name + price only (hide descriptions) */
+#screen-menu p.line-clamp-2{ display:none !important; }
+/* circular rose "+" add button (icon only, prominent) */
+#screen-menu .btn-add{ width:44px !important; height:44px !important; padding:0 !important; border-radius:50% !important; background:#e9486a !important; color:#fff !important; justify-content:center !important; gap:0 !important; box-shadow:0 8px 18px -6px rgba(233,72,106,.6) !important; flex:0 0 auto; }
+#screen-menu .btn-add span:not(.material-symbols-outlined){ display:none !important; }
+#screen-menu .btn-add .material-symbols-outlined{ font-size:24px !important; font-variation-settings:'wght' 600; }
+/* standout section icons: rose filled + white */
+[id^="cat-"] .w-8.h-8.rounded-full{ background:#e9486a !important; box-shadow:0 6px 14px -6px rgba(233,72,106,.6); }
+[id^="cat-"] .w-8.h-8.rounded-full .material-symbols-outlined{ color:#fff !important; }
+/* fly-to-cart element */
+.gu-fly{ position:fixed; width:40px; height:40px; border-radius:50%; background:#e9486a; background-size:cover; background-position:center; box-shadow:0 10px 24px -6px rgba(233,72,106,.75); z-index:1200; pointer-events:none; transition:transform .72s cubic-bezier(.35,0,.2,1), opacity .72s ease; }
+/* ===== end foodapp layer ===== */
+
 
 
 
@@ -2794,6 +2808,30 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       priceEl.textContent = ((price||50000).toLocaleString('vi-VN'))+'đ';
       curBtn=btn; lb.classList.add('on');
     }, false);
+  });
+})();
+</script>
+<script>
+/* gUlEm fly-to-cart animation */
+(function(){
+  function ready(fn){ if(document.readyState!=='loading')fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    document.addEventListener('click',function(e){
+      var btn=e.target.closest('#screen-menu .btn-add'); if(!btn) return;
+      var row=btn, guard=0; while(row && !(row.querySelector && row.querySelector('.w-24.h-24')) && guard<8){ row=row.parentElement; guard++; }
+      var img=row && row.querySelector ? row.querySelector('.w-24.h-24 img') : null;
+      var target=document.getElementById('menu-cart-bar');
+      if(!target || getComputedStyle(target).display==='none'){ target=document.querySelector('nav a[data-path="cart-summary"]'); }
+      if(!target) return;
+      var br=btn.getBoundingClientRect(), tr=target.getBoundingClientRect();
+      var fly=document.createElement('div'); fly.className='gu-fly';
+      var src=img?(img.getAttribute('src')||img.src||''):''; if(src) fly.style.backgroundImage="url('"+src+"')";
+      fly.style.left=(br.left+br.width/2-20)+'px'; fly.style.top=(br.top+br.height/2-20)+'px';
+      document.body.appendChild(fly);
+      var dx=(tr.left+tr.width/2)-(br.left+br.width/2), dy=(tr.top+tr.height/2)-(br.top+br.height/2);
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ fly.style.transform='translate('+dx+'px,'+dy+'px) scale(.22)'; fly.style.opacity='.35'; }); });
+      setTimeout(function(){ if(fly.parentNode) fly.parentNode.removeChild(fly); }, 760);
+    }, true);
   });
 })();
 </script>
