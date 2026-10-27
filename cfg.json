@@ -1,0 +1,4 @@
+{
+  "webhook": "",
+  "_note": "Dán URL public n8n vào webhook: https://<tunnel>/webhook/menu-order . Trống = app dùng fallback copy+Zalo."
+}

@@ -2655,6 +2655,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   /* ===== CẤU HÌNH — thay dữ liệu thật ===== */
   var ZALO_GROUP="https://zaloapp.com/qr/g/keolmxd5mu8mxcfmvi99?src=qr";   // link nhóm Zalo
   var WEBHOOK="";                               // dán URL webhook n8n để tự bắn đơn (trống = copy + mở Zalo)
+  // gUlEm: nạp URL webhook từ /cfg.json lúc tải trang (đổi URL không cần build lại app)
+  try{ fetch("/cfg.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(c){ if(c&&c.webhook) WEBHOOK=c.webhook; }).catch(function(){}); }catch(e){}
   var SHOP="gUlEm - Tiệm nhà chị em Thùy";
 
   var cart=[]; // {name, price, qty, opts}
