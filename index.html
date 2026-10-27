@@ -1250,12 +1250,12 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <div class="flex flex-col gap-3" id="confirm-items"></div><div class="h-px bg-surface-container-high my-1"></div>
 <div class="flex flex-col gap-2 pt-1"><div class="flex items-center justify-between text-body-sm"><span class="text-on-surface-variant">Tiền nước (3 ly)</span><span class="text-on-surface font-medium">150.000đ</span></div><div class="flex items-center justify-between text-body-sm"><span class="text-on-surface-variant">Topping thêm (2 phần)</span><span class="text-secondary font-medium">+20.000đ</span></div><div class="h-px bg-surface-container-high my-0.5"></div><div class="flex items-center justify-between"><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-bold">Tổng thanh toán</span><span class="font-body-sm text-body-sm text-secondary">Đã áp dụng ưu đãi</span></div><span class="confirm-total font-price-display text-price-display text-primary font-extrabold text-right text-[20px]">0đ</span></div></div>
 <div class="rounded-xl bg-secondary-container/20 p-3 flex items-center gap-3">
-<div class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0 animate-spin" style="animation-duration: 4s;">
-<span class="material-symbols-outlined text-[18px]">hourglass_top</span>
+<div id="gu-st-ring" class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0 animate-spin" style="animation-duration: 4s;">
+<span id="gu-st-icon" class="material-symbols-outlined text-[18px]">hourglass_top</span>
 </div>
 <div class="flex flex-col">
-<span class="font-label-md text-label-md text-on-secondary-container font-semibold">Đang chuẩn bị món</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Dự kiến mang ra bàn sau 5 - 8 phút</span>
+<span id="gu-st-title" class="font-label-md text-label-md text-on-secondary-container font-semibold">Đang chuẩn bị món</span>
+<span id="gu-st-sub" class="font-body-sm text-body-sm text-on-surface-variant">Dự kiến mang ra bàn sau 5 - 8 phút</span>
 </div>
 </div>
 </div>
@@ -3460,6 +3460,16 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
 
+  var STG=[{k:'making',t:'Đang pha',c:'#e9486a'},{k:'done',t:'Xong',c:'#f0a500'},{k:'delivered',t:'Đã giao',c:'#3ddc84'}];
+  var statusMap={}; try{ statusMap=JSON.parse(localStorage.getItem('gu_ostatus')||'{}'); }catch(e){}
+  function getStatus(code){ return statusMap[code]||''; }
+  function setStatus(code,k){
+    if(!code) return;
+    statusMap[code]=k; try{ localStorage.setItem('gu_ostatus',JSON.stringify(statusMap)); }catch(e){}
+    if(CFG.ntfy){ fetch('https://ntfy.sh/'+CFG.ntfy+'-st',{method:'POST',body:JSON.stringify({code:code,status:k}),headers:{'Tags':'gear'}}).catch(function(){}); }
+    refresh();
+  }
+
   function render(list){
     var box=$('ga-list'); if(!box)return;
     if(!list || !list.length){ box.innerHTML='<div class="ga-empty"><span class="material-symbols-outlined">receipt_long</span>Chưa có đơn nào hôm nay</div>'; $('ga-cnt').textContent='0'; $('ga-rev').textContent='0đ'; $('ga-new').textContent='0'; return; }
@@ -3479,6 +3489,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
         +'<div class="ga-items">'+esc(o.itemsText||('('+(o.count||0)+' món)'))+'</div>'
         +addr+note
         +'<div class="ga-foot"><span class="ga-total">'+money(o.total)+'</span><span class="ga-pay">'+esc(o.payment||'Tiền mặt')+'</span></div>'
+        +(o.code?('<div class="ga-strow">'+STG.map(function(s){var on=getStatus(o.code)===s.k;return '<button class="ga-stbtn'+(on?' on':'')+'" data-code="'+esc(o.code)+'" data-k="'+s.k+'"'+(on?' style="background:'+s.c+';border-color:'+s.c+';color:#1a0f14"':'')+'>'+s.t+'</button>';}).join('')+'</div>'):'')
         +'</div>';
     });
     box.innerHTML=html;
@@ -3494,7 +3505,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     if(!p || typeof p!=='object') return null;
     var cus=p.customer||{};
     var itemsText=(p.items||[]).map(function(i){return i.name+(i.opts?'('+i.opts+')':'')+' x'+i.qty;}).join(', ');
-    return { at:p.at||new Date().toISOString(), customerName:cus.name||p.customerName||'', customerPhone:cus.phone||p.customerPhone||'',
+    return { code:p.code||'', at:p.at||new Date().toISOString(), customerName:cus.name||p.customerName||'', customerPhone:cus.phone||p.customerPhone||'',
       address:cus.address||p.address||'', itemsText:itemsText||p.itemsText||'', count:p.count||0, total:p.total||0,
       payment:p.payment||'', note:p.note||'' };
   }
@@ -3561,6 +3572,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function boot(){
     $('ga-close').addEventListener('click',closeAdmin);
     $('ga-refresh').addEventListener('click',function(){ loadHistory(); });
+    $('ga-list').addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('.ga-stbtn'); if(b){ e.stopPropagation(); setStatus(b.getAttribute('data-code'), b.getAttribute('data-k')); } });
     $('ga-sound').addEventListener('click',function(){ soundOn=!soundOn; try{localStorage.setItem('gu_admin_sound',soundOn?'1':'0');}catch(e){} this.querySelector('.material-symbols-outlined').textContent=soundOn?'notifications_active':'notifications_off'; if(soundOn)chime(); });
     $('gu-pin-ok').addEventListener('click',tryPin);
     $('gu-pin-inp').addEventListener('keydown',function(e){ if(e.key==='Enter')tryPin(); });
@@ -3585,13 +3597,53 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   var TOPIC='';
   try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy)TOPIC=c.ntfy; }).catch(function(){}); }catch(e){}
   var of=window.fetch;
+  function mkcode(){ return 'GU'+String(Date.now()).slice(-6); }
   window.fetch=function(u,o){
     try{
       if(TOPIC && o && String(o.method||'').toUpperCase()==='POST' && typeof o.body==='string' && /trycloudflare|\/webhook\/menu-order/.test(String(u))){
-        of('https://ntfy.sh/'+TOPIC,{method:'POST',body:o.body,headers:{'Title':'Don moi gUlEm','Tags':'bell','Priority':'high'}}).catch(function(){});
+        var body=o.body;
+        try{ var j=JSON.parse(o.body); if(!j.code)j.code=mkcode(); window.__GU_ORDER_CODE=j.code; try{sessionStorage.setItem('gu_order_code',j.code);}catch(_){ } body=JSON.stringify(j); }catch(e){}
+        of('https://ntfy.sh/'+TOPIC,{method:'POST',body:body,headers:{'Title':'Don moi gUlEm','Tags':'bell','Priority':'high'}}).catch(function(){});
       }
     }catch(e){}
     return of.apply(this,arguments);
   };
+})();
+</script>
+
+<style>
+#gu-admin .ga-strow{ display:flex; gap:7px; margin-top:10px; }
+#gu-admin .ga-stbtn{ flex:1; padding:7px 4px; border-radius:10px; border:1.5px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06); color:#e9d4da; font-size:12px; font-weight:700; cursor:pointer; transition:.15s; font-family:inherit; }
+#gu-admin .ga-stbtn:active{ transform:scale(.95); }
+#gu-admin .ga-stbtn.on{ font-weight:800; }
+</style>
+<script>
+/* gUlEm: khách nhận cập nhật trạng thái đơn realtime (ntfy status channel) */
+(function(){
+  var TOPIC='';
+  try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy)TOPIC=c.ntfy; }).catch(function(){}); }catch(e){}
+  var es=null, myCode='';
+  var MAP={
+    making:{t:'Đang pha chế',s:'Nhân viên đang chuẩn bị đồ uống cho bạn',ic:'local_cafe',col:'#e9486a'},
+    done:{t:'Đồ uống đã sẵn sàng',s:'Đơn đã pha xong, đang chuẩn bị mang ra / giao',ic:'check_circle',col:'#f0a500'},
+    delivered:{t:'Đã giao — cảm ơn bạn 🤎',s:'Chúc bạn ngon miệng. Hẹn gặp lại ở gUlEm!',ic:'done_all',col:'#2fae6a'}
+  };
+  function apply(k){
+    var m=MAP[k]; if(!m)return;
+    var ti=document.getElementById('gu-st-title'), su=document.getElementById('gu-st-sub'),
+        ic=document.getElementById('gu-st-icon'), rg=document.getElementById('gu-st-ring');
+    if(ti)ti.textContent=m.t; if(su)su.textContent=m.s; if(ic)ic.textContent=m.ic;
+    if(rg){ rg.classList.remove('animate-spin'); rg.style.background=m.col; }
+  }
+  function subscribe(){
+    if(!TOPIC || es) return;
+    try{
+      es=new EventSource('https://ntfy.sh/'+TOPIC+'-st/sse');
+      es.onmessage=function(ev){ try{ var mm=JSON.parse(ev.data); if(mm.event==='message' && mm.message){ var d=JSON.parse(mm.message); if(d.code && d.code===myCode){ apply(d.status); try{ if(window.GU_SFX&&window.GU_SFX.pop)window.GU_SFX.pop(); if(navigator.vibrate)navigator.vibrate(12); }catch(_){ } } } }catch(e){} };
+    }catch(e){}
+  }
+  var _go=window.__go;
+  if(typeof _go==='function'){ window.__go=function(x){ var r=_go.apply(this,arguments); if(x==='screen-confirm'){ try{ myCode=window.__GU_ORDER_CODE||sessionStorage.getItem('gu_order_code')||''; }catch(e){} subscribe(); } return r; }; }
 })();
 </script>
