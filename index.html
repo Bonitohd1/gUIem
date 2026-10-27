@@ -38,7 +38,8 @@ button:active,a[data-path]:active,.btn-add:active{ transform:scale(.95); }
 /* Primary actions: layered rose glow */
 .btn-add{ box-shadow:0 4px 12px -4px rgba(233,72,106,.5); }
 .btn-add:active{ box-shadow:0 2px 6px -3px rgba(233,72,106,.5); }
-#menu-cart-bar{ box-shadow:0 14px 34px -12px rgba(233,72,106,.6) !important; }
+#menu-cart-bar{ box-shadow:0 14px 34px -12px rgba(233,72,106,.6) !important; bottom:calc(4rem + env(safe-area-inset-bottom) + 16px) !important; }
+@media (min-width:1024px){ #menu-cart-bar{ bottom:calc(4rem + 20px) !important; } }
 #place-order,#add-to-cart-cta{ box-shadow:0 10px 26px -10px rgba(233,72,106,.55); }
 
 /* Scroll-reveal */
