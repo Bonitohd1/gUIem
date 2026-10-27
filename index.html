@@ -179,6 +179,15 @@ body{ letter-spacing:-.004em; }
 .gu-hero-dots i{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.55); transition:all .35s var(--ease); display:block; }
 .gu-hero-dots i.on{ background:#fff; width:18px; border-radius:4px; }
 /* ===== end hero layer ===== */
+/* ===== loyalty rows: no text/button overlap on mobile ===== */
+#screen-loyalty .flex.items-center.justify-between{ gap:12px; }
+#screen-loyalty .flex.items-center.justify-between > .flex.items-center.gap-3{ min-width:0; flex:1 1 auto; }
+#screen-loyalty .flex.items-center.gap-3 .space-y-0\.5{ min-width:0; }
+#screen-loyalty .flex.items-center.gap-3 h4{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#screen-loyalty .flex.items-center.gap-3 p{ overflow:hidden; text-overflow:ellipsis; }
+#screen-loyalty .flex.flex-col.items-end{ flex:0 0 auto; }
+/* ===== end loyalty fix ===== */
+
 
 
 
@@ -2000,7 +2009,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary-fixed">Hạng Hạt Mộc</span>
 </div>
 <h2 class="font-headline-sm text-headline-sm text-surface-container-lowest">Nguyễn Văn A</h2>
-<p class="font-body-sm text-body-sm text-primary-fixed-dim/80 tracking-wide font-mono">AY-MEMBER-8899</p>
+<p class="font-body-sm text-body-sm text-primary-fixed-dim/80 tracking-wide font-mono">gUlEm MEMBER · 8899</p>
 </div>
 <!-- Quick QR Scan Trigger Button -->
 <button class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-surface-container-lowest/10 backdrop-blur-md text-surface-container-lowest active:scale-95 transition-all shadow-sm" id="open-qr-modal">
