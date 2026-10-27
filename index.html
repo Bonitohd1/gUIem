@@ -3506,7 +3506,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   }
   function loadHistory(){
     if(!CFG.ntfy){ $('ga-status').textContent='Chưa cấu hình kênh đơn (cfg.ntfy)'; render([]); return; }
-    fetch('https://ntfy.sh/'+CFG.ntfy+'/json?poll=1&since=3d',{cache:'no-store'})
+    fetch('https://ntfy.sh/'+CFG.ntfy+'/json?poll=1&since=24h',{cache:'no-store'})
       .then(function(r){ return r.text(); })
       .then(function(txt){
         (txt.split('\n').filter(Boolean)).forEach(function(ln){
