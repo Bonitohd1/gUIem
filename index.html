@@ -250,7 +250,7 @@ header .w-11.h-11.rounded-full img{ width:100% !important; height:100% !importan
 .gu-conf{ position:absolute; top:40%; left:50%; width:9px; height:9px; z-index:6; pointer-events:none; opacity:0; animation:guConf 1.6s ease-out forwards; }
 @keyframes guConf{ 0%{ opacity:1; transform:translate(-50%,-50%) scale(.4);} 15%{ opacity:1;} 100%{ opacity:0; transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy) + 160px)) rotate(var(--rot)) scale(1);} }
 /* ===== assistant bot ===== */
-.gu-bot-btn{ position:fixed; right:14px; bottom:150px; z-index:1150; width:54px; height:54px; border-radius:50%; background:linear-gradient(135deg,#e9486a,#ff86ab); color:#fff; border:0; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 26px -8px rgba(233,72,106,.7); cursor:pointer; animation:guFloat 3s ease-in-out infinite; }
+.gu-bot-btn{ position:fixed; left:14px; right:auto; bottom:98px; z-index:1150; width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,#e9486a,#ff86ab); color:#fff; border:0; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 26px -8px rgba(233,72,106,.7); cursor:pointer; animation:guFloat 3s ease-in-out infinite; }
 @keyframes guFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
 .gu-bot-btn .material-symbols-outlined{ font-size:27px; font-variation-settings:'FILL' 1; }
 .gu-bot-dot{ position:absolute; top:-1px; right:-1px; width:13px; height:13px; border-radius:50%; background:#fff; border:3px solid #e9486a; }
@@ -316,7 +316,7 @@ button,[role="button"],a[data-path]{ touch-action:manipulation; }
   [id^="screen-"] > main{ box-shadow:0 50px 130px -42px rgba(120,8,36,.42), 0 0 0 1px rgba(233,72,106,.06); }
   header.fixed{ left:50% !important; transform:translateX(-50%); width:36rem !important; }
   nav.fixed{ left:50% !important; transform:translateX(-50%); width:36rem !important; border-radius:22px 22px 0 0; overflow:hidden; }
-  .gu-bot-btn{ right:calc(50vw - 18rem - 66px) !important; }
+  .gu-bot-btn{ left:auto !important; right:calc(50vw - 18rem - 66px) !important; bottom:150px !important; }
   .gu-bot-panel{ right:calc(50vw - 18rem - 66px) !important; }
   .gu-pc-deco{ display:flex; position:fixed; z-index:0; top:0; height:100vh; width:calc(50vw - 18.5rem); box-sizing:border-box; flex-direction:column; justify-content:center; padding:0 clamp(28px,3.4vw,60px); }
   .gu-pc-deco.l{ left:0; align-items:flex-start; }
@@ -3128,19 +3128,28 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   try{ muted=localStorage.getItem('gu_muted')==='1'; }catch(e){}
   function ctx(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC&&AC.state==='suspended'){ try{AC.resume();}catch(e){} } return AC; }
   function tone(freq,dur,type,vol,when){ var ac=ctx(); if(!ac||muted) return; var t=ac.currentTime+(when||0); var o=ac.createOscillator(), g=ac.createGain(); o.type=type||'sine'; o.frequency.setValueAtTime(freq,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||0.15,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+dur+0.03); }
-  function ting(){ tone(880,0.16,'sine',0.2); tone(1320,0.22,'sine',0.15,0.07); tone(1760,0.3,'sine',0.11,0.15); }
-  function pop(){ tone(540,0.08,'triangle',0.18); tone(840,0.12,'sine',0.13,0.04); }
-  function success(){ tone(660,0.14,'sine',0.18); tone(880,0.14,'sine',0.18,0.1); tone(1175,0.28,'sine',0.15,0.21); }
+  // warm bell: layered partials, soft attack, long gentle decay -> "sang" hơn beep
+  function bell(freq,when,vol,dur){ var ac=ctx(); if(!ac||muted)return; var t=ac.currentTime+(when||0); dur=dur||0.9; vol=vol||0.16;
+    [[1,'sine',1],[2.01,'sine',0.33],[3.0,'sine',0.12],[1,'triangle',0.16]].forEach(function(p){ var o=ac.createOscillator(),g=ac.createGain(); o.type=p[1]; o.frequency.setValueAtTime(freq*p[0],t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol*p[2],t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+dur+0.05); }); }
+  function ting(){ bell(1046.5,0,0.13,0.8); bell(1396.9,0.08,0.1,0.9); }
+  function pop(){ tone(523.25,0.07,'sine',0.11); tone(784,0.1,'sine',0.08,0.03); }
+  function success(){ bell(523.25,0,0.17,1.0); bell(659.25,0.1,0.16,1.0); bell(783.99,0.2,0.15,1.15); bell(1046.5,0.32,0.13,1.35); }
+  function ding(){ bell(880,0,0.18,0.85); bell(1318.5,0.12,0.14,1.05); }
+  function coin(){ bell(1046.5,0,0.12,0.5); bell(1568,0.06,0.1,0.6); }
   function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
   function plusOne(x,y){ var el=document.createElement('div'); el.textContent='+1'; el.style.cssText='position:fixed;left:'+x+'px;top:'+y+'px;z-index:1180;color:#fff;background:#e9486a;font:800 12px "Plus Jakarta Sans",sans-serif;padding:3px 9px;border-radius:999px;box-shadow:0 8px 18px -6px rgba(233,72,106,.7);pointer-events:none;transform:translate(-50%,-50%);transition:top .8s cubic-bezier(.3,0,.2,1),opacity .8s;opacity:1'; document.body.appendChild(el); requestAnimationFrame(function(){ el.style.top=(y-46)+'px'; el.style.opacity='0'; }); setTimeout(function(){ if(el.parentNode)el.parentNode.removeChild(el); },860); }
   function burst(cx,cy){ var cl=['#e9486a','#ff86ab','#ffd166','#ffb3c8','#ff5c8a','#7ed9a8']; for(var i=0;i<42;i++){ (function(){ var c=document.createElement('span'); var a=Math.random()*6.283, d=80+Math.random()*230, dx=Math.cos(a)*d, dy=Math.sin(a)*d; c.style.cssText='position:fixed;left:'+cx+'px;top:'+cy+'px;width:9px;height:9px;z-index:1400;pointer-events:none;background:'+cl[i%cl.length]+';border-radius:'+(Math.random()>.5?'50%':'2px')+';opacity:1;transition:transform 1.3s cubic-bezier(.2,.6,.2,1),opacity 1.3s'; document.body.appendChild(c); requestAnimationFrame(function(){ c.style.transform='translate('+dx+'px,'+(dy+190)+'px) rotate('+(Math.random()*720)+'deg)'; c.style.opacity='0'; }); setTimeout(function(){ if(c.parentNode)c.parentNode.removeChild(c); },1400); })(); } }
-  window.GU_SFX={ ting:ting, pop:pop, success:success, burst:burst };
+  // mưa tim + thẻ "Cảm ơn" khi đặt đơn
+  function hearts(){ var cl=['#e9486a','#ff86ab','#ff5c8a','#c2335a','#ffb3c8']; for(var i=0;i<20;i++){ (function(i){ var h=document.createElement('div'); h.textContent='❤'; var size=14+Math.random()*28; h.style.cssText='position:fixed;left:'+(6+Math.random()*88)+'vw;bottom:-44px;z-index:1398;font-size:'+size+'px;color:'+cl[i%cl.length]+';pointer-events:none;opacity:'+(0.55+Math.random()*0.45)+';will-change:transform,opacity;transition:transform '+(1.9+Math.random()*1.3)+'s cubic-bezier(.2,.5,.2,1),opacity '+(1.9+Math.random())+'s ease-in'; document.body.appendChild(h); var dx=(Math.random()*2-1)*90; requestAnimationFrame(function(){ h.style.transform='translate('+dx+'px,-'+(window.innerHeight+90)+'px) rotate('+(Math.random()*60-30)+'deg)'; h.style.opacity='0'; }); setTimeout(function(){ if(h.parentNode)h.parentNode.removeChild(h); }, 3400); })(i); } }
+  function thanks(){ var o=document.createElement('div'); o.style.cssText='position:fixed;inset:0;z-index:1399;display:flex;align-items:center;justify-content:center;pointer-events:none'; o.innerHTML='<div class="gu-thx" style="background:rgba(255,255,255,.97);border-radius:26px;padding:28px 32px;text-align:center;box-shadow:0 34px 80px -22px rgba(120,8,36,.45);transform:scale(.6);opacity:0;transition:transform .55s cubic-bezier(.2,1.3,.3,1),opacity .4s"><div style="font-size:50px;line-height:1">🤎</div><div style="font-family:Fraunces,serif;font-weight:600;font-size:23px;color:#8a1e42;margin-top:10px">Cảm ơn bạn!</div><div style="font:500 13px \'Plus Jakarta Sans\',sans-serif;color:#9a5c6c;margin-top:5px;max-width:230px">gUlEm đã nhận đơn — đang pha ngay cho bạn 🌸</div></div>'; document.body.appendChild(o); var card=o.querySelector('.gu-thx'); requestAnimationFrame(function(){ card.style.transform='scale(1)'; card.style.opacity='1'; }); setTimeout(function(){ card.style.transform='scale(.92)'; card.style.opacity='0'; }, 2300); setTimeout(function(){ if(o.parentNode)o.parentNode.removeChild(o); }, 2780); }
+  function celebrate(){ success(); hearts(); thanks(); }
+  window.GU_SFX={ ting:ting, pop:pop, success:success, burst:burst, ding:ding, coin:coin, bell:bell, hearts:hearts, celebrate:celebrate };
   document.addEventListener('pointerdown',function u(){ ctx(); document.removeEventListener('pointerdown',u); });
 
   document.addEventListener('click',function(e){
     if(e.target.closest('.gu-open')){ ting(); haptic(20); return; }
     var add=e.target.closest('#screen-menu .btn-add, .gu-lb-add'); if(add){ pop(); haptic(14); var r=add.getBoundingClientRect(); plusOne(r.left+r.width/2, r.top+r.height/2); return; }
-    if(e.target.closest('#screen-cart #place-order, #place-order')){ success(); haptic(30); burst(window.innerWidth/2, window.innerHeight*0.42); return; }
+    if(e.target.closest('#screen-cart #place-order, #place-order')){ celebrate(); haptic(30); return; }
   }, true);
 
   /* mute toggle in bot header */
