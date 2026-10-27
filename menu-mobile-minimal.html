@@ -1,0 +1,355 @@
+<title>gUlEm</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-title" content="gUlEm">
+<meta name="theme-color" content="#3a2a20">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap">
+<style>
+  /* Layout: menu đặt món gUlEm — mobile-first, tối giản; 1 hero, danh sách món thoáng, giỏ + đặt đơn */
+  :root{
+    --bg:#f7f1e9; --surface:#ffffff; --surface-2:#f3ece2; --line:#ece2d4;
+    --ink:#2c2219; --muted:#8c7a6a; --espresso:#3a2a20; --espresso-2:#4e3828;
+    --accent:#a35a2d; --accent-soft:#f0e3d6; --zalo:#0068ff; --ok:#2f7d4f;
+    --f-head:"Fraunces", Georgia, serif;
+    --f-body:"Plus Jakarta Sans", system-ui, sans-serif;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+    --bg:#15110c; --surface:#1f1811; --surface-2:#191209; --line:#2b2118;
+    --ink:#f0e8dc; --muted:#a4917f; --accent-soft:#2a2018; color-scheme:dark;
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.5;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+  img{max-width:100%}
+  .ms{font-family:"Material Symbols Outlined";font-weight:400;line-height:1;vertical-align:middle;font-feature-settings:'liga'}
+  .shell{max-width:480px;margin:0 auto;padding-bottom:116px}
+
+  /* header — slim */
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--espresso);z-index:40}
+  .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--espresso);color:#f3e9dd;
+    padding:11px max(18px,env(safe-area-inset-left,0px)) 11px max(18px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:11px}
+  .logo{width:40px;height:40px;border-radius:12px;flex:0 0 auto;background:linear-gradient(150deg,#7a4f2e,#2e1d12);display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+  .brand{min-width:0;flex:1}
+  .brand .nm{font-family:var(--f-head);font-weight:600;font-size:18px;line-height:1.1;letter-spacing:.01em}
+  .brand .sub{font-size:11px;opacity:.72;margin-top:1px}
+  .zbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#f3e9dd;text-decoration:none;font-weight:600;font-size:12px;padding:7px 12px;border-radius:999px}
+
+  .wrap{padding:0 max(18px,env(safe-area-inset-left,0px))}
+
+  /* hero — một thông điệp chủ đạo */
+  .hero{position:relative;margin:18px 0 6px;border-radius:20px;overflow:hidden;padding:22px 20px;color:#fff;
+    background:radial-gradient(130% 120% at 85% 10%,rgba(255,255,255,.18),transparent 55%),linear-gradient(135deg,#9a5e32,#5a3a21 70%,#3a2415);
+    display:flex;align-items:center;gap:14px;min-height:118px}
+  .hero .txt{flex:1;min-width:0}
+  .hero .eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+  .hero h2{font-family:var(--f-head);font-weight:700;font-size:28px;line-height:1.05;margin:4px 0 2px}
+  .hero h2 span{color:#ffd9b0}
+  .hero p{margin:0;font-size:12.5px;opacity:.9}
+  .hero .art{flex:0 0 auto;font-size:52px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.3))}
+
+  /* section */
+  .cat{margin-top:26px}
+  .cat-h{display:flex;align-items:baseline;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:6px}
+  .cat-h .lab{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  .cat-h h3{font-family:var(--f-head);font-weight:600;font-size:21px;margin:0;color:var(--ink)}
+  .cat-h .cnt{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+  .item{display:flex;align-items:center;gap:14px;padding:14px 2px;border-bottom:1px solid var(--line)}
+  .item:last-child{border-bottom:0}
+  .thumb{width:58px;height:58px;border-radius:15px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--accent-soft);position:relative}
+  .thumb .badge{position:absolute;top:-6px;left:-6px;font-size:8px;font-weight:800;letter-spacing:.03em;background:var(--accent);color:#fff;padding:2px 6px;border-radius:999px;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+  .mid{flex:1;min-width:0}
+  .mid .nm{font-family:var(--f-head);font-weight:600;font-size:16px;color:var(--ink);line-height:1.25}
+  .mid .ds{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mid .pr{font-weight:700;color:var(--accent);font-size:14px;margin-top:5px;font-variant-numeric:tabular-nums}
+  .act{flex:0 0 auto}
+  .addbtn{appearance:none;border:0;width:38px;height:38px;border-radius:12px;background:var(--espresso);color:#f3e9dd;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s}
+  .addbtn:active{transform:scale(.9)}
+  .stepper{display:flex;align-items:center;gap:3px;background:var(--surface-2);border-radius:12px;padding:3px}
+  .stepper button{appearance:none;width:32px;height:32px;border-radius:9px;border:0;background:var(--surface);color:var(--accent);font-size:19px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .stepper button:active{transform:scale(.9)}
+  .stepper .q{min-width:22px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);font-size:15px}
+
+  /* zalo */
+  .zcard{margin:30px 0 8px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;text-align:center}
+  .zcard h3{font-family:var(--f-head);font-weight:600;font-size:17px;margin:0 0 4px;color:var(--ink)}
+  .zcard p{margin:0 0 15px;font-size:12.5px;color:var(--muted)}
+  .qr{width:150px;height:150px;margin:0 auto 15px;background:#fff;border-radius:14px;padding:11px;box-shadow:0 6px 18px -10px rgba(58,42,32,.5)}
+  .qr canvas,.qr img{width:100%!important;height:100%!important;display:block}
+  .zjoin{display:inline-flex;align-items:center;gap:8px;background:var(--zalo);color:#fff;text-decoration:none;font-weight:700;padding:12px 24px;border-radius:999px;font-size:14px}
+
+  .foot{margin:24px 0 10px;text-align:center;color:var(--muted);font-size:12px;line-height:1.7}
+  .foot .nm{font-family:var(--f-head);font-weight:600;color:var(--ink);font-size:15px}
+
+  /* cart bar */
+  .cartbar{position:fixed;left:0;right:0;bottom:0;z-index:35;pointer-events:none;
+    padding:12px max(18px,env(safe-area-inset-left,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-right,0px));
+    background:linear-gradient(180deg,transparent,var(--bg) 40%)}
+  .cartbar .inner{max-width:444px;margin:0 auto;background:var(--espresso);color:#f3e9dd;border-radius:17px;padding:13px 16px;display:flex;align-items:center;gap:13px;pointer-events:auto;cursor:pointer;box-shadow:0 14px 34px -12px rgba(58,42,32,.9);transition:transform .12s}
+  .cartbar .inner:active{transform:scale(.99)}
+  .cartbar[hidden]{display:none}
+  .cartbar .ico{position:relative;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto}
+  .cartbar .ico .n{position:absolute;top:-5px;right:-5px;background:var(--accent);color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--espresso)}
+  .cartbar .ct{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+  .cartbar .ct b{font-size:14px}
+  .cartbar .ct small{font-size:11.5px;opacity:.82}
+  .cartbar .go{margin-left:auto;font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+
+  /* sheet */
+  .ov{position:fixed;inset:0;z-index:44;background:rgba(32,22,14,.5);opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(2px)}
+  .ov.open{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:45;max-width:480px;margin:0 auto;background:var(--bg);border-radius:24px 24px 0 0;
+    transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.25,1);max-height:90vh;display:flex;flex-direction:column;
+    padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -12px 44px rgba(58,42,32,.3)}
+  .sheet.open{transform:translateY(0)}
+  .grab{width:42px;height:5px;border-radius:999px;background:var(--line);margin:10px auto 2px}
+  .sheet .hd{display:flex;align-items:center;gap:10px;padding:8px 20px 12px}
+  .sheet .hd h3{font-family:var(--f-head);font-weight:600;font-size:19px;margin:0}
+  .sheet .hd .pill{font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:3px 10px;border-radius:999px}
+  .sheet .hd .x{margin-left:auto;appearance:none;border:0;background:var(--surface-2);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;color:var(--ink);display:flex;align-items:center;justify-content:center}
+  .sheet .body{overflow:auto;padding:0 20px;flex:1}
+  .crow{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .crow .ct{flex:1;min-width:0}
+  .crow .ct b{font-family:var(--f-head);font-size:15px;font-weight:600;color:var(--ink);display:block;line-height:1.2}
+  .crow .ct small{font-size:11.5px;color:var(--muted)}
+  .crow .cpr{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .empty{text-align:center;padding:40px 10px;color:var(--muted);font-size:13.5px}
+  .fields{display:flex;flex-direction:column;gap:10px;padding:16px 0 6px}
+  .fields input,.fields textarea{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px 14px;font-family:var(--f-body);font-size:14px;background:var(--surface);color:var(--ink);resize:vertical}
+  .fields input:focus,.fields textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+  .sheet .ft{padding:14px 20px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:11px;background:var(--bg)}
+  .tot{display:flex;align-items:center;justify-content:space-between}
+  .tot small{font-size:12px;color:var(--muted)}
+  .tot .lbl{font-family:var(--f-head);font-weight:600;font-size:16px}
+  .tot .big{font-family:var(--f-head);font-weight:700;font-size:22px;color:var(--accent);font-variant-numeric:tabular-nums}
+  .order-btn{appearance:none;border:0;display:flex;align-items:center;justify-content:center;gap:9px;background:var(--espresso);color:#f3e9dd;font-weight:700;font-size:16px;padding:16px;border-radius:15px;cursor:pointer;font-family:var(--f-body)}
+  .order-btn:active{transform:scale(.99)}
+  .copy-btn{appearance:none;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:11px;font-size:12.5px;cursor:pointer;font-family:var(--f-body)}
+
+  /* confirm */
+  .confirm{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;opacity:0;pointer-events:none;transition:opacity .3s}
+  .confirm.open{opacity:1;pointer-events:auto}
+  .confirm .circle{width:86px;height:86px;border-radius:50%;background:var(--espresso);color:#ffd9b0;display:flex;align-items:center;justify-content:center;font-size:46px;box-shadow:0 0 0 12px var(--accent-soft);margin-bottom:20px}
+  .confirm h2{font-family:var(--f-head);font-weight:700;font-size:23px;margin:0 0 8px;color:var(--ink)}
+  .confirm p{margin:0;color:var(--muted);font-size:14px;max-width:30ch}
+  .confirm .sum{margin:20px 0;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 20px;font-size:13px;color:var(--ink);max-width:320px;width:100%;line-height:1.7}
+  .confirm .back{appearance:none;border:0;background:var(--espresso);color:#f3e9dd;font-weight:700;padding:14px 28px;border-radius:999px;cursor:pointer;font-family:var(--f-body);font-size:14.5px}
+
+  .toast{position:fixed;left:50%;bottom:98px;transform:translateX(-50%) translateY(16px);z-index:60;background:var(--espresso);color:#f3e9dd;padding:12px 18px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:88vw;text-align:center;box-shadow:0 12px 30px rgba(58,42,32,.4)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+
+<div class="shell">
+  <header class="top">
+    <div class="logo">🧋</div>
+    <div class="brand">
+      <div class="nm">gUlEm</div>
+      <div class="sub">Tiệm nhà chị em Thùy · 7:00–22:00</div>
+    </div>
+    <a class="zbtn" id="zaloTop" href="#" target="_blank" rel="noopener"><span class="ms" style="font-size:15px">forum</span> Zalo</a>
+  </header>
+
+  <div class="wrap">
+    <section class="hero">
+      <div class="txt">
+        <div class="eyebrow">Mọi đồ uống</div>
+        <h2>Đồng giá <span>50.000đ</span></h2>
+        <p>Trà sữa &amp; cà phê thủ công, chắt chiu từng ly</p>
+      </div>
+      <div class="art">🧋</div>
+    </section>
+
+    <main id="menuRoot"></main>
+
+    <section class="zcard">
+      <h3>Vào nhóm Zalo đặt &amp; nhận ưu đãi</h3>
+      <p>Quét mã hoặc bấm nút để tham gia nhóm</p>
+      <div class="qr" id="qr"></div>
+      <a class="zjoin" id="zaloJoin" href="#" target="_blank" rel="noopener"><span class="ms" style="font-size:18px">forum</span> Tham gia nhóm Zalo</a>
+    </section>
+
+    <footer class="foot">
+      <div class="nm" id="fName">gUlEm — Tiệm nhà chị em Thùy</div>
+      <div id="fPhone">☎ 0963 240 972 · Mở cửa 7:00 – 22:00</div>
+    </footer>
+  </div>
+</div>
+
+<div class="cartbar" id="cartbar" hidden>
+  <div class="inner" id="openCart">
+    <div class="ico"><span class="ms">shopping_bag</span><span class="n" id="barBadge">0</span></div>
+    <div class="ct"><b id="barCount">0 món</b><small id="barTotal">0đ</small></div>
+    <div class="go">Xem giỏ · Đặt <span class="ms" style="font-size:17px">arrow_forward</span></div>
+  </div>
+</div>
+
+<div class="ov" id="ov"></div>
+<section class="sheet" id="sheet" role="dialog" aria-label="Giỏ hàng">
+  <div class="grab"></div>
+  <div class="hd"><h3>Đơn của bạn</h3><span class="pill" id="sheetCount">0 món</span><button class="x" id="closeCart" aria-label="Đóng">✕</button></div>
+  <div class="body">
+    <div id="cartList"></div>
+    <div class="fields">
+      <input id="fCustName" type="text" placeholder="Tên của bạn (để quán gọi tên)">
+      <input id="fCustPhone" type="tel" placeholder="Số điện thoại / bàn số">
+      <textarea id="fNote" rows="2" placeholder="Ghi chú (ít đá, ít đường, thêm topping…)"></textarea>
+    </div>
+  </div>
+  <div class="ft">
+    <div class="tot"><div><div class="lbl">Tổng cộng</div><small>Đồng giá 50.000đ/món</small></div><span class="big" id="grandTotal">0đ</span></div>
+    <button class="order-btn" id="placeOrder"><span class="ms" style="font-size:20px">send</span> Đặt món ngay</button>
+    <button class="copy-btn" id="copyOrder">Chỉ sao chép đơn</button>
+  </div>
+</section>
+
+<div class="confirm" id="confirm">
+  <div class="circle"><span class="ms" style="font-size:46px;font-variation-settings:'FILL' 1">check_circle</span></div>
+  <h2>Đã gửi đơn tới quán!</h2>
+  <p>Cảm ơn bạn ♥ Quán sẽ chuẩn bị và phục vụ trong ít phút.</p>
+  <div class="sum" id="confirmSum"></div>
+  <button class="back" id="confirmBack">Về menu gọi thêm</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  /* ===== CẤU HÌNH ===== */
+  var ZALO_GROUP="https://zaloapp.com/qr/g/keolmxd5mu8mxcfmvi99?src=qr";
+  var WEBHOOK="";                               // dán URL webhook n8n để tự bắn đơn
+  var SHOP="gUlEm - Tiệm nhà chị em Thùy";
+
+  var PRICE=50000;
+  var MENU=[
+    {cat:"Trà", lab:"Trà sữa & trà", items:[
+      {id:"t1", name:"Trà Earl Grey kem sữa", emo:"🧋", badge:"Best", desc:"Trà bá tước ủ lạnh, kem sữa béo mặn nhẹ"},
+      {id:"t2", name:"Trà nhài kem sữa", emo:"🍵", desc:"Hương nhài thanh khiết, foam sữa mịn"},
+      {id:"t3", name:"Trà sữa xoài", emo:"🥭", desc:"Trà sữa Ô long, puree xoài cát thơm"}
+    ]},
+    {cat:"Cà phê", lab:"Cà phê mộc", items:[
+      {id:"c1", name:"Americano chanh vàng", emo:"🍋", desc:"Espresso phối chanh vàng, sảng khoái"},
+      {id:"c2", name:"Cà phê muối", emo:"🧂", badge:"Đặc sản", desc:"Cà phê phin, lớp kem muối xứ Huế"},
+      {id:"c3", name:"Cà phê sữa", emo:"☕", desc:"Rang mộc chuẩn gu Việt, sữa đặc béo"}
+    ]},
+    {cat:"Giải khát", lab:"Tươi mát", items:[
+      {id:"g1", name:"Hoa quả ép theo mùa", emo:"🍊", desc:"Trái cây tươi ép trong ngày"}
+    ]}
+  ];
+
+  var money=function(n){return (n||0).toLocaleString("vi-VN")+"đ";};
+  var byId={}; MENU.forEach(function(c){c.items.forEach(function(it){byId[it.id]=it;});});
+  var cart={};
+  var g=function(id){return document.getElementById(id);};
+
+  g("zaloTop").href=ZALO_GROUP; g("zaloJoin").href=ZALO_GROUP;
+  try{ new QRCode(g("qr"),{text:ZALO_GROUP,width:148,height:148,colorDark:"#3a2a20",colorLight:"#ffffff"}); }catch(e){}
+
+  var root=g("menuRoot");
+  MENU.forEach(function(c){
+    var sec=document.createElement("section"); sec.className="cat";
+    sec.innerHTML='<div class="cat-h"><div><div class="lab">'+c.lab+'</div><h3>'+c.cat+'</h3></div><span class="cnt">'+c.items.length+' món</span></div>';
+    c.items.forEach(function(it){
+      var el=document.createElement("div"); el.className="item";
+      el.innerHTML=
+        '<div class="thumb">'+it.emo+(it.badge?'<span class="badge">'+it.badge+'</span>':'')+'</div>'+
+        '<div class="mid"><div class="nm">'+it.name+'</div><div class="ds">'+it.desc+'</div><div class="pr">'+money(PRICE)+'</div></div>'+
+        '<div class="act" data-act="'+it.id+'"></div>';
+      sec.appendChild(el);
+    });
+    root.appendChild(sec);
+  });
+
+  function renderActs(){
+    MENU.forEach(function(c){c.items.forEach(function(it){
+      var box=document.querySelector('[data-act="'+it.id+'"]'); if(!box)return;
+      var q=cart[it.id]||0;
+      box.innerHTML = q<=0
+        ? '<button class="addbtn" data-add="'+it.id+'" aria-label="Thêm '+it.name+'">+</button>'
+        : '<div class="stepper"><button data-dec="'+it.id+'" aria-label="Bớt">−</button><span class="q">'+q+'</span><button data-inc="'+it.id+'" aria-label="Thêm">+</button></div>';
+    });});
+  }
+  function counts(){var n=0,t=0;Object.keys(cart).forEach(function(id){n+=cart[id];t+=cart[id]*PRICE;});return{n:n,t:t};}
+  function addQ(id,d){cart[id]=Math.max(0,(cart[id]||0)+d); if(cart[id]===0)delete cart[id]; renderActs(); renderCart();}
+
+  document.addEventListener("click",function(e){
+    var t=e.target.closest("[data-add],[data-inc],[data-dec]"); if(!t)return;
+    if(t.dataset.add){addQ(t.dataset.add,1); toast("Đã thêm "+byId[t.dataset.add].name);}
+    else if(t.dataset.inc)addQ(t.dataset.inc,1);
+    else if(t.dataset.dec)addQ(t.dataset.dec,-1);
+  });
+
+  var cartbar=g("cartbar");
+  function renderCart(){
+    var c=counts();
+    cartbar.hidden=c.n===0;
+    g("barCount").textContent=c.n+" món"; g("barTotal").textContent=money(c.t); g("barBadge").textContent=c.n;
+    g("sheetCount").textContent=c.n+" món"; g("grandTotal").textContent=money(c.t);
+    var box=g("cartList");
+    if(c.n===0){ box.innerHTML='<div class="empty">Chưa chọn món nào.<br>Chạm nút <b>+</b> để thêm.</div>'; return; }
+    box.innerHTML="";
+    Object.keys(cart).forEach(function(id){
+      var it=byId[id],q=cart[id];
+      var row=document.createElement("div"); row.className="crow";
+      row.innerHTML='<div class="thumb" style="width:46px;height:46px;font-size:22px;border-radius:12px">'+it.emo+'</div>'+
+        '<div class="ct"><b>'+it.name+'</b><small>'+money(PRICE)+' × '+q+'</small></div>'+
+        '<div class="stepper"><button data-dec="'+id+'">−</button><span class="q">'+q+'</span><button data-inc="'+id+'">+</button></div>'+
+        '<div class="cpr">'+money(PRICE*q)+'</div>';
+      box.appendChild(row);
+    });
+  }
+  var ov=g("ov"),sheet=g("sheet");
+  function openSheet(){ov.classList.add("open");sheet.classList.add("open");}
+  function closeSheet(){ov.classList.remove("open");sheet.classList.remove("open");}
+  g("openCart").addEventListener("click",openSheet);
+  g("closeCart").addEventListener("click",closeSheet);
+  ov.addEventListener("click",closeSheet);
+
+  function val(id){var e=g(id);return e?e.value.trim():"";}
+  function orderText(){
+    var c=counts(),L=["🧾 ĐƠN HÀNG — "+SHOP,""];
+    Object.keys(cart).forEach(function(id){L.push("• "+byId[id].name+" × "+cart[id]+"  "+money(PRICE*cart[id]));});
+    L.push("—","Tổng: "+money(c.t)+"  ("+c.n+" món)");
+    var nm=val("fCustName"),ph=val("fCustPhone"),nt=val("fNote");
+    if(nm||ph)L.push("Khách: "+[nm,ph].filter(Boolean).join(" · "));
+    if(nt)L.push("Ghi chú: "+nt);
+    return L.join("\n");
+  }
+  function payload(){var c=counts();return{shop:SHOP,at:new Date().toISOString(),count:c.n,total:c.t,
+    items:Object.keys(cart).map(function(id){return{name:byId[id].name,qty:cart[id],price:PRICE,opts:"",lineTotal:PRICE*cart[id]};}),
+    customer:{name:val("fCustName"),phone:val("fCustPhone")},note:val("fNote")};}
+  function copyOrder(cb){var tx=orderText();
+    try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(tx).then(function(){cb&&cb(true);},function(){cb&&cb(false);});}else{cb&&cb(false);}}catch(e){cb&&cb(false);}}
+  function showConfirm(){
+    var c=counts();
+    g("confirmSum").innerHTML=Object.keys(cart).map(function(id){return byId[id].name+" × "+cart[id];}).join("<br>")+
+      '<div style="margin-top:8px;font-weight:800;color:var(--accent)">Tổng: '+money(c.t)+" ("+c.n+" món)</div>";
+    g("confirm").classList.add("open");
+  }
+  function finishOrder(){ closeSheet(); showConfirm(); cart={}; renderActs(); renderCart(); }
+
+  g("placeOrder").addEventListener("click",function(){
+    if(counts().n===0){toast("Bạn chưa chọn món nào");return;}
+    if(WEBHOOK){
+      toast("Đang gửi đơn…");
+      fetch(WEBHOOK,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload())})
+        .then(function(r){if(!r.ok)throw 0; toast("✓ Đã gửi đơn!"); finishOrder();})
+        .catch(function(){ copyOrder(function(){}); try{window.open(ZALO_GROUP,"_blank");}catch(e){} toast("Lỗi mạng — đã copy đơn, dán vào Zalo"); finishOrder();});
+    } else {
+      copyOrder(function(ok){toast(ok?"✓ Đã copy đơn — dán vào nhóm Zalo":"Hãy chụp màn đơn gửi Zalo");});
+      try{window.open(ZALO_GROUP,"_blank");}catch(e){}
+      finishOrder();
+    }
+  });
+  g("copyOrder").addEventListener("click",function(){
+    if(counts().n===0){toast("Bạn chưa chọn món nào");return;}
+    copyOrder(function(ok){toast(ok?"✓ Đã sao chép đơn hàng":"Không sao chép được — hãy chụp màn hình");});
+  });
+  g("confirmBack").addEventListener("click",function(){g("confirm").classList.remove("open");});
+
+  var toastEl=g("toast"),tmr;
+  function toast(m){toastEl.textContent=m;toastEl.classList.add("show");clearTimeout(tmr);tmr=setTimeout(function(){toastEl.classList.remove("show");},2500);}
+
+  renderActs(); renderCart();
+})();
+</script>
