@@ -62,6 +62,29 @@ a:focus-visible,button:focus-visible{ outline:2px solid #e9486a; outline-offset:
 }
 #screen-menu section:has(> div > a[href^="#cat-"]) > div{ padding-top:8px; padding-bottom:8px; }
 /* ===== end declutter layer ===== */
+/* ===== đồng giá banner — cuốn + shimmer ===== */
+.gu-deal{ position:relative; overflow:hidden; display:flex; align-items:center; gap:12px; border-radius:22px; padding:14px 16px; color:#fff; background:linear-gradient(118deg,#d61f54 0%,#e9486a 44%,#ff86ab 100%); box-shadow:0 18px 36px -14px rgba(214,31,84,.7); isolation:isolate; }
+.gu-deal-ic{ flex:0 0 auto; width:48px; height:48px; border-radius:16px; background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; font-size:27px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.3); }
+.gu-deal-txt{ min-width:0; flex:1; }
+.gu-deal-top{ font:800 10.5px/1.1 'Plus Jakarta Sans',sans-serif; letter-spacing:.16em; opacity:.92; }
+.gu-deal-main{ font-family:'Fraunces',serif; font-weight:600; font-size:19px; line-height:1.1; letter-spacing:-.01em; margin-top:3px; text-shadow:0 1px 10px rgba(130,10,40,.28); }
+.gu-deal-price{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:62px; background:rgba(255,255,255,.17); border:1.5px solid rgba(255,255,255,.5); border-radius:16px; padding:5px 12px; }
+.gu-deal-num{ font-family:'Fraunces',serif; font-weight:700; font-size:30px; line-height:.95; }
+.gu-deal-num small{ font-size:16px; font-weight:700; }
+.gu-deal-cur{ font:700 8.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:.1em; text-transform:uppercase; opacity:.9; margin-top:3px; }
+.gu-deal-shine{ position:absolute; inset:0; z-index:2; pointer-events:none; background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.5) 50%,transparent 65%); transform:translateX(-130%); animation:guShine 3.6s ease-in-out infinite; }
+@keyframes guShine{ 0%{transform:translateX(-130%);} 55%,100%{transform:translateX(130%);} }
+
+/* ===== ảnh món — dày dặn & mềm (bỏ viền cứng, thêm chiều sâu) ===== */
+#screen-menu .w-24.h-24{ width:110px !important; height:110px !important; border-radius:20px !important; background:#fff !important; box-shadow:0 14px 28px -12px rgba(233,72,106,.4), 0 3px 8px -3px rgba(60,20,35,.12) !important; overflow:hidden; }
+#screen-menu .w-24.h-24 img, #screen-menu .w-24.h-24 [style*="background-image"]{ filter:saturate(1.14) brightness(1.04) contrast(1.03); border-radius:20px; transition:transform .5s var(--ease); }
+#screen-menu .w-24.h-24::after{ content:""; position:absolute; inset:0; border-radius:20px; box-shadow:inset 0 -24px 36px -20px rgba(60,20,35,.28), inset 0 0 0 1px rgba(255,255,255,.5); pointer-events:none; }
+#screen-menu .w-24.h-24{ position:relative; }
+#screen-menu .reveal:active .w-24.h-24 img{ transform:scale(1.05); }
+
+@media (prefers-reduced-motion: reduce){ .gu-deal-shine{ display:none; } }
+/* ===== end rich layer ===== */
+
 
 
 /* Benadep-style clean, bright product imagery */
@@ -76,22 +99,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <div class="screen active" id="screen-menu">
 <header class="fixed top-0 w-full z-50 pt-safe bg-primary/95 text-on-primary shadow-[0_4px_20px_-2px_rgba(180,40,90,0.25)] backdrop-blur-xl"><div class="h-20 px-margin flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0 flex-1"><div class="w-11 h-11 rounded-full p-0.5 bg-secondary/30 flex items-center justify-center shrink-0 overflow-hidden"><img alt="Cafe &amp; Tea Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAu5z9T24cFAV9JFWXwyHK2PoUB5dJHBMD1XI9Rhv12VLUWfkqBDNpMAA5fVfYi9IN2r8JZmqVnBoTCP48OQ8pGMK-iEHmN4dDZ4uz3t_QBi8g95dGpcZgVr3T11HeGrjqLPCrH6yspHzfrZ565nrp-xH7Jj6_XQaBZdR6QEe2umzXqJo52rrv6daJVSfrnOqPLBnVrpN08z8twykNAsFcfrS7LTgaOkX6cK7xqtgz5HTcVr17M4m8uuQ"></div><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-primary-fixed truncate tracking-tight">gUlEm</span><span class="text-[10px] font-label-sm uppercase px-1.5 py-0.5 rounded-full bg-secondary text-on-secondary shrink-0 tracking-wider">Trà &amp; Cà Phê</span></div><div class="flex items-center gap-1.5 text-primary-fixed-dim"><span class="w-1.5 h-1.5 rounded-full bg-secondary-container animate-pulse"></span><p class="font-label-sm text-label-sm truncate opacity-90">Mở cửa 7:00 – 22:00</p></div></div></div><div class="flex items-center gap-space-sm shrink-0"><a aria-label="Tham gia Nhóm Zalo gUlEm" class="min-h-[44px] px-3.5 rounded-full bg-tertiary text-on-tertiary font-label-sm text-label-sm flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,32,91,0.25)] active:scale-95 transition-transform" href="https://zaloapp.com/qr/g/keolmxd5mu8mxcfmvi99?src=qr" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[16px]">forum</span><span class="tracking-wide">Nhóm Zalo</span></a></div></div></header><main class="flex-1 flex flex-col relative w-full pt-20 pb-24 bg-surface max-w-xl mx-auto min-h-screen"><div class="flex flex-col w-full pb-20">
 <!-- BANNER ĐỒNG GIÁ 50K -->
-<section class="px-gutter pt-space-sm pb-space-xs">
-<div class="w-full bg-secondary-container text-on-secondary-container rounded-xl px-space-md py-space-sm shadow-sm flex items-center justify-between gap-space-sm relative overflow-hidden">
-<div class="flex items-center gap-space-xs min-w-0">
-<span class="material-symbols-outlined text-[20px] text-secondary shrink-0" style="font-variation-settings: 'FILL' 1;">stars</span>
-<div class="min-w-0">
-<p class="font-label-md text-label-md tracking-tight font-bold uppercase truncate">
-            Tất cả đồ uống ĐỒNG GIÁ 50.000đ
-          </p>
-<p class="font-body-sm text-[11px] opacity-90 truncate">Trải nghiệm dòng Trà ủ lạnh &amp; Cà phê thủ công thượng hạng</p>
-</div>
-</div>
-<span class="px-2.5 py-1 rounded-full bg-surface text-secondary font-label-sm text-label-sm font-bold shrink-0 shadow-sm">
-        50K
-      </span>
-</div>
-</section>
+<section class="px-gutter pt-space-sm pb-space-xs"><div class="gu-deal"><span class="gu-deal-ic material-symbols-outlined" style="font-variation-settings:'FILL' 1;">local_cafe</span><div class="gu-deal-txt"><p class="gu-deal-top">TẤT CẢ MENU · TRÀ &amp; CÀ PHÊ</p><p class="gu-deal-main">Đồng giá – thỏa sức chọn</p></div><div class="gu-deal-price"><span class="gu-deal-num">50<small>K</small></span><span class="gu-deal-cur">mỗi ly</span></div><span class="gu-deal-shine" aria-hidden="true"></span></div></section>
 <!-- HERO SECTION -->
 <section class="px-gutter py-space-xs">
 <div class="relative w-full rounded-2xl overflow-hidden shadow-md bg-surface-container">
