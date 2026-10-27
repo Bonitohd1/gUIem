@@ -3187,7 +3187,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     /* quantity stepper */
     function sync(){
       var steps=document.querySelectorAll('#screen-menu .gu-step');
-      for(var i=0;i<steps.length;i++){ var st=steps[i], plus=st.querySelector('.btn-add'); if(!plus)continue; var nm=plus.getAttribute('data-name'); var q=window.guGetQty?window.guGetQty(nm):0; var qs=st.querySelector('.gu-qty'); if(qs)qs.textContent=q; st.classList.toggle('expanded', q>0); }
+      for(var i=0;i<steps.length;i++){ var st=steps[i], plus=st.querySelector('.btn-add'); if(!plus)continue; var nm=plus.getAttribute('data-name'); var q=window.guGetQty?window.guGetQty(nm):0; var qs=st.querySelector('.gu-qty'); if(qs)qs.textContent=q; st.classList.toggle('expanded', q>0); var pic=plus.querySelector('.material-symbols-outlined'); if(pic)pic.textContent='add'; var tx=plus.querySelector('span:not(.material-symbols-outlined)'); if(tx)tx.textContent=''; }
     }
     function build(){
       var pluses=document.querySelectorAll('#screen-menu .btn-add');
