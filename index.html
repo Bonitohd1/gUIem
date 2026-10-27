@@ -309,18 +309,32 @@ button,[role="button"],a[data-path]{ touch-action:manipulation; }
 /* ===== desktop / PC interface ===== */
 .gu-pc-deco{ display:none; }
 @media (min-width:1024px){
-  body{ background:radial-gradient(circle at 20% 22%,rgba(255,176,202,.9),transparent 42%),radial-gradient(circle at 84% 76%,rgba(255,202,216,.85),transparent 44%),linear-gradient(140deg,#d4305f,#e9486a 48%,#ff9cbb) fixed; }
-  [id^="screen-"] > main{ box-shadow:0 44px 120px -34px rgba(80,6,32,.72); }
+  html body{ background:
+     radial-gradient(1100px 640px at 6% -8%, rgba(255,214,228,.65), transparent 60%),
+     radial-gradient(1000px 560px at 106% 108%, rgba(214,55,107,.42), transparent 55%),
+     linear-gradient(158deg,#fff4f7 0%, #ffe6ee 44%, #ffcfe0 100%) fixed !important; }
+  [id^="screen-"] > main{ box-shadow:0 50px 130px -42px rgba(120,8,36,.42), 0 0 0 1px rgba(233,72,106,.06); }
   header.fixed{ left:50% !important; transform:translateX(-50%); width:36rem !important; }
   nav.fixed{ left:50% !important; transform:translateX(-50%); width:36rem !important; border-radius:22px 22px 0 0; overflow:hidden; }
   .gu-bot-btn{ right:calc(50vw - 18rem - 66px) !important; }
   .gu-bot-panel{ right:calc(50vw - 18rem - 66px) !important; }
-  .gu-pc-deco{ display:block; position:fixed; z-index:0; pointer-events:none; top:50%; transform:translateY(-50%); width:calc(50vw - 19rem); text-align:center; padding:0 26px; }
-  .gu-pc-deco.l{ left:0; } .gu-pc-deco.r{ right:0; }
-  .gu-pc-mark{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(40px,4.6vw,78px); color:#fff; opacity:.95; text-shadow:0 8px 34px rgba(110,6,32,.45); letter-spacing:-.02em; line-height:1; }
-  .gu-pc-tag{ color:rgba(255,255,255,.9); font:600 15px/1.5 'Plus Jakarta Sans',sans-serif; margin-top:14px; }
-  .gu-pc-cup{ font-size:clamp(50px,6vw,96px); line-height:1; filter:drop-shadow(0 10px 24px rgba(110,6,32,.4)); animation:guCupFloat 3.4s ease-in-out infinite; }
-  .gu-pc-50{ margin-top:14px; display:inline-block; background:#fff; color:#e9486a; font:800 16px 'Plus Jakarta Sans',sans-serif; padding:8px 18px; border-radius:999px; box-shadow:0 12px 26px -8px rgba(110,6,32,.4); }
+  .gu-pc-deco{ display:flex; position:fixed; z-index:0; top:0; height:100vh; width:calc(50vw - 18.5rem); box-sizing:border-box; flex-direction:column; justify-content:center; padding:0 clamp(28px,3.4vw,60px); }
+  .gu-pc-deco.l{ left:0; align-items:flex-start; }
+  .gu-pc-deco.r{ right:0; align-items:center; text-align:center; }
+  .gu-pc-logo{ width:88px; height:88px; border-radius:50%; object-fit:contain; background:#fff; box-shadow:0 16px 36px -12px rgba(120,8,36,.4), 0 0 0 1px rgba(201,154,62,.35); }
+  .gu-pc-brand{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(46px,4.2vw,72px); color:#8a1e42; line-height:.95; letter-spacing:-.025em; margin-top:22px; }
+  .gu-pc-sub{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:clamp(18px,1.5vw,23px); color:#c2335a; margin-top:8px; }
+  .gu-pc-lead{ font:400 15px/1.65 'Plus Jakarta Sans',sans-serif; color:#9a5c6c; margin-top:18px; max-width:38ch; }
+  .gu-pc-feats{ margin-top:28px; display:flex; flex-direction:column; gap:15px; }
+  .gu-pc-feat{ display:flex; align-items:center; gap:13px; color:#78082a; font:600 14.5px 'Plus Jakarta Sans',sans-serif; }
+  .gu-pc-feat .gu-fi{ width:42px; height:42px; border-radius:13px; background:#fff; color:#e9486a; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px -10px rgba(194,51,90,.5); flex:0 0 auto; }
+  .gu-pc-feat .gu-fi .material-symbols-outlined{ font-size:22px; }
+  .gu-pc-qr{ background:#fff; border-radius:26px; padding:26px 26px 22px; box-shadow:0 34px 80px -28px rgba(120,8,36,.4); width:clamp(222px,19vw,266px); }
+  .gu-pc-qr .gu-qh{ font-family:'Fraunces',serif; font-weight:600; font-size:20px; color:#8a1e42; }
+  .gu-pc-qr .gu-qs{ font:400 12.5px/1.5 'Plus Jakarta Sans',sans-serif; color:#9a5c6c; margin:4px 0 16px; }
+  .gu-pc-qr img{ width:100%; border-radius:14px; display:block; box-shadow:0 0 0 1px #ffe0e9; }
+  .gu-pc-phone{ margin-top:20px; color:#78082a; font:700 21px 'Plus Jakarta Sans',sans-serif; }
+  .gu-pc-phone small{ display:block; font-weight:500; font-size:12px; color:#b06a7e; margin-bottom:3px; }
 }
 /* ===== end step/pc layer ===== */
 
@@ -3187,8 +3201,19 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     }, false);
 
     /* desktop brand deco */
-    var L=document.createElement('div'); L.className='gu-pc-deco l'; L.innerHTML='<div class="gu-pc-mark">gUlEm</div><div class="gu-pc-tag">Tiệm nhà chị em Thùy<br>Trà & Cà Phê thủ công</div>';
-    var R=document.createElement('div'); R.className='gu-pc-deco r'; R.innerHTML='<div class="gu-pc-cup">🧋</div><div class="gu-pc-tag">Tất cả đồ uống</div><div class="gu-pc-50">Đồng giá 50K / ly</div>';
+    var L=document.createElement('div'); L.className='gu-pc-deco l';
+    L.innerHTML='<img class="gu-pc-logo" src="/logo.png" alt="gUlEm">'
+      +'<div class="gu-pc-brand">gUlEm</div>'
+      +'<div class="gu-pc-sub">Tiệm nhà chị em Thùy</div>'
+      +'<div class="gu-pc-lead">Trà & cà phê pha thủ công, ấm nồng như ở nhà. Chọn món vài chạm, giao tận nơi trong khu vực.</div>'
+      +'<div class="gu-pc-feats">'
+      +'<div class="gu-pc-feat"><span class="gu-fi"><span class="material-symbols-outlined">local_offer</span></span>Đồng giá 50.000đ mỗi ly — cả menu</div>'
+      +'<div class="gu-pc-feat"><span class="gu-fi"><span class="material-symbols-outlined">two_wheeler</span></span>Giao tận nơi trong khu vực</div>'
+      +'<div class="gu-pc-feat"><span class="gu-fi"><span class="material-symbols-outlined">loyalty</span></span>Tích điểm cho khách quen</div>'
+      +'</div>';
+    var R=document.createElement('div'); R.className='gu-pc-deco r';
+    R.innerHTML='<div class="gu-pc-qr"><div class="gu-qh">Đặt bằng điện thoại</div><div class="gu-qs">Quét mã để vào nhóm Zalo & nhận ưu đãi mỗi tuần</div><img src="/zalo-qr.png" alt="QR Zalo gUlEm"></div>'
+      +'<div class="gu-pc-phone"><small>Gọi đặt món</small>0963 240 972</div>';
     document.body.appendChild(L); document.body.appendChild(R);
   });
 })();
