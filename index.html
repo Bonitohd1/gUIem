@@ -142,7 +142,7 @@ body{ letter-spacing:-.004em; }
 .gu-lb.on{ display:flex; }
 .gu-lb-card{ width:100%; max-width:360px; background:#fff7f9; border-radius:26px; overflow:hidden; box-shadow:0 30px 70px -20px rgba(180,40,90,.6); transform:scale(.9); opacity:0; transition:transform .4s var(--ease),opacity .3s; position:relative; }
 .gu-lb.on .gu-lb-card{ transform:none; opacity:1; }
-.gu-lb-img{ width:100%; height:300px; object-fit:cover; display:block; background:#ffe3ec; filter:saturate(1.1) brightness(1.03); }
+.gu-lb-img{ width:100%; height:300px; background-size:cover; background-position:center; background-repeat:no-repeat; background-color:#ffe3ec; display:block; }
 .gu-lb-body{ padding:16px 18px 18px; }
 .gu-lb-name{ font-family:'Fraunces',serif; font-weight:600; font-size:21px; color:#241019; letter-spacing:-.012em; line-height:1.15; }
 .gu-lb-price{ font:700 16px 'Plus Jakarta Sans',sans-serif; color:#e9486a; margin-top:5px; }
@@ -2775,7 +2775,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function ready(fn){ if(document.readyState!=='loading')fn(); else document.addEventListener('DOMContentLoaded',fn); }
   ready(function(){
     var lb=document.createElement('div'); lb.className='gu-lb';
-    lb.innerHTML='<div class="gu-lb-card"><button class="gu-lb-x" aria-label="Đóng"><span class="material-symbols-outlined" style="font-size:20px">close</span></button><img class="gu-lb-img" alt=""><div class="gu-lb-body"><div class="gu-lb-name"></div><div class="gu-lb-price"></div><button class="gu-lb-add"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:-4px;margin-right:6px">add_shopping_cart</span>Thêm vào giỏ</button></div></div>';
+    lb.innerHTML='<div class="gu-lb-card"><button class="gu-lb-x" aria-label="Đóng"><span class="material-symbols-outlined" style="font-size:20px">close</span></button><div class="gu-lb-img" role="img"></div><div class="gu-lb-body"><div class="gu-lb-name"></div><div class="gu-lb-price"></div><button class="gu-lb-add"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:-4px;margin-right:6px">add_shopping_cart</span>Thêm vào giỏ</button></div></div>';
     document.body.appendChild(lb);
     var imgEl=lb.querySelector('.gu-lb-img'), nameEl=lb.querySelector('.gu-lb-name'), priceEl=lb.querySelector('.gu-lb-price'), addBtn=lb.querySelector('.gu-lb-add');
     var curBtn=null;
@@ -2788,7 +2788,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       var src=img.getAttribute('src')||img.src||''; if(!src) return;
       var row=w, guard=0; while(row && !(row.querySelector && row.querySelector('.btn-add')) && guard<8){ row=row.parentElement; guard++; }
       var btn=(row && row.querySelector) ? row.querySelector('.btn-add') : null;
-      imgEl.src=src;
+      imgEl.style.backgroundImage="url(\""+src+"\")";
       nameEl.textContent = btn ? btn.getAttribute('data-name') : (img.getAttribute('alt')||'Món');
       var price = btn ? parseInt(btn.getAttribute('data-price'),10) : 50000;
       priceEl.textContent = ((price||50000).toLocaleString('vi-VN'))+'đ';
