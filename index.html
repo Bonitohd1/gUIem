@@ -3187,7 +3187,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     function hZalo(){ setTimeout(function(){ try{ window.open('https://zaloapp.com/qr/g/keolmxd5mu8mxcfmvi99?src=qr','_blank'); }catch(e){} }, 60); return {text:'Mình mở nhóm Zalo gUlEm để bạn nhận ưu đãi mỗi tuần nhé 💬'}; }
     function hDeal(){ return {text:'🎁 Tất cả đồ uống đồng giá 50.000đ/ly.\n⭐ Mỗi đơn được tích điểm (≈ 1 điểm mỗi 10.000đ) để đổi quà. Lần sau chỉ cần nhập SĐT là tự nhận ưu đãi!', action:{label:'Tài khoản của tôi', run:function(){ closeB(); if(window.guOpenAccount)window.guOpenAccount(); }}}; }
     function hZodiac(){ closeB(); setTimeout(function(){ if(window.__guZodiac)window.__guZodiac(); }, 180); return null; }
-    var QA=[{label:'☕ Hôm nay còn gì?',fn:hToday},{label:'🔥 Món bán chạy',fn:hHot},{label:'📅 Đặt trước ngày mai',fn:hPre},{label:'🧾 Đơn của tôi',fn:hOrders},{label:'🕗 Giờ mở cửa & địa chỉ',fn:hInfo},{label:'🎁 Ưu đãi & điểm',fn:hDeal},{label:'🔮 Gợi ý theo cung',fn:hZodiac},{label:'💬 Nhóm Zalo',fn:hZalo}];
+    function hCard(){ closeB(); setTimeout(function(){ if(window.guDrawCard)window.guDrawCard(); }, 180); return null; }
+    var QA=[{label:'☕ Hôm nay còn gì?',fn:hToday},{label:'🔥 Món bán chạy',fn:hHot},{label:'🎴 Rút lá bài hôm nay',fn:hCard},{label:'📅 Đặt trước ngày mai',fn:hPre},{label:'🧾 Đơn của tôi',fn:hOrders},{label:'🕗 Giờ mở cửa & địa chỉ',fn:hInfo},{label:'🎁 Ưu đãi & điểm',fn:hDeal},{label:'🔮 Gợi ý theo cung',fn:hZodiac},{label:'💬 Nhóm Zalo',fn:hZalo}];
     QA.forEach(function(q){ var c=document.createElement('button'); c.className='gu-chip'; c.textContent=q.label; c.addEventListener('click',function(){ bubble('user',esc(q.label)); typing(function(){ var r=q.fn(); if(r)botSay(r.text,r.action); }); }); chipbar.appendChild(c); });
     function greet(){ var h=new Date().getHours(); var g=h<11?'Chào buổi sáng':(h<13?'Chào buổi trưa':(h<18?'Chào buổi chiều':'Chào buổi tối')); return g+'! Mình là trợ lý gUlEm 🤎\nBạn cần giúp gì nào? Chạm một gợi ý bên dưới nhé.'; }
     abtn.addEventListener('click',function(){ apanel.classList.contains('on')?closeB():openB(); });
@@ -3241,6 +3242,21 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   /* Nguyên tố theo cung (chu kỳ Hỏa–Thổ–Phong–Thủy từ Bạch Dương) — dùng trang trí hào quang/mề đay */
   var ZELS=[{k:'Hỏa',c:'#ff7a59',soft:'#ffe1d4',ic:'🔥'},{k:'Thổ',c:'#51b488',soft:'#d7efe1',ic:'🌿'},{k:'Phong',c:'#7aa7ff',soft:'#dde7ff',ic:'🌬️'},{k:'Thủy',c:'#3fbfd4',soft:'#d2eef3',ic:'💧'}];
   function zel(i){ return ZELS[i%4]; }
+  /* Bộ "lá bài" bói vui — rút 1 lá mỗi ngày */
+  var CARDS=[
+   {ic:'☀️',name:'Lá Mặt Trời',msg:'Một niềm vui bất ngờ đang chờ bạn cuối ngày — cứ mỉm cười đón nhận.',dr:'Trà sữa xoài',cc:'#fff0cf'},
+   {ic:'🌙',name:'Lá Mặt Trăng',msg:'Lắng nghe trực giác — tối nay nó sẽ mách bạn một điều quan trọng.',dr:'Trà nhài kem sữa',cc:'#e7e0ff'},
+   {ic:'⭐',name:'Lá Ngôi Sao',msg:'Điều ước thầm kín của bạn đang đến gần hơn bạn nghĩ rất nhiều.',dr:'Cà phê muối',cc:'#fff0cf'},
+   {ic:'🍀',name:'Lá May Mắn',msg:'Vận may gõ cửa hôm nay — hãy mạnh dạn nắm lấy cơ hội nhé!',dr:'Americano chanh vàng',cc:'#d9f3df'},
+   {ic:'💌',name:'Lá Tình Thân',msg:'Có một người đang nghĩ về bạn nhiều hơn bạn tưởng đấy.',dr:'Trà nhài kem sữa',cc:'#ffe0ea'},
+   {ic:'🔑',name:'Lá Chìa Khoá',msg:'Một cánh cửa mới sắp mở ra — hãy sẵn sàng bước qua.',dr:'Cà phê sữa',cc:'#f3e4cf'},
+   {ic:'🌈',name:'Lá Cầu Vồng',msg:'Sau một chút chờ đợi, điều tươi sáng nhất sẽ đến với bạn.',dr:'Hoa quả ép theo mùa',cc:'#e3f0ff'},
+   {ic:'🦋',name:'Lá Hoá Bướm',msg:'Một thay đổi nhỏ hôm nay sẽ mở ra điều đẹp đẽ về sau.',dr:'Trà Earl Grey kem sữa',cc:'#e7e0ff'},
+   {ic:'🔥',name:'Lá Ngọn Lửa',msg:'Năng lượng của bạn đang bừng lên — làm ngay điều bạn yêu thích!',dr:'Americano chanh vàng',cc:'#ffe0d3'},
+   {ic:'🌸',name:'Lá Hoa Nở',msg:'Điều tốt lành đang âm thầm nảy nở quanh bạn mỗi ngày.',dr:'Trà nhài kem sữa',cc:'#ffe0ea'},
+   {ic:'💎',name:'Lá Viên Ngọc',msg:'Giá trị thật của bạn sắp được mọi người nhận ra.',dr:'Cà phê muối',cc:'#d9eef3'},
+   {ic:'🧭',name:'Lá La Bàn',msg:'Tin vào lựa chọn của mình — bạn đang đi đúng hướng rồi.',dr:'Cà phê sữa',cc:'#f3e4cf'}
+  ];
   function zhash(s){ var h=5381; for(var i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0; } return h; }
   function zday(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
   ready(function(){
@@ -3286,7 +3302,30 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       +'.zlove{text-align:center;margin-top:14px;font:600 12.5px \'Plus Jakarta Sans\',sans-serif;color:#c2335a;}'
       +'.zacts{display:flex;gap:10px;margin-top:16px;}.zacts button{flex:1;padding:13px;border-radius:14px;font:800 13px \'Plus Jakarta Sans\',sans-serif;cursor:pointer;}'
       +'.zacts .zshare{background:#e9486a;color:#fff;border:0;box-shadow:0 10px 22px -10px rgba(233,72,106,.7);}'
-      +'.zacts .zswap{background:#fff;color:#8a1e42;border:1.5px solid #ffd0de;}';
+      +'.zacts .zswap{background:#fff;color:#8a1e42;border:1.5px solid #ffd0de;}'
+      +'.zcardbtn{width:100%;margin-top:16px;padding:14px;border-radius:16px;border:0;background:linear-gradient(135deg,#8a1e42,#c2335a);color:#fff;font:800 14px \'Plus Jakarta Sans\',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 14px 30px -12px rgba(138,30,66,.7);}'
+      +'.gu-card{position:fixed;inset:0;z-index:100011;display:none;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff2f7,#ffdcec);overflow:hidden;padding:20px;}'
+      +'.gu-card::before{content:"";position:absolute;inset:0;background:radial-gradient(90% 50% at 50% 12%,rgba(255,190,220,.5),transparent 60%);pointer-events:none;}'
+      +'.gu-card.on{display:flex;animation:guZin .3s ease;}'
+      +'.gu-card .cx{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;width:38px;height:38px;border-radius:50%;background:#fff;color:#8a1e42;border:1px solid #ffd7e2;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;}'
+      +'.gu-card .cbody{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;}'
+      +'.gu-card .ch{font:800 21px \'Fraunces\',serif;color:#8a1e42;text-align:center;}'
+      +'.gu-card .cs{font:600 12.5px/1.5 \'Plus Jakarta Sans\',sans-serif;color:#b06a7e;text-align:center;margin-top:7px;max-width:290px;}'
+      +'.cdeck{display:flex;gap:13px;margin-top:28px;}'
+      +'.cback{width:94px;height:142px;border-radius:14px;background:linear-gradient(160deg,#8a1e42,#c2335a);border:2px solid #e7c48a;box-shadow:0 16px 34px -14px rgba(138,30,66,.7);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .25s;position:relative;}'
+      +'.cback:active,.cback.lift{transform:translateY(-10px) scale(1.02);}'
+      +'.cback .cmono{font:800 24px \'Fraunces\',serif;color:#e7c48a;}'
+      +'.cback::after{content:"✦";position:absolute;top:8px;left:10px;color:rgba(231,196,138,.85);font-size:12px;}'
+      +'.creveal{perspective:1000px;margin-top:8px;}'
+      +'.ccard{width:212px;min-height:292px;border-radius:20px;background:linear-gradient(165deg,#fff,var(--cc,#ffe3ee));border:2px solid #e7c48a;box-shadow:0 22px 50px -18px rgba(138,30,66,.6);padding:22px 18px;text-align:center;transform:rotateY(90deg);transition:transform .5s cubic-bezier(.22,1,.36,1);}'
+      +'.ccard.show{transform:rotateY(0);}'
+      +'.ccard .cem{font-size:56px;line-height:1;}.ccard .cnm{font:800 19px \'Fraunces\',serif;color:#78082a;margin-top:8px;}'
+      +'.ccard .cmsg{font:500 14px/1.55 \'Plus Jakarta Sans\',sans-serif;color:#4a2230;margin-top:12px;}'
+      +'.ccard .cdr{font:700 12px \'Plus Jakarta Sans\',sans-serif;color:#c2335a;margin-top:14px;background:#fff0f5;border:1px solid #ffd0de;border-radius:999px;padding:6px 12px;display:inline-block;}'
+      +'.cacts{display:flex;gap:10px;margin-top:22px;}.cacts button{padding:12px 16px;border-radius:13px;font:800 13px \'Plus Jakarta Sans\',sans-serif;cursor:pointer;}'
+      +'.cacts .cshare{background:#e9486a;color:#fff;border:0;box-shadow:0 10px 22px -10px rgba(233,72,106,.7);}'
+      +'.cacts .corder{background:#fff;color:#8a1e42;border:1.5px solid #ffd0de;}'
+      +'.cnote{font:600 12px \'Plus Jakarta Sans\',sans-serif;color:#b06a7e;margin-top:18px;text-align:center;}';
     var zst=document.createElement('style'); zst.textContent=ZCSS; document.head.appendChild(zst);
 
     var ov=document.createElement('div'); ov.className='gu-zsky';
@@ -3317,11 +3356,13 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
         +'<div class="zstat"><div class="v">'+mood.e+'</div><div class="k">'+mood.w+'</div></div></div>'
         +'<div class="zdrink"><span class="zdemo">🥤</span><div class="zdt"><small>Đồ uống hợp cung hôm nay</small><b>'+z.dr+'</b></div><button class="zorder">Đặt ngay</button></div>'
         +'<div class="zlove">💞 Hôm nay bạn hợp nhất với <b>'+love.e+' '+love.n+'</b></div>'
+        +'<button class="zcardbtn">🎴 Rút lá bài hôm nay — xem vũ trụ nhắn gì</button>'
         +'<div class="zacts"><button class="zswap">↺ Đổi cung</button><button class="zshare">Chia sẻ ✦</button></div>';
+      body.querySelector('.zcardbtn').addEventListener('click',function(){ if(window.guDrawCard)window.guDrawCard(); });
       body.querySelector('.zswap').addEventListener('click',function(){ picker(); body.scrollTop=0; });
       body.querySelector('.zorder').addEventListener('click',function(){ orderDrink(z.dr); });
       body.querySelector('.zshare').addEventListener('click',function(){
-        var txt='🔮 '+z.e+' '+z.n+' — vận ngày '+ds+': '+daily+'\nSố may mắn '+num+' · đồ uống hợp cung: '+z.dr+' ☕\n— Bói vui cùng gUlEm';
+        var txt='🔮 Vũ trụ vừa nhắn cho '+z.e+' '+z.n+' một điều hôm nay… và nó đúng đến lạ 👀\nBạn thử xem cung mình nói gì nhé — bói vui + đồ uống hợp mệnh tại gUlEm 🥤\n→ '+location.origin;
         if(navigator.share){ navigator.share({title:'Cung hoàng đạo gUlEm',text:txt}).catch(function(){}); }
         else if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ miniToast('✓ Đã sao chép — dán chia sẻ nhé!'); },function(){ miniToast('Hãy chụp màn hình để chia sẻ nhé'); }); }
         else miniToast('Hãy chụp màn hình để chia sẻ nhé');
@@ -3330,6 +3371,38 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     function orderDrink(name){ close(); if(window.__go)window.__go('screen-menu'); setTimeout(function(){ var b=null; document.querySelectorAll('#screen-menu .btn-add[data-name]').forEach(function(x){ if(x.getAttribute('data-name')===name)b=x; }); var card=b&&b.closest('.rounded-2xl'); if(card){ card.scrollIntoView({behavior:'smooth',block:'center'}); card.style.transition='box-shadow .4s'; card.style.boxShadow='0 0 0 3px #e9486a'; setTimeout(function(){ card.style.boxShadow=''; },1700); } else { var el=document.getElementById('cat-tea'); if(el)el.scrollIntoView({behavior:'smooth'}); } },300); }
     function miniToast(m){ var t=document.createElement('div'); t.textContent=m; t.style.cssText='position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:100012;background:#e9486a;color:#fff;font:600 13px "Plus Jakarta Sans",sans-serif;padding:10px 18px;border-radius:999px;box-shadow:0 10px 24px rgba(180,40,90,.4);max-width:86vw;text-align:center'; document.body.appendChild(t); setTimeout(function(){ if(t.parentNode)t.parentNode.removeChild(t); },2200); }
     function open(){ var saved=null; try{saved=localStorage.getItem('gu_zodiac');}catch(e){} if(saved!==null && Z[+saved]) result(+saved); else picker(); ov.classList.add('on'); body.scrollTop=0; }
+
+    /* ===== Rút lá bài hôm nay (bói vui + chia sẻ gây tò mò) ===== */
+    var cov=null;
+    function buildCardOv(){ if(cov)return cov; cov=document.createElement('div'); cov.className='gu-card';
+      cov.innerHTML='<button class="cx" aria-label="Đóng"><span class="material-symbols-outlined">close</span></button><div class="cbody"></div>';
+      document.body.appendChild(cov);
+      for(var i=0;i<18;i++){ var sp=document.createElement('span'); sp.className='zstar'; var sz=1+Math.random()*2; sp.style.width=sz+'px'; sp.style.height=sz+'px'; sp.style.left=(Math.random()*100)+'%'; sp.style.top=(Math.random()*62)+'%'; sp.style.animationDelay=(Math.random()*3)+'s'; cov.appendChild(sp); }
+      cov.querySelector('.cx').addEventListener('click',function(){ cov.classList.remove('on'); });
+      return cov;
+    }
+    function savedCard(){ try{ var s=JSON.parse(localStorage.getItem('gu_card')||'null'); if(s&&s.d===zday()&&CARDS[s.idx])return s.idx; }catch(e){} return -1; }
+    function shareCard(c){ var txt='🎴 Mình vừa bốc được “'+c.name+'” ở gUlEm… và điều nó nói khiến mình bất ngờ 👀\nBạn có dám rút lá của riêng mình hôm nay không? 🔮\n→ '+location.origin;
+      if(navigator.share){ navigator.share({title:'Lá bài hôm nay · gUlEm',text:txt}).catch(function(){}); }
+      else if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ miniToast('✓ Đã sao chép — dán khoe bạn bè nhé!'); },function(){ miniToast('Chụp màn hình để chia sẻ nhé'); }); }
+      else miniToast('Chụp màn hình để chia sẻ nhé'); }
+    function revealCard(idx,isNew){ var box=cov.querySelector('.cbody'); var c=CARDS[idx];
+      box.innerHTML='<div class="ch">Lá bài hôm nay của bạn</div><div class="creveal"><div class="ccard" style="--cc:'+c.cc+'"><div class="cem">'+c.ic+'</div><div class="cnm">'+c.name+'</div><div class="cmsg">'+c.msg+'</div><div class="cdr">☕ Hợp vị hôm nay: '+c.dr+'</div></div></div><div class="cacts"><button class="corder">Đặt đồ uống</button><button class="cshare">Chia sẻ ✦</button></div><div class="cnote">Mỗi ngày một lá — mai quay lại rút tiếp nhé 🌙</div>';
+      setTimeout(function(){ var cc=box.querySelector('.ccard'); if(cc)cc.classList.add('show'); if(isNew){ try{ if(window.GU_SFX&&window.GU_SFX.celebrate)window.GU_SFX.celebrate(); if(navigator.vibrate)navigator.vibrate([10,40,16]); }catch(e){} } }, 70);
+      box.querySelector('.corder').addEventListener('click',function(){ cov.classList.remove('on'); orderDrink(c.dr); });
+      box.querySelector('.cshare').addEventListener('click',function(){ shareCard(c); });
+    }
+    function pickState(){ var box=cov.querySelector('.cbody');
+      box.innerHTML='<div class="ch">Rút một lá cho hôm nay ✨</div><div class="cs">Hít một hơi thật nhẹ… rồi chạm vào lá bạn thấy có duyên nhất 🔮</div><div class="cdeck"></div>';
+      var deck=box.querySelector('.cdeck');
+      [0,1,2].forEach(function(p){ var b=document.createElement('div'); b.className='cback'; b.innerHTML='<span class="cmono">gU</span>';
+        b.addEventListener('mouseenter',function(){ b.classList.add('lift'); }); b.addEventListener('mouseleave',function(){ b.classList.remove('lift'); });
+        b.addEventListener('click',function(){ var idx=zhash(zday()+'card'+p)%CARDS.length; try{localStorage.setItem('gu_card',JSON.stringify({d:zday(),idx:idx}));}catch(e){} try{ if(window.GU_SFX&&window.GU_SFX.ting)window.GU_SFX.ting(); }catch(e){} revealCard(idx,true); });
+        deck.appendChild(b);
+      });
+    }
+    function openCard(){ buildCardOv(); var s=savedCard(); if(s>=0)revealCard(s,false); else pickState(); cov.classList.add('on'); }
+    window.guDrawCard=openCard;
 
     /* trợ lý concierge gọi qua window.__guZodiac (chip "Gợi ý theo cung") */
     window.__guZodiac=open;
