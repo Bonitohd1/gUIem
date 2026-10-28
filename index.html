@@ -9,6 +9,27 @@
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="icon" type="image/png" href="/icon-192.png">
 <script>if('serviceWorker'in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
+<script>
+/* gUlEm · GUX: gửi/đọc qua CÙNG TÊN MIỀN (/api/ntfy) để tránh mạng chặn ntfy.sh; dự phòng gọi thẳng ntfy */
+window.GUX=(function(){
+  var TOPIC='';
+  try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy)TOPIC=c.ntfy; }).catch(function(){}); }catch(e){}
+  function suf(k){ return k==='status'?'-st':(k==='menu'?'-menu':''); }
+  function pub(kind,obj){
+    var body=JSON.stringify(obj);
+    return fetch('/api/ntfy?topic='+kind,{method:'POST',headers:{'Content-Type':'application/json'},body:body})
+      .then(function(r){ if(r.ok)return true; throw 0; })
+      .catch(function(){ if(!TOPIC)return false; return fetch('https://ntfy.sh/'+TOPIC+suf(kind),{method:'POST',body:body,headers:{'Title':'gUlEm','Tags':'bell','Priority':'high'}}).then(function(r){return !!r.ok;}).catch(function(){return false;}); });
+  }
+  function poll(kind,since){
+    since=since||'24h';
+    return fetch('/api/ntfy?topic='+kind+'&since='+since,{cache:'no-store'})
+      .then(function(r){ if(r.ok)return r.text(); throw 0; })
+      .catch(function(){ if(!TOPIC)return ''; return fetch('https://ntfy.sh/'+TOPIC+suf(kind)+'/json?poll=1&since='+since,{cache:'no-store'}).then(function(r){return r.text();}).catch(function(){return '';}); });
+  }
+  return { pub:pub, poll:poll };
+})();
+</script>
 <meta name="apple-mobile-web-app-title" content="gUlEm">
 <meta name="application-name" content="gUlEm">
 <meta name="theme-color" content="#e9486a">
@@ -2658,15 +2679,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   // gUlEm: nạp URL webhook + kênh đơn từ /cfg.json lúc tải trang (đổi URL không cần build lại app)
   try{ fetch("/cfg.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(c){ if(c){ if(c.webhook)WEBHOOK=c.webhook; if(c.ntfy)ORD_TOPIC=c.ntfy; } }).catch(function(){}); }catch(e){}
   // phát đơn thẳng lên kênh admin (ntfy) — không phụ thuộc webhook/tunnel; kèm trừ tồn kho theo ngày
-  function pubSend(topic,p){ if(!topic)return Promise.resolve(false);
-    var main=fetch('https://ntfy.sh/'+topic,{method:'POST',body:JSON.stringify(p),headers:{'Title':'Don moi gUlEm','Tags':'bell','Priority':'high'}}).then(function(r){return !!r.ok;}).catch(function(){return false;});
-    if(p&&p.recvDate){ var si={}; (p.items||[]).forEach(function(it){ si[it.name]=(si[it.name]||0)+(it.qty||0); }); fetch('https://ntfy.sh/'+topic+'-menu',{method:'POST',body:JSON.stringify({t:'sold',date:p.recvDate,items:si,ts:Date.now()})}).catch(function(){}); }
-    return main;
-  }
-  function pubAdmin(p){ if(ORD_TOPIC) return pubSend(ORD_TOPIC,p);
-    // phòng trường hợp cfg chưa kịp nạp: lấy kênh rồi phát ngay, không để rớt đơn
-    return fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy){ ORD_TOPIC=c.ntfy; return pubSend(c.ntfy,p); } return false; }).catch(function(){return false;});
-  }
+  // gửi đơn về admin qua cùng tên miền (/api/ntfy), dự phòng gọi thẳng ntfy — trả Promise<ok>
+  function pubAdmin(p){ return (window.GUX?window.GUX.pub('orders',p):Promise.resolve(false)); }
   var SHOP="gUlEm - Tiệm nhà chị em Thùy";
 
   var cart=[]; // {name, price, qty, opts}
@@ -3622,7 +3636,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function setStatus(code,k,publish){
     if(!code) return;
     statusMap[code]=k; try{ localStorage.setItem('gu_ostatus',JSON.stringify(statusMap)); }catch(e){}
-    if(publish!==false && CFG.ntfy){ fetch('https://ntfy.sh/'+CFG.ntfy+'-st',{method:'POST',body:JSON.stringify({code:code,status:k}),headers:{'Tags':'gear'}}).catch(function(){}); }
+    if(publish!==false && window.GUX){ window.GUX.pub('status',{code:code,status:k}); }
     refresh();
   }
 
@@ -3738,19 +3752,28 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     }
   }
   function loadHistory(){
-    if(!CFG.ntfy){ $('ga-status').textContent='Chưa cấu hình kênh đơn (cfg.ntfy)'; render([]); return; }
-    fetch('https://ntfy.sh/'+CFG.ntfy+'/json?poll=1&since=24h',{cache:'no-store'})
-      .then(function(r){ return r.text(); })
+    (window.GUX?window.GUX.poll('orders','24h'):Promise.resolve(''))
       .then(function(txt){
         (txt.split('\n').filter(Boolean)).forEach(function(ln){
           try{ var m=JSON.parse(ln); if(m.event==='message' && m.message){ ingest(JSON.parse(m.message), m.id, false); } }catch(e){}
         });
         ORDERS.forEach(function(o){ var t=tparse(o.at); if(t>seenMax)seenMax=t; });
         try{ localStorage.setItem('gu_admin_seen',String(seenMax)); }catch(e){}
-        $('ga-status').textContent=(es?'🟢 Đang nhận trực tiếp · ':'Đã kết nối · ')+hhmm(Date.now());
+        $('ga-status').textContent='🟢 Đang nhận đơn · '+hhmm(Date.now());
         refresh();
       })
-      .catch(function(){ $('ga-status').textContent='Không tải được lịch sử đơn'; });
+      .catch(function(){ $('ga-status').textContent='Đang kết nối lại…'; });
+  }
+  var stSeen=Object.create(null);
+  function loadStatus(){
+    (window.GUX?window.GUX.poll('status','24h'):Promise.resolve(''))
+      .then(function(txt){
+        (txt.split('\n').filter(Boolean)).forEach(function(ln){
+          try{ var m=JSON.parse(ln); if(m.event==='message' && m.message){ if(m.id&&stSeen[m.id])return; if(m.id)stSeen[m.id]=1;
+            var d=JSON.parse(m.message); if(d.code&&d.status){ var prev=getStatus(d.code); if(prev!==d.status){ setStatus(d.code,d.status,false); if(d.status==='received'&&prev!=='received'){ chime(); toast('✅ Khách đã nhận đơn '+d.code+' — hoàn tất'); } } }
+          } }catch(e){}
+        });
+      }).catch(function(){});
   }
   function subscribe(){
     if(!CFG.ntfy || es) return;
@@ -3775,9 +3798,9 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     $('gu-admin').classList.add('on');
     try{ if('Notification'in window && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
     ORDERS=[]; seenIds=Object.create(null);
-    loadHistory();
+    loadHistory(); loadStatus();
     subscribe();
-    clearInterval(pollTimer); pollTimer=setInterval(loadHistory, 30000);
+    clearInterval(pollTimer); pollTimer=setInterval(function(){ loadHistory(); loadStatus(); }, 8000);
     tickClock(); clearInterval(clockTimer); clockTimer=setInterval(tickClock, 20000);
     clearInterval(elapTimer); elapTimer=setInterval(function(){ if($('gu-admin').classList.contains('on')) refresh(); }, 60000);
   }
@@ -3892,15 +3915,17 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function confirmReceived(){
     if(!myCode) { try{ myCode=window.__GU_ORDER_CODE||sessionStorage.getItem('gu_order_code')||''; }catch(e){} }
     apply('received');
-    if(TOPIC && myCode){ fetch('https://ntfy.sh/'+TOPIC+'-st',{method:'POST',body:JSON.stringify({code:myCode,status:'received'}),headers:{'Tags':'tada'}}).catch(function(){}); }
+    if(myCode && window.GUX){ window.GUX.pub('status',{code:myCode,status:'received'}); }
     try{ if(window.GU_SFX&&window.GU_SFX.celebrate)window.GU_SFX.celebrate(); else if(window.GU_SFX&&window.GU_SFX.success)window.GU_SFX.success(); if(navigator.vibrate)navigator.vibrate([12,40,18]); }catch(_){ }
   }
+  var stPoll=null, lastSt='';
   function subscribe(){
-    if(!TOPIC || es) return;
-    try{
-      es=new EventSource('https://ntfy.sh/'+TOPIC+'-st/sse');
-      es.onmessage=function(ev){ try{ var mm=JSON.parse(ev.data); if(mm.event==='message' && mm.message){ var d=JSON.parse(mm.message); if(d.code && d.code===myCode && d.status!=='received'){ apply(d.status); try{ if(window.GU_SFX&&window.GU_SFX.pop)window.GU_SFX.pop(); if(navigator.vibrate)navigator.vibrate(12); }catch(_){ } } } }catch(e){} };
-    }catch(e){}
+    // đọc trạng thái qua cùng tên miền (proxy) để không bị mạng chặn
+    if(stPoll) return;
+    function tick(){ if(!myCode||!window.GUX)return; window.GUX.poll('status','24h').then(function(txt){
+      (txt.split('\n').filter(Boolean)).forEach(function(ln){ try{ var m=JSON.parse(ln); if(m.event==='message'&&m.message){ var d=JSON.parse(m.message); if(d.code===myCode && d.status && d.status!=='received' && d.status!==lastSt){ lastSt=d.status; apply(d.status); try{ if(window.GU_SFX&&window.GU_SFX.pop)window.GU_SFX.pop(); if(navigator.vibrate)navigator.vibrate(12); }catch(_){ } } } }catch(e){} });
+    }).catch(function(){}); }
+    tick(); stPoll=setInterval(tick, 7000);
   }
   document.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('#gu-st-receive'); if(b){ e.preventDefault(); confirmReceived(); } });
   var _go=window.__go;
@@ -3994,7 +4019,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 /* gUlEm · thực đơn theo ngày + đặt trước (ntfy -menu) */
 (function(){
   var TOPIC='', booted=false;
-  try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy){ TOPIC=c.ntfy; if(document.readyState!=='loading')boot(); else document.addEventListener('DOMContentLoaded',boot); } }).catch(function(){}); }catch(e){}
+  try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy)TOPIC=c.ntfy; }).catch(function(){}); }catch(e){}
+  if(document.readyState!=='loading')boot(); else document.addEventListener('DOMContentLoaded',boot);
 
   function ds(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
   function today(){ return ds(new Date()); }
@@ -4076,13 +4102,13 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     if(d.t==='plan') plans[d.date]=d;
     else if(d.t==='sold'){ sold[d.date]=sold[d.date]||{}; var it=d.items||{}; for(var k in it) sold[d.date][k]=(sold[d.date][k]||0)+(it[k]||0); }
   }catch(e){} }
-  function load(){ if(!TOPIC)return;
-    fetch('https://ntfy.sh/'+TOPIC+'-menu/json?poll=1&since=48h',{cache:'no-store'}).then(function(r){return r.text();}).then(function(tx){
+  function load(){
+    (window.GUX?window.GUX.poll('menu','48h'):Promise.resolve('')).then(function(tx){
       plans={}; sold={}; tx.split('\n').filter(Boolean).forEach(function(ln){ try{ var m=JSON.parse(ln); if(m.event==='message'&&m.message)ingest(m.message); }catch(e){} });
       updateNote(); apply();
     }).catch(function(){});
   }
-  function sub(){ if(es||!TOPIC)return; try{ es=new EventSource('https://ntfy.sh/'+TOPIC+'-menu/sse'); es.onmessage=function(ev){ try{ var m=JSON.parse(ev.data); if(m.event==='message'&&m.message){ ingest(m.message); updateNote(); apply(); } }catch(e){} }; }catch(e){} }
+  function sub(){ /* thay SSE bằng poll định kỳ qua proxy (mạng không chặn) */ }
 
   var prevOR=window.guOnRender; window.guOnRender=function(){ try{ if(prevOR)prevOR(); }catch(e){} apply(); };
   // hook bền: re-apply sau mọi click (giỏ đổi số lượng) để badge "Còn X" cập nhật
@@ -4124,13 +4150,13 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     });
   }
   function collectPlan(){ var items={}; Array.prototype.forEach.call(document.querySelectorAll('#gu-menued .me-row'),function(row){ var nm=row.getAttribute('data-name'); var on=row.querySelector('[data-tog]').classList.contains('on'); var q=parseInt(row.querySelector('[data-q]').value,10)||0; if(on&&q>0) items[nm]={on:1,qty:q}; }); return items; }
-  function publishPlan(date,items,note){ if(!TOPIC)return; fetch('https://ntfy.sh/'+TOPIC+'-menu',{method:'POST',body:JSON.stringify({t:'plan',date:date,items:items,note:note||'',ts:Date.now()}),headers:{'Tags':'calendar'}}).then(function(){ setTimeout(load,600); }).catch(function(){}); }
+  function publishPlan(date,items,note){ if(window.GUX){ window.GUX.pub('menu',{t:'plan',date:date,items:items,note:note||'',ts:Date.now()}).then(function(){ setTimeout(load,800); }); } }
   function saveEditor(){ var items=collectPlan(); publishPlan(EDATE,items); plans[EDATE]={t:'plan',date:EDATE,items:items,note:''}; apply(); updateNote();
     var b=document.getElementById('me-save'); b.textContent='✓ Đã lưu'; setTimeout(function(){ b.textContent='Lưu & công khai'; document.getElementById('gu-menued').classList.remove('on'); },700); }
   function clearEditor(){ publishPlan(EDATE,{}); plans[EDATE]={t:'plan',date:EDATE,items:{},note:''}; renderEditor(); apply(); }
   function openEditor(){ buildEditor(); EDATE=today(); renderEditor(); document.getElementById('gu-menued').classList.add('on'); }
   window.guMenuEditor=openEditor;
 
-  function boot(){ if(booted)return; booted=true; injectBar(0); load(); sub(); setInterval(load,45000); }
+  function boot(){ if(booted)return; booted=true; injectBar(0); load(); setInterval(load,15000); }
 })();
 </script>
