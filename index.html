@@ -2779,6 +2779,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       arr.unshift({code:p.code,at:p.at,itemsText:(p.items||[]).map(function(i){return i.name+(i.opts?'('+i.opts+')':'')+' x'+i.qty;}).join(', '),items:(p.items||[]).map(function(i){return {name:i.name,price:i.price,qty:i.qty,opts:i.opts||''};}),total:p.total,count:p.count,recvDate:p.recvDate||'',recvLabel:p.recvLabel||'',phone:(p.customer&&p.customer.phone)||'',payment:p.payment||''});
       arr=arr.slice(0,40); localStorage.setItem(hk,JSON.stringify(arr));
       if(window.guRenderHistory)window.guRenderHistory();
+      // tạo/đăng nhập tài khoản SĐT tự động từ thông tin đơn
+      var cu=p.customer||{}; if(cu.name && cu.phone && window.guSetAccount) window.guSetAccount(cu.name, cu.phone);
     }catch(e){}
     renderConfirm();
     try{ var ce=document.getElementById('gu-order-code'); if(ce){ ce.textContent='Mã đơn: '+p.code+' · đang gửi…'; ce.classList.remove('hidden'); } }catch(e){}
@@ -2941,6 +2943,10 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     }
     injectButtons();
     prefill();
+    // cho phép tạo/đăng nhập tài khoản tự động khi đặt đơn + mở modal từ nơi khác
+    window.guSetAccount=function(name,phone){ if(!name||!phone)return; var a=get()||{}; a.name=name; a.phone=phone; put(a); syncBtns(); };
+    window.guGetAccount=get;
+    window.guOpenAccount=open;
     // re-run prefill when navigating to cart/confirm (fields may render later)
     document.addEventListener('click',function(){ setTimeout(prefill,120); }, true);
   });
@@ -4246,5 +4252,58 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   var _go=window.__go; if(typeof _go==='function'){ window.__go=function(x){ var r=_go.apply(this,arguments); if(x==='screen-history'){ render(); pollStatus(); } return r; }; }
   setInterval(function(){ var s=document.getElementById('screen-history'); if(s && (s.classList.contains('active')||s.style.display==='block')) pollStatus(); }, 10000);
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',render); else render();
+})();
+</script>
+
+<style>
+/* gUlEm · thẻ xác nhận tài khoản trên màn theo dõi đơn */
+#gu-acctcard .gu-acctc{ display:flex; align-items:center; gap:12px; background:linear-gradient(135deg,#ffffff,#fff2f6); border:1px solid #ffd7e2; border-radius:18px; padding:14px 15px; box-shadow:0 12px 30px -18px rgba(180,40,90,.45); }
+#gu-acctcard .gu-acctc.new{ border-color:#ffce5e; background:linear-gradient(135deg,#fffdf4,#fff2f6); }
+#gu-acctcard .gu-acctc-ic{ width:44px;height:44px;border-radius:14px;flex:0 0 auto;background:rgba(233,72,106,.12);color:#e9486a;display:flex;align-items:center;justify-content:center; }
+#gu-acctcard .gu-acctc.new .gu-acctc-ic{ background:rgba(240,165,0,.18); color:#d9930a; }
+#gu-acctcard .gu-acctc-ic .material-symbols-outlined{ font-size:24px; }
+#gu-acctcard .gu-acctc-tx{ flex:1; min-width:0; }
+#gu-acctcard .gu-acctc-h{ font:800 14.5px 'Plus Jakarta Sans',sans-serif; color:#78082a; line-height:1.3; }
+#gu-acctcard .gu-acctc-s{ font:500 12px/1.4 'Plus Jakarta Sans',sans-serif; color:#9a5c6c; margin-top:3px; }
+#gu-acctcard .gu-acctc-pts{ flex:0 0 auto; text-align:center; background:rgba(233,72,106,.1); border-radius:12px; padding:7px 12px; }
+#gu-acctcard .gu-acctc-pts b{ display:block; color:#e9486a; font:800 18px 'Plus Jakarta Sans',sans-serif; line-height:1; }
+#gu-acctcard .gu-acctc-pts span{ font-size:9px; color:#b06a7e; text-transform:uppercase; letter-spacing:.04em; }
+</style>
+<script>
+/* gUlEm · xác nhận tài khoản SĐT ngay sau khi đặt đơn */
+(function(){
+  function members(){ try{return JSON.parse(localStorage.getItem('gu_members')||'{}');}catch(e){return {};} }
+  function acct(){ try{return JSON.parse(localStorage.getItem('gu_account')||'null');}catch(e){return null;} }
+  function norm(p){ return (p||'').replace(/[^0-9]/g,''); }
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function build(){
+    var cf=document.getElementById('screen-confirm'); if(!cf)return null;
+    var c=document.getElementById('gu-acctcard'); if(c)return c;
+    var oc=document.getElementById('gu-order-code'); var hero=oc?oc.closest('.px-margin'):null;
+    if(!hero){ var m=cf.querySelector('main > div'); hero=m?m.firstElementChild:null; }
+    if(!hero||!hero.parentNode)return null;
+    c=document.createElement('div'); c.id='gu-acctcard'; c.className='px-margin mt-4';
+    hero.parentNode.insertBefore(c, hero.nextSibling);
+    return c;
+  }
+  function render(){
+    var c=build(); if(!c)return;
+    var a=acct(); var ph=norm(a&&a.phone); var mem=members()[ph]||null;
+    var name=(a&&a.name)||(mem&&mem.name)||'bạn';
+    var pts=(mem&&mem.points)||0, orders=(mem&&mem.orders)||0;
+    var isNew=orders<=1;
+    c.innerHTML='<div class="gu-acctc'+(isNew?' new':'')+'">'
+      +'<div class="gu-acctc-ic"><span class="material-symbols-outlined">'+(isNew?'celebration':'loyalty')+'</span></div>'
+      +'<div class="gu-acctc-tx">'
+      +'<div class="gu-acctc-h">'+(isNew?'Tài khoản gUlEm đã sẵn sàng 🎉':('Chào mừng '+esc(name)+' quay lại 🤎'))+'</div>'
+      +'<div class="gu-acctc-s">'+(isNew
+          ?('SĐT '+esc((a&&a.phone)||'')+' đã là tài khoản của bạn — lần sau chỉ cần nhập SĐT là tự điền thông tin.')
+          :(esc(orders)+' đơn đã đặt · khách quen gUlEm, cảm ơn bạn!'))+'</div>'
+      +'</div>'
+      +'<div class="gu-acctc-pts"><b>'+esc(pts)+'</b><span>điểm</span></div>'
+      +'</div>';
+  }
+  var _go=window.__go;
+  if(typeof _go==='function'){ window.__go=function(x){ var r=_go.apply(this,arguments); if(x==='screen-confirm'){ setTimeout(render,80); } return r; }; }
 })();
 </script>
