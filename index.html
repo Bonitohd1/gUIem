@@ -2769,29 +2769,42 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     var tt=document.querySelectorAll('.confirm-total'); for(var i=0;i<tt.length;i++) tt[i].textContent=money(c.t);
   }
 
+  function saveHistory(p){ try{ var hk='gu_orders'; var arr=JSON.parse(localStorage.getItem(hk)||'[]');
+    if(arr.some(function(o){return o.code===p.code;})) { if(window.guRenderHistory)window.guRenderHistory(); return; }
+    arr.unshift({code:p.code,at:p.at,itemsText:(p.items||[]).map(function(i){return i.name+(i.opts?'('+i.opts+')':'')+' x'+i.qty;}).join(', '),items:(p.items||[]).map(function(i){return {name:i.name,price:i.price,qty:i.qty,opts:i.opts||''};}),total:p.total,count:p.count,recvDate:p.recvDate||'',recvLabel:p.recvLabel||'',phone:(p.customer&&p.customer.phone)||'',payment:p.payment||''});
+    arr=arr.slice(0,40); localStorage.setItem(hk,JSON.stringify(arr)); if(window.guRenderHistory)window.guRenderHistory();
+  }catch(e){} }
+  function onSent(p){
+    try{ saveHistory(p); }catch(e){}
+    try{ var cu=p.customer||{}; if(cu.name && cu.phone && window.guSetAccount) window.guSetAccount(cu.name, cu.phone); }catch(e){}
+    try{ if(window.guAwardPoints) window.guAwardPoints(p); }catch(e){}
+    try{ if(window.GU_SFX&&window.GU_SFX.celebrate) window.GU_SFX.celebrate(); }catch(e){}
+    if(window.guConfirmState) window.guConfirmState('sent', p.code);
+    if(WEBHOOK){ try{ fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}).catch(function(){}); }catch(e){} }
+  }
+  function sendOrder(p){
+    if(window.guConfirmState) window.guConfirmState('sending', p.code);
+    return pubAdmin(p).then(function(ok){
+      var b2=document.getElementById('place-order'); if(b2){ b2.__sending=false; b2.disabled=false; if(b2.dataset.old){ b2.innerHTML=b2.dataset.old; } }
+      if(ok){ onSent(p); cart=[]; render(); }
+      else { if(window.guConfirmState) window.guConfirmState('failed', p.code); }
+      return ok;
+    });
+  }
   function placeOrder(){
     var c=totals(); if(c.n===0){toast('Bạn chưa chọn món nào');return;}
+    var btn=document.getElementById('place-order'); if(btn && btn.__sending) return; // chống bấm 2 lần
     var p=payload();
-    if(!p.code) p.code='GU'+String(Date.now()).slice(-6);
+    if(!p.code) p.code='GU'+Date.now().toString(36).toUpperCase().slice(-5)+Math.random().toString(36).slice(2,4).toUpperCase(); // mã đơn duy nhất
     var rv=window.__GU_RECV||{}; p.recvDate=rv.date||''; p.recvLabel=rv.label||'Hôm nay';
-    window.__GU_ORDER_CODE=p.code; try{sessionStorage.setItem('gu_order_code',p.code);}catch(e){}
-    // lưu đơn vào lịch sử trên máy khách (để màn "Đơn hàng" hiển thị)
-    try{ var hk='gu_orders'; var arr=JSON.parse(localStorage.getItem(hk)||'[]');
-      arr.unshift({code:p.code,at:p.at,itemsText:(p.items||[]).map(function(i){return i.name+(i.opts?'('+i.opts+')':'')+' x'+i.qty;}).join(', '),items:(p.items||[]).map(function(i){return {name:i.name,price:i.price,qty:i.qty,opts:i.opts||''};}),total:p.total,count:p.count,recvDate:p.recvDate||'',recvLabel:p.recvLabel||'',phone:(p.customer&&p.customer.phone)||'',payment:p.payment||''});
-      arr=arr.slice(0,40); localStorage.setItem(hk,JSON.stringify(arr));
-      if(window.guRenderHistory)window.guRenderHistory();
-      // tạo/đăng nhập tài khoản SĐT tự động từ thông tin đơn
-      var cu=p.customer||{}; if(cu.name && cu.phone && window.guSetAccount) window.guSetAccount(cu.name, cu.phone);
-    }catch(e){}
+    window.__GU_ORDER_CODE=p.code; window.__GU_LAST_PAYLOAD=p; try{sessionStorage.setItem('gu_order_code',p.code);}catch(e){}
     renderConfirm();
-    try{ var ce=document.getElementById('gu-order-code'); if(ce){ ce.textContent='Mã đơn: '+p.code+' · đang gửi…'; ce.classList.remove('hidden'); } }catch(e){}
-    // 1) LUÔN báo đơn về admin qua ntfy (ổn định, không cần webhook/tunnel) + hiện trạng thái gửi
-    pubAdmin(p).then(function(ok){ try{ var ce=document.getElementById('gu-order-code'); if(ce){ ce.textContent='Mã đơn: '+p.code+(ok?' · ✓ đã lên hệ thống':' · ⚠️ chưa gửi được (mạng?)'); ce.style.background=ok?'':'rgba(255,90,82,.18)'; ce.style.color=ok?'':'#b23b48'; } }catch(e){} });
-    // 2) gửi n8n (Telegram/Sheet) nếu có webhook — chạy nền, không chặn
-    if(WEBHOOK){ try{ fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}).catch(function(){}); }catch(e){} }
-    toast('✓ Đã gửi đơn tới quán!');
-    if(window.__go)window.__go('screen-confirm'); cart=[]; render();
+    if(btn){ btn.__sending=true; btn.disabled=true; if(!btn.dataset.old)btn.dataset.old=btn.innerHTML; btn.innerHTML='<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>Đang gửi…'; }
+    if(window.__go)window.__go('screen-confirm');
+    sendOrder(p);
   }
+  // Gửi lại khi lần trước thất bại (nút trên màn xác nhận)
+  window.guResendOrder=function(){ var p=window.__GU_LAST_PAYLOAD; if(!p) return; renderConfirm(); sendOrder(p); };
 
   document.addEventListener('click',function(e){
     var add=e.target.closest('#screen-menu .btn-add'); if(add){ addToCart(add.getAttribute('data-name'), parseInt(add.getAttribute('data-price'),10)||50000, 1); return; }
@@ -3226,7 +3239,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   document.addEventListener('click',function(e){
     if(e.target.closest('.gu-open')){ ting(); haptic(20); return; }
     var add=e.target.closest('#screen-menu .btn-add, .gu-lb-add'); if(add){ pop(); haptic(14); var r=add.getBoundingClientRect(); plusOne(r.left+r.width/2, r.top+r.height/2); return; }
-    if(e.target.closest('#screen-cart #place-order, #place-order')){ celebrate(); haptic(30); return; }
+    if(e.target.closest('#screen-cart #place-order, #place-order')){ haptic(30); return; } /* confetti chỉ nổ khi gửi đơn thành công (trong placeOrder) */
   }, true);
 
   /* mute toggle in bot header */
@@ -3470,19 +3483,26 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     var nmv=(nm&&nm.value||'').trim(), phv=norm(ph&&ph.value);
     // bỏ cờ lỗi cũ
     [nm,ph].forEach(function(x){ if(x)x.classList.remove('gu-req'); });
+    var isTable=/b[aà]n\s*\S+/i.test((ph&&ph.value)||'');
     if(!nmv){ e.preventDefault(); e.stopImmediatePropagation(); nm.classList.add('gu-req'); nm.focus(); toast('Bạn cho gUlEm xin tên với nhé 🌸'); return; }
-    if(phv.length<9){ e.preventDefault(); e.stopImmediatePropagation(); ph.classList.add('gu-req'); ph.focus(); toast('Nhập số điện thoại để quán liên hệ giao món nha'); return; }
-    // hợp lệ -> tích điểm + lưu thành viên
-    var ad=field('cust-address'); var total=totalNow();
-    var add=Math.max(1, Math.round(total/10000));
-    var m=load(); var ex=m[phv]||{phone:phv,points:0,orders:0,created:Date.now()};
-    ex.name=nmv; if(ad&&ad.value.trim())ex.address=ad.value.trim();
-    ex.points=(ex.points||0)+add; ex.orders=(ex.orders||0)+1; ex.last=Date.now();
-    m[phv]=ex; save(m); try{localStorage.setItem(LAST,phv);}catch(_){}
-    try{ if(window.GU_SFX&&window.GU_SFX.coin)window.GU_SFX.coin(); else if(window.GU_SFX&&window.GU_SFX.pop)window.GU_SFX.pop(); }catch(_){}
-    setTimeout(function(){ toast('🎉 +'+add+' điểm! Bạn đang có '+ex.points+' điểm gUlEm'); }, 700);
-    // KHÔNG chặn: để handler đặt đơn gốc chạy tiếp
+    if(phv.length<9 && !isTable){ e.preventDefault(); e.stopImmediatePropagation(); ph.classList.add('gu-req'); ph.focus(); toast('Nhập SĐT để quán liên hệ giao món (hoặc ghi “Bàn số…” nếu ngồi tại quán)'); return; }
+    // hợp lệ -> KHÔNG chặn, để handler đặt đơn chạy. Việc cộng điểm/lưu thành viên dời sang guAwardPoints (chỉ khi gửi thành công).
   }, true);
+
+  // Cộng điểm + lưu thành viên — CHỈ gọi sau khi đơn gửi lên quán thành công
+  window.guAwardPoints=function(p){
+    try{
+      var phv=norm((p&&p.customer&&p.customer.phone)||''); if(phv.length<9) return;
+      var nmv=(p&&p.customer&&p.customer.name)||''; var adv=(p&&p.customer&&p.customer.address)||'';
+      var total=(p&&p.total)||0; var add=Math.max(1, Math.round(total/10000));
+      var m=load(); var ex=m[phv]||{phone:phv,points:0,orders:0,created:Date.now()};
+      if(nmv)ex.name=nmv; if(adv)ex.address=adv;
+      ex.points=(ex.points||0)+add; ex.orders=(ex.orders||0)+1; ex.last=Date.now();
+      m[phv]=ex; save(m); try{localStorage.setItem(LAST,phv);}catch(_){}
+      try{ if(window.GU_SFX&&window.GU_SFX.coin)window.GU_SFX.coin(); }catch(_){}
+      setTimeout(function(){ toast('🎉 +'+add+' điểm! Bạn đang có '+ex.points+' điểm gUlEm'); }, 900);
+    }catch(e){}
+  };
 
   function boot(){ wire(); lookup(); }
   if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded',boot);
@@ -3965,46 +3985,109 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 #gu-admin .ga-rv-chips{ font:600 11px 'Plus Jakarta Sans',sans-serif; color:#8ff0bf; margin-top:5px; }
 #gu-admin .ga-rv-cmt{ font:500 12.5px 'Plus Jakarta Sans',sans-serif; color:#e9d4da; margin-top:5px; font-style:italic; line-height:1.4; }
 </style>
+<style>
+/* gUlEm · tiến trình 4 bước sống trên màn xác nhận */
+#gu-ctrk{ display:flex; align-items:flex-start; margin:0 2px 14px; }
+#gu-ctrk .nd{ display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 auto; width:46px; }
+#gu-ctrk .dot{ width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#f3dbe3;color:#c98aa0;transition:.35s; }
+#gu-ctrk .dot .material-symbols-outlined{ font-size:20px; }
+#gu-ctrk .nd.done .dot{ background:#ffe0b0;color:#b9771a; }
+#gu-ctrk .nd.active .dot{ background:#e9486a;color:#fff;box-shadow:0 8px 18px -6px rgba(233,72,106,.7);transform:scale(1.1); }
+#gu-ctrk .nd.k-received.active .dot,#gu-ctrk .nd.k-received.done .dot{ background:#2fae6a;color:#fff;box-shadow:0 8px 18px -6px rgba(47,174,106,.7); }
+#gu-ctrk .lb{ font:700 10.5px 'Plus Jakarta Sans',sans-serif;color:#9a5c6c;white-space:nowrap; }
+#gu-ctrk .nd.active .lb{ color:#c2335a; }
+#gu-ctrk .ln{ flex:1 1 auto;height:3px;border-radius:3px;background:#f3dbe3;margin:17px -5px 0; }
+#gu-ctrk .ln.fill{ background:#ffce8a; }
+#gu-cf-actions{ display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+#gu-cf-actions .gu-cfbtn{ width:100%;padding:12px;border-radius:12px;border:0;font:800 13.5px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer; }
+#gu-cf-actions .gu-cfbtn.resend{ background:linear-gradient(135deg,#e9486a,#c2335a);color:#fff;box-shadow:0 10px 24px -10px rgba(233,72,106,.7); }
+#gu-cf-actions .gu-cfbtn.viewall{ background:#fff6f9;border:1.5px solid #ffd0de;color:#c2335a; }
+#gu-cf-actions .gu-cfbtn:active{ transform:scale(.97); }
+</style>
 <script>
-/* gUlEm: khách nhận cập nhật trạng thái đơn realtime (ntfy status channel) */
+/* gUlEm: khách theo dõi đơn realtime — tiến trình 4 bước (ntfy status channel qua proxy) */
 (function(){
-  var TOPIC='';
-  try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy)TOPIC=c.ntfy; }).catch(function(){}); }catch(e){}
-  var es=null, myCode='';
+  var myCode='';
+  var STEPS=[{k:'making',t:'Pha',ic:'local_cafe'},{k:'done',t:'Xong',ic:'room_service'},{k:'delivered',t:'Giao',ic:'two_wheeler'},{k:'received',t:'Nhận',ic:'verified'}];
+  var IDX={'':0,making:1,done:2,delivered:3,received:4};
   var MAP={
-    making:{t:'Đang pha chế',s:'Nhân viên đang chuẩn bị đồ uống cho bạn',ic:'local_cafe',col:'#e9486a'},
-    done:{t:'Đồ uống đã sẵn sàng',s:'Đơn đã pha xong, đang chuẩn bị mang ra / giao',ic:'check_circle',col:'#f0a500'},
-    delivered:{t:'Đơn đang đến tay bạn',s:'Nhận được rồi thì bấm “Tôi đã nhận đơn” giúp quán nhé 🤎',ic:'two_wheeler',col:'#5b9cff'},
-    received:{t:'Đã nhận — cảm ơn bạn 🤎',s:'Chúc bạn ngon miệng. Hẹn gặp lại ở gUlEm!',ic:'verified',col:'#2fae6a'}
+    '':{t:'Quán đã nhận đơn',s:'Đang chờ tới lượt pha — theo dõi tiến trình ngay tại đây 🤎',ic:'receipt_long'},
+    making:{t:'Đang pha chế',s:'Nhân viên đang chuẩn bị đồ uống cho bạn',ic:'local_cafe'},
+    done:{t:'Đồ uống đã sẵn sàng',s:'Đơn đã pha xong, đang chuẩn bị mang ra / giao',ic:'room_service'},
+    delivered:{t:'Đơn đang đến tay bạn',s:'Nhận được rồi thì bấm “Tôi đã nhận đơn” giúp quán nhé 🤎',ic:'two_wheeler'},
+    received:{t:'Đã nhận — cảm ơn bạn 🤎',s:'Chúc bạn ngon miệng. Hẹn gặp lại ở gUlEm!',ic:'verified'}
   };
-  function apply(k){
-    var m=MAP[k]; if(!m)return;
+  function box(){ var r=document.getElementById('gu-st-ring'); return r?r.closest('.rounded-xl'):null; }
+  function ensureUI(){
+    var b=box(); if(!b)return;
+    if(!document.getElementById('gu-ctrk')){ var t=document.createElement('div'); t.id='gu-ctrk'; b.insertBefore(t,b.firstChild); }
+    if(!document.getElementById('gu-cf-actions')){ var a=document.createElement('div'); a.id='gu-cf-actions'; b.appendChild(a); }
+  }
+  function renderTrk(status){ var trk=document.getElementById('gu-ctrk'); if(!trk)return; var f=IDX[status]||0; var html='';
+    STEPS.forEach(function(s,i){ var n=i+1; var cls='nd k-'+s.k+(n<f?' done':'')+(n===f?' active':'');
+      html+='<div class="'+cls+'"><div class="dot"><span class="material-symbols-outlined">'+s.ic+'</span></div><div class="lb">'+s.t+'</div></div>';
+      if(i<STEPS.length-1) html+='<div class="ln'+(n<f?' fill':'')+'"></div>';
+    }); trk.innerHTML=html;
+  }
+  function applyStatus(k){
+    ensureUI(); if(!(k in MAP))k='';
+    var m=MAP[k];
     var ti=document.getElementById('gu-st-title'), su=document.getElementById('gu-st-sub'),
         ic=document.getElementById('gu-st-icon'), rg=document.getElementById('gu-st-ring'),
         rc=document.getElementById('gu-st-receive');
     if(ti)ti.textContent=m.t; if(su)su.textContent=m.s; if(ic)ic.textContent=m.ic;
-    if(rg){ rg.classList.remove('animate-spin'); rg.style.background=m.col; }
+    if(rg){ rg.classList.remove('animate-spin'); rg.style.background=(k==='received'?'#2fae6a':(k==='delivered'?'#5b9cff':(k==='done'?'#f0a500':'#e9486a'))); }
     if(rc){ if(k==='delivered'){ rc.classList.remove('hidden'); rc.classList.add('flex'); } else { rc.classList.add('hidden'); rc.classList.remove('flex'); } }
+    renderTrk(k);
   }
+  function hero(state,code){
+    var cf=document.getElementById('screen-confirm'); if(!cf)return;
+    var h2=cf.querySelector('h2'); var icon=cf.querySelector('.w-16.h-16 .material-symbols-outlined');
+    var pill=document.getElementById('gu-order-code');
+    if(pill){ pill.classList.remove('hidden'); pill.style.background=''; pill.style.color=''; }
+    if(state==='sending'){ if(h2)h2.textContent='Đang gửi đơn tới quán…'; if(icon){icon.textContent='progress_activity';icon.classList.add('animate-spin');} if(pill)pill.textContent='Mã đơn: '+code+' · đang gửi…'; }
+    else if(state==='sent'){ if(h2)h2.textContent='Đã gửi đơn tới quán! Cảm ơn bạn'; if(icon){icon.textContent='check_circle';icon.classList.remove('animate-spin');} if(pill)pill.textContent='Mã đơn: '+code+' · ✓ đã lên hệ thống'; }
+    else if(state==='failed'){ if(h2)h2.textContent='Chưa gửi được đơn — thử lại nhé'; if(icon){icon.textContent='error';icon.classList.remove('animate-spin');} if(pill){ pill.textContent='Mã đơn: '+code+' · ⚠️ chưa gửi được'; pill.style.background='rgba(255,90,82,.18)'; pill.style.color='#b23b48'; } }
+  }
+  function actions(state){
+    ensureUI(); var a=document.getElementById('gu-cf-actions'); if(!a)return;
+    if(state==='failed'){ a.innerHTML='<button class="gu-cfbtn resend" onclick="window.guResendOrder&&window.guResendOrder()"><span class="material-symbols-outlined" style="font-size:18px">refresh</span>Gửi lại đơn</button>'; }
+    else if(state==='sent'){ a.innerHTML='<button class="gu-cfbtn viewall" onclick="window.__go&&window.__go(\'screen-history\')"><span class="material-symbols-outlined" style="font-size:17px">receipt_long</span>Xem tất cả đơn của tôi</button>'; }
+    else { a.innerHTML=''; }
+  }
+  // state: sending | sent | failed
+  window.guConfirmState=function(state,code){ myCode=code||myCode; hero(state,myCode); actions(state);
+    if(state==='sent'){ applyStatus(''); lastSt=''; subscribe(); }
+    else if(state==='sending'){ renderTrk(''); }
+  };
   function confirmReceived(){
-    if(!myCode) { try{ myCode=window.__GU_ORDER_CODE||sessionStorage.getItem('gu_order_code')||''; }catch(e){} }
-    apply('received');
+    if(!myCode){ try{ myCode=window.__GU_ORDER_CODE||sessionStorage.getItem('gu_order_code')||''; }catch(e){} }
+    lastSt='received'; applyStatus('received'); stop();
     if(myCode && window.GUX){ window.GUX.pub('status',{code:myCode,status:'received'}); }
-    try{ if(window.GU_SFX&&window.GU_SFX.celebrate)window.GU_SFX.celebrate(); else if(window.GU_SFX&&window.GU_SFX.success)window.GU_SFX.success(); if(navigator.vibrate)navigator.vibrate([12,40,18]); }catch(_){ }
+    try{ if(window.GU_SFX&&window.GU_SFX.celebrate)window.GU_SFX.celebrate(); if(navigator.vibrate)navigator.vibrate([12,40,18]); }catch(_){ }
     setTimeout(function(){ if(window.guOpenReview)window.guOpenReview(myCode); }, 800);
   }
   var stPoll=null, lastSt='';
+  function stop(){ if(stPoll){ clearInterval(stPoll); stPoll=null; } }
   function subscribe(){
-    // đọc trạng thái qua cùng tên miền (proxy) để không bị mạng chặn
     if(stPoll) return;
     function tick(){ if(!myCode||!window.GUX)return; window.GUX.poll('status','24h').then(function(txt){
-      (txt.split('\n').filter(Boolean)).forEach(function(ln){ try{ var m=JSON.parse(ln); if(m.event==='message'&&m.message){ var d=JSON.parse(m.message); if(d.code===myCode && d.status && d.status!=='received' && d.status!==lastSt){ lastSt=d.status; apply(d.status); try{ if(window.GU_SFX&&window.GU_SFX.pop)window.GU_SFX.pop(); if(navigator.vibrate)navigator.vibrate(12); }catch(_){ } } } }catch(e){} });
+      // Lấy TRẠNG THÁI MỚI NHẤT của đơn này (không phát lại cả lịch sử -> hết rung/âm lặp)
+      var latest=null;
+      txt.split('\n').filter(Boolean).forEach(function(ln){ try{ var m=JSON.parse(ln); if(m.event==='message'&&m.message){ var d=JSON.parse(m.message); if(d.code===myCode && d.status) latest=d.status; } }catch(e){} });
+      if(latest && latest!==lastSt){ lastSt=latest; applyStatus(latest);
+        try{ if(window.GU_SFX&&window.GU_SFX.pop)window.GU_SFX.pop(); if(navigator.vibrate)navigator.vibrate(12); }catch(_){ }
+        if(latest==='received') stop();
+      }
     }).catch(function(){}); }
-    tick(); stPoll=setInterval(tick, 7000);
+    tick(); stPoll=setInterval(tick, 6000);
   }
   document.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('#gu-st-receive'); if(b){ e.preventDefault(); confirmReceived(); } });
   var _go=window.__go;
-  if(typeof _go==='function'){ window.__go=function(x){ var r=_go.apply(this,arguments); if(x==='screen-confirm'){ try{ myCode=window.__GU_ORDER_CODE||sessionStorage.getItem('gu_order_code')||''; }catch(e){} subscribe(); } return r; }; }
+  if(typeof _go==='function'){ window.__go=function(x){ var r=_go.apply(this,arguments);
+    if(x==='screen-confirm'){ try{ if(!myCode)myCode=window.__GU_ORDER_CODE||sessionStorage.getItem('gu_order_code')||''; }catch(e){} ensureUI(); subscribe(); }
+    else { stop(); }
+    return r; }; }
 })();
 </script>
 
