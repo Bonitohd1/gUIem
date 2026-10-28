@@ -4068,6 +4068,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function sub(){ if(es||!TOPIC)return; try{ es=new EventSource('https://ntfy.sh/'+TOPIC+'-menu/sse'); es.onmessage=function(ev){ try{ var m=JSON.parse(ev.data); if(m.event==='message'&&m.message){ ingest(m.message); updateNote(); apply(); } }catch(e){} }; }catch(e){} }
 
   var prevOR=window.guOnRender; window.guOnRender=function(){ try{ if(prevOR)prevOR(); }catch(e){} apply(); };
+  // hook bền: re-apply sau mọi click (giỏ đổi số lượng) để badge "Còn X" cập nhật
+  document.addEventListener('click',function(){ setTimeout(apply,0); }, false);
 
   /* ---------- Admin editor ---------- */
   function buildEditor(){
