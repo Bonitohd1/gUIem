@@ -131,6 +131,19 @@ module.exports = async (req, res) => {
       return;
     }
 
+    if (op === 'delete') {
+      const code = codeKey(data.code);
+      if (!code) { res.status(400).json({ ok: false, error: 'no code' }); return; }
+      let ph = '';
+      const cur = await cmd(c, ['GET', 'gu:o:' + code]);
+      if (cur) { try { ph = digits(JSON.parse(cur).customer && JSON.parse(cur).customer.phone); } catch (e) {} }
+      await cmd(c, ['DEL', 'gu:o:' + code]);
+      await cmd(c, ['LREM', 'gu:orec', '0', code]);
+      if (ph) await cmd(c, ['LREM', 'gu:op:' + ph, '0', code]);
+      res.status(200).json({ ok: true });
+      return;
+    }
+
     if (op === 'plan') {
       const d = dateKey(data.date);
       if (!d) { res.status(400).json({ ok: false, error: 'bad date' }); return; }
