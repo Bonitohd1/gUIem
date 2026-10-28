@@ -871,15 +871,15 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Có thể chọn nhiều</span>
 </div>
 <div class="space-y-2">
-<!-- Foam Kem Phô Mai (Ticked by default) -->
-<label class="topping-item flex items-center justify-between p-3 rounded-xl bg-surface-container-low text-primary ring-2 ring-secondary/80 cursor-pointer transition-all select-none">
+<!-- Foam Kem Phô Mai -->
+<label class="topping-item flex items-center justify-between p-3 rounded-xl bg-surface-container text-on-surface cursor-pointer hover:bg-surface-container-high transition-all select-none">
 <div class="flex items-center gap-3">
-<input checked="" class="sr-only topping-checkbox" type="checkbox" value="10000"/>
-<div class="checkbox-indicator w-5 h-5 rounded-md bg-secondary text-on-secondary flex items-center justify-center shrink-0">
+<input class="sr-only topping-checkbox" type="checkbox" value="10000"/>
+<div class="checkbox-indicator w-5 h-5 rounded-md bg-surface-container-highest text-transparent flex items-center justify-center shrink-0">
 <span class="material-symbols-outlined text-[14px]">check</span>
 </div>
 <div class="flex flex-col">
-<span class="font-label-md text-label-md font-bold">Thêm Foam phô mai béo ngậy</span>
+<span class="font-label-md text-label-md font-semibold">Thêm Foam phô mai béo ngậy</span>
 <span class="font-body-sm text-[11px] text-on-surface-variant">Lớp bọt sánh mịn, thơm lừng hương hoa nhài</span>
 </div>
 </div>
@@ -2732,6 +2732,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function addFromCustomize(){
     var root=document.getElementById('screen-customize'); if(!root)return;
     var h=root.querySelector('h2'); var name=h?h.textContent.trim():'Món tuỳ chọn';
+    if(window.guDayAvailable && !window.guDayAvailable(name)){ toast('⚠️ '+name+' đã tạm hết — bạn chọn món khác nhé'); return; }
     var qd=root.querySelector('#qty-display'); var qty=qd?parseInt(qd.textContent,10)||1:1;
     var add=0, parts=[];
     function selOpt(cls){ var b=root.querySelector('.'+cls+'.ring-secondary'); if(!b)b=root.querySelector('.'+cls+'[class*="ring-secondary"]'); if(!b)return ''; var l=b.querySelector('.font-label-md'); return l?l.textContent.trim():''; }
@@ -3026,6 +3027,34 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     if(img && cimg){ var sc=img.getAttribute('src')||img.src||''; if(sc) cimg.setAttribute('src', sc); }
     if(window.__go) window.__go('screen-customize');
   }, false);
+})();
+</script>
+<style>
+/* gUlEm · nút tuỳ chọn (đường/đá/topping) cạnh nút Thêm */
+.gu-add-wrap{ display:flex; align-items:center; gap:7px; }
+.gu-cust-btn{ width:33px; height:33px; border-radius:999px; border:1.5px solid #f3c6d4; background:#fff; color:#c2335a; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto; box-shadow:0 2px 9px -5px rgba(180,40,90,.5); transition:transform .12s, background .15s; }
+.gu-cust-btn:active{ transform:scale(.86); }
+.gu-cust-btn:hover{ background:#fff3f7; }
+.gu-item-out .gu-cust-btn{ opacity:.4; pointer-events:none; }
+</style>
+<script>
+/* gUlEm · nút ⚙ mở tuỳ chọn cho từng món (giúp khách thấy rõ chỗ chọn topping) */
+(function(){
+  function wrap(){
+    document.querySelectorAll('#screen-menu .btn-add[data-name]').forEach(function(b){
+      if(b.closest('.gu-add-wrap')) return;
+      var w=document.createElement('div'); w.className='gu-add-wrap';
+      var cb=document.createElement('button'); cb.type='button'; cb.className='gu-cust-btn'; cb.setAttribute('aria-label','Tuỳ chọn đường, đá, topping');
+      cb.innerHTML='<span class="material-symbols-outlined" style="font-size:17px">tune</span>';
+      b.parentNode.insertBefore(w,b); w.appendChild(cb); w.appendChild(b);
+      cb.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation();
+        var row=b.closest('.rounded-2xl'); var h3=row?row.querySelector('h3'):null; if(h3)h3.click();
+      });
+    });
+  }
+  function ready(fn){ if(document.readyState!=='loading')fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){ setTimeout(wrap,500); setTimeout(wrap,1400); });
+  document.addEventListener('click',function(){ setTimeout(wrap,60); }, false);
 })();
 </script>
 <script>
@@ -4090,8 +4119,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       if(!badge && row){ badge=document.createElement('span'); badge.className='gu-avail'; row.insertBefore(badge,c.btn); }
       var rs=remSold(SEL,c.n), avail, cls, txt;
       if(p===null){
-        if(isToday){ if(badge)badge.style.display='none'; if(c.card)c.card.classList.remove('gu-item-out'); c.btn.disabled=false; return; }
-        avail=false; cls='out'; txt='Chưa mở đặt';
+        // Không set menu riêng cho ngày này -> nhận đơn bình thường (hôm nay) HOẶC đặt trước (mai) không giới hạn
+        if(badge)badge.style.display='none'; if(c.card)c.card.classList.remove('gu-item-out'); c.btn.disabled=false; return;
       } else {
         var show=rs-inCart(c.n);
         if(rs<=0){ avail=false; cls='out'; txt=(isToday?'Tạm hết hôm nay':'Tạm hết'); }
@@ -4103,7 +4132,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       c.btn.disabled=!avail;
     });
   }
-  function canAdd(name){ var p=planOf(SEL); if(p===null)return SEL===today(); return (remSold(SEL,name)-inCart(name))>0; }
+  function canAdd(name){ var p=planOf(SEL); if(p===null)return true; return (remSold(SEL,name)-inCart(name))>0; }
+  window.guDayAvailable=function(name){ var p=planOf(SEL); if(p===null)return true; return remSold(SEL,name)>0; };
 
   document.addEventListener('click',function(e){
     var add=e.target.closest('#screen-menu .btn-add[data-name]'); if(!add)return;
@@ -4138,7 +4168,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   }
   function updateNote(){
     var n=document.getElementById('gu-daynote'), t=document.getElementById('gu-daynote-t'); if(!n)return; var p=planOf(SEL);
-    if(SEL!==today() && p===null){ n.classList.add('on'); t.textContent='Quán chưa mở đặt trước cho ngày '+ddmm(SEL)+'. Bạn quay lại sau nhé 🌸'; }
+    if(SEL!==today() && p===null){ n.classList.add('on'); t.textContent='Đặt trước cho '+wd(SEL)+' '+ddmm(SEL)+' — quán nhận đơn, chuẩn bị & giao đúng ngày 🌸'; }
     else if(p && p.note){ n.classList.add('on'); t.textContent=p.note; }
     else if(SEL!==today() && p){ n.classList.add('on'); t.textContent='Đặt trước cho '+wd(SEL)+' '+ddmm(SEL)+' — quán chuẩn bị & giao đúng ngày.'; }
     else n.classList.remove('on');
