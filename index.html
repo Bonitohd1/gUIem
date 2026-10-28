@@ -3122,37 +3122,70 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       }
     }catch(e){}
 
-    /* caring assistant bot */
-    var tips=[
-      'Nhớ uống đủ nước mỗi ngày nha 💧',
-      'Ngồi lâu rồi đó — đứng dậy vươn vai một cái nào 🌿',
-      'Hôm nay bạn đã cố gắng rồi, tự thưởng một ly nhé 🍵',
-      'Hít thở sâu, thả lỏng vai một chút nào ☁️',
-      'Một ly trà ấm giúp buổi chiều nhẹ nhàng hơn đấy 🫖',
-      'Uống nước ấm buổi sáng tốt cho cơ thể lắm 💛',
-      'Gợi ý hôm nay: Cà phê muối — Hương vị tình thân 🧂'
-    ];
-    var btn=document.createElement('button'); btn.className='gu-bot-btn'; btn.setAttribute('aria-label','Trợ lý gUlEm'); btn.innerHTML='<span class="material-symbols-outlined">favorite</span><span class="gu-bot-dot"></span>';
-    var panel=document.createElement('div'); panel.className='gu-bot-panel';
-    panel.innerHTML='<div class="gu-bot-head"><div class="gu-bot-ava">g</div><div><div class="gu-bot-name">gUlEm chăm bạn</div><div class="gu-bot-status">● Đang trực tuyến</div></div><button class="gu-bot-x"><span class="material-symbols-outlined" style="font-size:20px">close</span></button></div><div class="gu-bot-msg"></div><button class="gu-bot-cta">Gợi ý món cho mình →</button>';
-    document.body.appendChild(btn); document.body.appendChild(panel);
-    var msgEl=panel.querySelector('.gu-bot-msg'), idx=Math.floor(Math.random()*tips.length), rot=null;
-    function showTip(){ msgEl.textContent=tips[idx%tips.length]; idx++; }
-    function openB(){ showTip(); panel.classList.add('on'); var d=btn.querySelector('.gu-bot-dot'); if(d)d.style.display='none'; clearInterval(rot); rot=setInterval(showTip,4500); }
-    function closeB(){ panel.classList.remove('on'); clearInterval(rot); }
-    btn.addEventListener('click',function(){ panel.classList.contains('on')?closeB():openB(); });
-    panel.querySelector('.gu-bot-x').addEventListener('click',closeB);
-    panel.querySelector('.gu-bot-cta').addEventListener('click',function(){ closeB(); if(window.__go)window.__go('screen-menu'); var el=document.getElementById('cat-coffee')||document.getElementById('cat-tea'); if(el) el.scrollIntoView({behavior:'smooth'}); });
-
-    /* gentle one-time water reminder after 70s */
-    setTimeout(function(){
-      if(panel.classList.contains('on')) return;
-      var t=document.createElement('div'); t.textContent='💧 gUlEm nhắc nhẹ: uống một ngụm nước nha!';
-      t.style.cssText='position:fixed;left:50%;bottom:150px;transform:translateX(-50%) translateY(10px);z-index:1140;background:#fff;color:#8a1e42;font:600 13px "Plus Jakarta Sans",sans-serif;padding:12px 18px;border-radius:999px;box-shadow:0 14px 30px -8px rgba(180,40,90,.4);opacity:0;transition:all .4s;max-width:86vw;text-align:center';
-      document.body.appendChild(t);
-      requestAnimationFrame(function(){ t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
-      setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ if(t.parentNode)t.parentNode.removeChild(t); },500); }, 5200);
-    }, 70000);
+    /* === Trợ lý gUlEm — concierge thông minh (chat chip, đọc tồn kho thật) === */
+    (function(){ var css=
+      '.gu-bot2{width:322px;max-width:88vw;padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:min(66vh,490px);bottom:96px;}'
+      +'.gu-bot2 .gu-bot-head{padding:13px 14px 11px;border-bottom:1px solid #ffe0e9;}'
+      +'.gu-bot-chat{flex:1;overflow-y:auto;padding:12px 13px;display:flex;flex-direction:column;gap:8px;background:#fff7f9;min-height:130px;}'
+      +'.gu-bubble{max-width:90%;padding:9px 12px;border-radius:14px;font:500 13px/1.5 \'Plus Jakarta Sans\',sans-serif;white-space:pre-line;word-wrap:break-word;}'
+      +'.gu-bubble.bot{align-self:flex-start;background:#fff;color:#4a2230;border:1px solid #ffe0e9;border-bottom-left-radius:5px;}'
+      +'.gu-bubble.user{align-self:flex-end;background:linear-gradient(135deg,#e9486a,#ff6f93);color:#fff;border-bottom-right-radius:5px;}'
+      +'.gu-bot-act{display:block;margin-top:9px;padding:9px 12px;border-radius:11px;border:0;background:#e9486a;color:#fff;font:800 12px \'Plus Jakarta Sans\',sans-serif;cursor:pointer;width:100%;}'
+      +'.gu-bot-act:active{transform:scale(.97);}'
+      +'.gu-chips{display:flex;gap:7px;overflow-x:auto;padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid #ffe0e9;background:#fff;scrollbar-width:none;}'
+      +'.gu-chips::-webkit-scrollbar{display:none;}'
+      +'.gu-chip{flex:0 0 auto;padding:8px 13px;border-radius:999px;border:1.5px solid #ffd0de;background:#fff6f9;color:#c2335a;font:700 12px \'Plus Jakarta Sans\',sans-serif;white-space:nowrap;cursor:pointer;}'
+      +'.gu-chip:active{transform:scale(.95);}'
+      +'.gu-typing{display:inline-flex;gap:3px;padding:3px 2px;}'
+      +'.gu-typing i{width:6px;height:6px;border-radius:50%;background:#e9a9bd;animation:guTy 1s infinite;}'
+      +'.gu-typing i:nth-child(2){animation-delay:.15s;}.gu-typing i:nth-child(3){animation-delay:.3s;}'
+      +'@keyframes guTy{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-3px);}}'
+      +'.gu-bot-nudge{position:fixed;left:14px;bottom:160px;z-index:1145;background:#fff;color:#8a1e42;font:600 12.5px \'Plus Jakarta Sans\',sans-serif;padding:10px 14px;border-radius:14px;box-shadow:0 14px 30px -8px rgba(180,40,90,.4);max-width:72vw;cursor:pointer;opacity:0;transform:translateY(8px);transition:all .4s;}'
+      +'@media(min-width:1024px){.gu-bot-nudge{left:auto;right:calc(50vw - 18rem - 66px);}}';
+      var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+    })();
+    var abtn=document.createElement('button'); abtn.className='gu-bot-btn'; abtn.setAttribute('aria-label','Trợ lý gUlEm'); abtn.innerHTML='<span class="material-symbols-outlined">support_agent</span><span class="gu-bot-dot"></span>';
+    var apanel=document.createElement('div'); apanel.className='gu-bot-panel gu-bot2';
+    apanel.innerHTML='<div class="gu-bot-head"><div class="gu-bot-ava">g</div><div style="flex:1;min-width:0"><div class="gu-bot-name">Trợ lý gUlEm</div><div class="gu-bot-status">● Đang trực tuyến</div></div><button class="gu-bot-x"><span class="material-symbols-outlined" style="font-size:20px">close</span></button></div><div class="gu-bot-chat" id="gu-bot-chat"></div><div class="gu-chips" id="gu-bot-chips"></div>';
+    document.body.appendChild(abtn); document.body.appendChild(apanel);
+    var chat=apanel.querySelector('#gu-bot-chat'), chipbar=apanel.querySelector('#gu-bot-chips');
+    function esc(s){ return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+    function bubble(who,html){ var d=document.createElement('div'); d.className='gu-bubble '+who; d.innerHTML=html; chat.appendChild(d); chat.scrollTop=chat.scrollHeight; return d; }
+    function botSay(text,action){ var d=bubble('bot',esc(text).replace(/\n/g,'<br>')); if(action){ var a=document.createElement('button'); a.className='gu-bot-act'; a.textContent=action.label; a.addEventListener('click',action.run); d.appendChild(a); } chat.scrollTop=chat.scrollHeight; return d; }
+    function typing(cb){ var d=bubble('bot','<span class="gu-typing"><i></i><i></i><i></i></span>'); setTimeout(function(){ if(d.parentNode)d.parentNode.removeChild(d); cb(); }, 430); }
+    function closeB(){ apanel.classList.remove('on'); }
+    function openB(){ apanel.classList.add('on'); var d=abtn.querySelector('.gu-bot-dot'); if(d)d.style.display='none'; if(!apanel.__greeted){ apanel.__greeted=1; botSay(greet()); } }
+    function goScreen(scr,after){ closeB(); if(window.__go)window.__go(scr); if(after)setTimeout(after,240); }
+    function menuState(){ var cards=document.querySelectorAll('#screen-menu .btn-add[data-name]'); var avail=[];
+      cards.forEach(function(b){ var name=b.getAttribute('data-name'); var card=b.closest('.rounded-2xl'); var badge=card&&card.querySelector('.gu-avail'); var t=badge?badge.textContent:'';
+        if(/Tạm hết/.test(t))return; var con=t.match(/Còn\s*(\d+)\s*ly/); avail.push(con?(name+' — còn '+con[1]+' ly'):name);
+      });
+      return {avail:avail, hetAll:(cards.length>0&&avail.length===0)};
+    }
+    function hToday(){ var s=menuState(); var recv=(window.__GU_RECV&&window.__GU_RECV.label)||'Hôm nay'; recv=(recv==='Hôm nay'?'Hôm nay':recv);
+      if(s.hetAll) return {text:recv+' quán tạm chưa mở món nào 🥺 Bạn quay lại sau một chút nhé!'};
+      if(!s.avail.length) return {text:'Để mình mở thực đơn cho bạn xem nhé!', action:{label:'Xem thực đơn →', run:function(){ goScreen('screen-menu'); }}};
+      return {text:recv+' quán có:\n• '+s.avail.join('\n• ')+'\n\nTất cả đồng giá 50K/ly 🤎', action:{label:'Đặt món ngay →', run:function(){ goScreen('screen-menu'); }}};
+    }
+    function hHot(){ return {text:'Được yêu thích nhất ở gUlEm:\n🧂 Cà phê muối — hương vị tình thân\n🌸 Trà nhài kem sữa — thơm dịu\n🥭 Trà sữa xoài — chua ngọt mát', action:{label:'Xem thực đơn →', run:function(){ goScreen('screen-menu'); }}}; }
+    function hPre(){ return {text:'Muốn nhận vào NGÀY MAI? Rất dễ:\n1) Ở đầu thực đơn chọn tab “Đặt trước · mai”.\n2) Chọn món (quán chốt số lượng mỗi ngày).\n3) Đặt như thường — quán chuẩn bị & giao đúng ngày 🌸', action:{label:'Mở đặt trước →', run:function(){ goScreen('screen-menu', function(){ var tabs=document.querySelectorAll('#gu-daybar .gd-tab'); if(tabs[1])tabs[1].click(); }); }}}; }
+    function hOrders(){ return {text:'Bạn xem lại đơn & tiến trình pha chế (Pha → Xong → Giao → Nhận) trong mục “Đơn hàng”.', action:{label:'Mở Đơn hàng →', run:function(){ goScreen('screen-history'); }}}; }
+    function hInfo(){ return {text:'🕗 Mở cửa từ 8:00 sáng — cả tuần\n📍 Giao tận nơi khu vực Hà Nội\n☎️ 0963 240 972', action:{label:'Gọi quán', run:function(){ try{ location.href='tel:0963240972'; }catch(e){} }}}; }
+    function hZalo(){ setTimeout(function(){ try{ window.open('https://zaloapp.com/qr/g/keolmxd5mu8mxcfmvi99?src=qr','_blank'); }catch(e){} }, 60); return {text:'Mình mở nhóm Zalo gUlEm để bạn nhận ưu đãi mỗi tuần nhé 💬'}; }
+    function hDeal(){ return {text:'🎁 Tất cả đồ uống đồng giá 50.000đ/ly.\n⭐ Mỗi đơn được tích điểm (≈ 1 điểm mỗi 10.000đ) để đổi quà. Lần sau chỉ cần nhập SĐT là tự nhận ưu đãi!', action:{label:'Tài khoản của tôi', run:function(){ closeB(); if(window.guOpenAccount)window.guOpenAccount(); }}}; }
+    function hZodiac(){ closeB(); setTimeout(function(){ if(window.__guZodiac)window.__guZodiac(); }, 180); return null; }
+    var QA=[{label:'☕ Hôm nay còn gì?',fn:hToday},{label:'🔥 Món bán chạy',fn:hHot},{label:'📅 Đặt trước ngày mai',fn:hPre},{label:'🧾 Đơn của tôi',fn:hOrders},{label:'🕗 Giờ mở cửa & địa chỉ',fn:hInfo},{label:'🎁 Ưu đãi & điểm',fn:hDeal},{label:'🔮 Gợi ý theo cung',fn:hZodiac},{label:'💬 Nhóm Zalo',fn:hZalo}];
+    QA.forEach(function(q){ var c=document.createElement('button'); c.className='gu-chip'; c.textContent=q.label; c.addEventListener('click',function(){ bubble('user',esc(q.label)); typing(function(){ var r=q.fn(); if(r)botSay(r.text,r.action); }); }); chipbar.appendChild(c); });
+    function greet(){ var h=new Date().getHours(); var g=h<11?'Chào buổi sáng':(h<13?'Chào buổi trưa':(h<18?'Chào buổi chiều':'Chào buổi tối')); return g+'! Mình là trợ lý gUlEm 🤎\nBạn cần giúp gì nào? Chạm một gợi ý bên dưới nhé.'; }
+    abtn.addEventListener('click',function(){ apanel.classList.contains('on')?closeB():openB(); });
+    apanel.querySelector('.gu-bot-x').addEventListener('click',closeB);
+    /* nhắc nhẹ 1 lần/phiên để khách biết có trợ lý */
+    setTimeout(function(){ if(apanel.classList.contains('on'))return; try{ if(sessionStorage.getItem('gu_bot_nudge'))return; sessionStorage.setItem('gu_bot_nudge','1'); }catch(e){}
+      var n=document.createElement('div'); n.className='gu-bot-nudge'; n.textContent='Cần gợi ý món hay đặt trước? Chạm mình nhé 💬'; document.body.appendChild(n);
+      requestAnimationFrame(function(){ n.style.opacity='1'; n.style.transform='translateY(0)'; });
+      n.addEventListener('click',function(){ n.remove(); openB(); });
+      setTimeout(function(){ n.style.opacity='0'; setTimeout(function(){ if(n.parentNode)n.remove(); },400); }, 6500);
+    }, 26000);
   });
 })();
 </script>
@@ -3199,9 +3232,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     function miniToast(m){ var t=document.createElement('div'); t.textContent=m; t.style.cssText='position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:1340;background:#e9486a;color:#fff;font:600 13px "Plus Jakarta Sans",sans-serif;padding:10px 18px;border-radius:999px;box-shadow:0 10px 24px rgba(180,40,90,.4);max-width:86vw;text-align:center'; document.body.appendChild(t); setTimeout(function(){ if(t.parentNode)t.parentNode.removeChild(t); },2200); }
     function open(){ var saved=null; try{saved=localStorage.getItem('gu_zodiac');}catch(e){} if(saved!==null && Z[+saved]) result(+saved); else picker(); ov.classList.add('on'); }
 
-    /* add a zodiac entry to the assistant bot panel */
-    var panel=document.querySelector('.gu-bot-panel');
-    if(panel){ var zb=document.createElement('button'); zb.className='gu-zbtn'; zb.textContent='🔮 Chọn cung hoàng đạo — gợi ý đồ uống'; zb.addEventListener('click',open); var cta=panel.querySelector('.gu-bot-cta'); if(cta) panel.insertBefore(zb,cta); else panel.appendChild(zb); }
+    /* trợ lý concierge gọi qua window.__guZodiac (chip "Gợi ý theo cung") */
     window.__guZodiac=open;
   });
 })();
