@@ -3207,30 +3207,107 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
    {e:'🏺',n:'Bảo Bình',d:'20/1–18/2',h:'Ý tưởng khác biệt của bạn hôm nay sẽ khiến mọi người bất ngờ đấy!',dr:'Hoa quả ép theo mùa'},
    {e:'🐟',n:'Song Ngư',d:'19/2–20/3',h:'Thả hồn mơ mộng một chút — cảm hứng sẽ tự tìm đến bạn.',dr:'Trà sữa xoài'}
   ];
+  var DAILY=[
+   'Một tin vui nhỏ đang trên đường đến với bạn.',
+   'Hôm nay hợp để bắt đầu điều bạn ấp ủ bấy lâu.',
+   'Giữ nụ cười — nó sẽ mở ra một cơ hội bất ngờ.',
+   'Lắng nghe trực giác, nó đang mách đúng đấy.',
+   'Dành chút thời gian cho bản thân, bạn xứng đáng.',
+   'Chuyện nhỏ đừng bận lòng — điều tốt đẹp đang tới.',
+   'Sự kiên nhẫn hôm nay sẽ được đền đáp xứng đáng.',
+   'Nói một lời cảm ơn với ai đó — ngày sẽ nhẹ hơn.',
+   'Một quyết định can đảm sẽ mang lại may mắn.',
+   'Năng lượng của bạn đang lan toả tích cực ra xung quanh.',
+   'Thử một điều mới hôm nay, dù rất nhỏ thôi.',
+   'Tình cảm hôm nay ấm áp — giữ gìn người bên cạnh nhé.',
+   'Buông bớt lo toan, mọi thứ đang xếp đúng chỗ của nó.',
+   'Hôm nay là ngày tốt để tự thưởng cho mình một niềm vui nhỏ.'
+  ];
+  var ZCOLORS=[{n:'Hồng pastel',c:'#ff9ebb'},{n:'Xanh mint',c:'#7fe0c3'},{n:'Vàng nắng',c:'#ffd36e'},{n:'Tím lavender',c:'#b9a6ff'},{n:'Cam đào',c:'#ff9e7a'},{n:'Xanh biển',c:'#6cc5ff'},{n:'Đỏ ruby',c:'#ff6b81'},{n:'Nâu caramel',c:'#c79b6e'}];
+  var ZMOODS=[{e:'😌',w:'An yên'},{e:'🤩',w:'Hứng khởi'},{e:'🥰',w:'Ấm áp'},{e:'😎',w:'Tự tin'},{e:'🌈',w:'Lạc quan'},{e:'🧘',w:'Thư thái'},{e:'✨',w:'May mắn'},{e:'💪',w:'Quyết tâm'}];
+  function zhash(s){ var h=5381; for(var i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0; } return h; }
+  function zday(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
   ready(function(){
-    var ov=document.createElement('div'); ov.className='gu-zod';
-    ov.innerHTML='<div class="gu-zod-card"><button class="gu-zod-x"><span class="material-symbols-outlined" style="font-size:19px">close</span></button><div class="gu-zod-body"></div></div>';
+    var ZCSS=
+      '.gu-zsky{position:fixed;inset:0;z-index:100008;display:none;flex-direction:column;background:radial-gradient(130% 80% at 50% -10%,#3a2254,#1b1030 55%,#120a22);color:#f3e9ff;overflow:hidden;}'
+      +'.gu-zsky.on{display:flex;animation:guZin .3s ease;}@keyframes guZin{from{opacity:0}to{opacity:1}}'
+      +'.gu-zsky .zstar{position:absolute;border-radius:50%;background:#fff;animation:guTwk 3s ease-in-out infinite;}'
+      +'@keyframes guTwk{0%,100%{opacity:.2;}50%{opacity:.9;}}'
+      +'.gu-zsky-top{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top)) 16px 10px;}'
+      +'.gu-zsky-top .zback{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;border:0;display:flex;align-items:center;justify-content:center;cursor:pointer;}'
+      +'.gu-zsky-top .ztt{font:800 16px \'Fraunces\',serif;}'
+      +'.gu-zsky-body{position:relative;z-index:2;flex:1;overflow-y:auto;padding:6px 18px calc(28px + env(safe-area-inset-bottom));}'
+      +'.zsub{text-align:center;font:600 12.5px \'Plus Jakarta Sans\',sans-serif;color:#c7b8e8;margin:6px 0 4px;}'
+      +'.zgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px;}'
+      +'.zitem{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px 6px;text-align:center;cursor:pointer;transition:.2s;}'
+      +'.zitem:active{transform:scale(.94);}.zitem .e{font-size:30px;display:block;}'
+      +'.zitem .n{display:block;font:800 12.5px \'Plus Jakarta Sans\',sans-serif;margin-top:5px;color:#fff;}'
+      +'.zitem .d{display:block;font:600 9.5px \'Plus Jakarta Sans\',sans-serif;color:#c7b8e8;margin-top:2px;}'
+      +'.zhero{text-align:center;padding:10px 0 2px;}'
+      +'.zmascot{font-size:72px;line-height:1;filter:drop-shadow(0 10px 24px rgba(0,0,0,.5));animation:guHeroPop .6s var(--ease) both, guCupFloat 3.6s ease-in-out .6s infinite;}'
+      +'.zname{font:800 25px \'Fraunces\',serif;margin-top:4px;}.zrange{font:600 12px \'Plus Jakarta Sans\',sans-serif;color:#c7b8e8;margin-top:2px;}'
+      +'.zdate{display:inline-block;margin-top:10px;font:700 11px \'Plus Jakarta Sans\',sans-serif;color:#ffd98a;background:rgba(255,217,138,.12);padding:4px 12px;border-radius:999px;}'
+      +'.zcard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px;margin-top:14px;}'
+      +'.zlabel{font:800 11px \'Plus Jakarta Sans\',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#c7b8e8;}'
+      +'.zhoro{font:500 15px/1.6 \'Plus Jakarta Sans\',sans-serif;color:#fff;margin-top:8px;}'
+      +'.ztrait{font:500 12.5px/1.5 \'Plus Jakarta Sans\',sans-serif;color:#c7b8e8;margin-top:10px;font-style:italic;}'
+      +'.zstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}'
+      +'.zstat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:13px 6px;text-align:center;}'
+      +'.zstat .v{font:800 20px \'Fraunces\',serif;color:#fff;line-height:1;}'
+      +'.zstat .v .dot{display:inline-block;width:18px;height:18px;border-radius:50%;vertical-align:-3px;box-shadow:0 0 10px currentColor;}'
+      +'.zstat .k{font:700 9.5px \'Plus Jakarta Sans\',sans-serif;color:#c7b8e8;margin-top:5px;text-transform:uppercase;letter-spacing:.03em;}'
+      +'.zdrink{display:flex;align-items:center;gap:12px;margin-top:14px;background:linear-gradient(135deg,rgba(233,72,106,.28),rgba(255,134,171,.12));border:1px solid rgba(255,134,171,.32);border-radius:18px;padding:13px 14px;}'
+      +'.zdrink .zdemo{font-size:30px;}.zdrink .zdt{flex:1;min-width:0;}'
+      +'.zdrink .zdt small{display:block;font:700 9.5px \'Plus Jakarta Sans\',sans-serif;color:#ffc3d6;text-transform:uppercase;letter-spacing:.04em;}'
+      +'.zdrink .zdt b{font:800 15px \'Plus Jakarta Sans\',sans-serif;color:#fff;}'
+      +'.zdrink .zorder{flex:0 0 auto;padding:9px 14px;border-radius:999px;border:0;background:#fff;color:#8a1e42;font:800 12.5px \'Plus Jakarta Sans\',sans-serif;cursor:pointer;}'
+      +'.zlove{text-align:center;margin-top:14px;font:600 12.5px \'Plus Jakarta Sans\',sans-serif;color:#ffc3d6;}'
+      +'.zacts{display:flex;gap:10px;margin-top:16px;}.zacts button{flex:1;padding:13px;border-radius:14px;font:800 13px \'Plus Jakarta Sans\',sans-serif;cursor:pointer;}'
+      +'.zacts .zshare{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.2);}'
+      +'.zacts .zswap{background:transparent;color:#c7b8e8;border:1px solid rgba(255,255,255,.16);}';
+    var zst=document.createElement('style'); zst.textContent=ZCSS; document.head.appendChild(zst);
+
+    var ov=document.createElement('div'); ov.className='gu-zsky';
+    ov.innerHTML='<div class="gu-zsky-top"><button class="zback" aria-label="Đóng"><span class="material-symbols-outlined">arrow_back</span></button><div class="ztt">Góc cung hoàng đạo</div></div><div class="gu-zsky-body"></div>';
     document.body.appendChild(ov);
-    var body=ov.querySelector('.gu-zod-body');
+    for(var s=0;s<26;s++){ var sp=document.createElement('span'); sp.className='zstar'; var sz=1+Math.random()*2.3; sp.style.width=sz+'px'; sp.style.height=sz+'px'; sp.style.left=(Math.random()*100)+'%'; sp.style.top=(Math.random()*72)+'%'; sp.style.animationDelay=(Math.random()*3)+'s'; ov.appendChild(sp); }
+    var body=ov.querySelector('.gu-zsky-body');
     function close(){ ov.classList.remove('on'); }
-    ov.addEventListener('click',function(e){ if(e.target===ov||e.target.closest('.gu-zod-x')) close(); });
+    ov.querySelector('.zback').addEventListener('click',close);
+
     function picker(){
-      body.innerHTML='<div class="gu-zod-h">🔮 Cung hoàng đạo của bạn</div><div class="gu-zod-sub">Chọn cung để nhận linh vật & lời nhắn hôm nay</div><div class="gu-zod-grid"></div>';
-      var g=body.querySelector('.gu-zod-grid');
-      Z.forEach(function(z,i){ var it=document.createElement('div'); it.className='gu-zod-item'; it.innerHTML='<span class="e">'+z.e+'</span><span class="n">'+z.n+'</span><span class="d">'+z.d+'</span>'; it.addEventListener('click',function(){ try{localStorage.setItem('gu_zodiac',String(i));}catch(e){} result(i); }); g.appendChild(it); });
+      body.innerHTML='<div class="zsub">Chọn cung của bạn để nhận vận hôm nay & đồ uống hợp mệnh ✨</div><div class="zgrid"></div>';
+      var g=body.querySelector('.zgrid');
+      Z.forEach(function(z,i){ var it=document.createElement('div'); it.className='zitem'; it.innerHTML='<span class="e">'+z.e+'</span><span class="n">'+z.n+'</span><span class="d">'+z.d+'</span>'; it.addEventListener('click',function(){ try{localStorage.setItem('gu_zodiac',String(i));}catch(e){} try{ if(window.GU_SFX&&window.GU_SFX.ting)window.GU_SFX.ting(); }catch(e){} result(i); body.scrollTop=0; }); g.appendChild(it); });
     }
     function result(i){
-      var z=Z[i];
-      body.innerHTML='<div class="gu-zod-res"><div class="gu-zod-mascot">'+z.e+'</div><div class="gu-zod-name">'+z.n+'</div><div class="gu-zod-range">'+z.d+'</div><div class="gu-zod-horo">'+z.h+'</div><div class="gu-zod-drink">☕ Đồ uống hợp cung hôm nay: <b>'+z.dr+'</b></div><div class="gu-zod-actions"><button class="gu-zod-btn sec" data-a="share">Chia sẻ</button><button class="gu-zod-btn pri" data-a="order">Đặt ngay</button></div><button class="gu-zod-back">← Chọn cung khác</button></div>';
-      body.querySelector('.gu-zod-back').addEventListener('click',picker);
-      body.querySelector('[data-a=order]').addEventListener('click',function(){ close(); if(window.__go)window.__go('screen-menu'); var el=document.getElementById('cat-tea'); if(el)el.scrollIntoView({behavior:'smooth'}); });
-      body.querySelector('[data-a=share]').addEventListener('click',function(){
-        var txt='🔮 Cung '+z.n+' '+z.e+' hôm nay: '+z.h+' · Đồ uống hợp vị: '+z.dr+' · Khám phá tại gUlEm ☕';
-        if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ miniToast('✓ Đã sao chép — dán chia sẻ nhé!'); },function(){ miniToast('Hãy chụp màn hình để chia sẻ nhé'); }); } else miniToast('Hãy chụp màn hình để chia sẻ nhé');
+      var z=Z[i], dk=zday();
+      var daily=DAILY[zhash(z.n+dk)%DAILY.length];
+      var num=(zhash(z.n+dk+'n')%9)+1;
+      var col=ZCOLORS[zhash(z.n+dk+'c')%ZCOLORS.length];
+      var mood=ZMOODS[zhash(z.n+dk+'m')%ZMOODS.length];
+      var li=zhash(z.n+dk+'l')%12; if(li===i)li=(li+1)%12; var love=Z[li];
+      var dd=new Date(); var ds=('0'+dd.getDate()).slice(-2)+'/'+('0'+(dd.getMonth()+1)).slice(-2);
+      body.innerHTML='<div class="zhero"><div class="zmascot">'+z.e+'</div><div class="zname">'+z.n+'</div><div class="zrange">'+z.d+'</div><div class="zdate">✦ Vận ngày '+ds+'</div></div>'
+        +'<div class="zcard"><div class="zlabel">🔮 Lời nhắn hôm nay</div><div class="zhoro">'+daily+'</div><div class="ztrait">Nét '+z.n+': '+z.h+'</div></div>'
+        +'<div class="zstats"><div class="zstat"><div class="v">'+num+'</div><div class="k">Số may mắn</div></div>'
+        +'<div class="zstat"><div class="v"><span class="dot" style="background:'+col.c+';color:'+col.c+'"></span></div><div class="k">'+col.n+'</div></div>'
+        +'<div class="zstat"><div class="v">'+mood.e+'</div><div class="k">'+mood.w+'</div></div></div>'
+        +'<div class="zdrink"><span class="zdemo">🥤</span><div class="zdt"><small>Đồ uống hợp cung hôm nay</small><b>'+z.dr+'</b></div><button class="zorder">Đặt ngay</button></div>'
+        +'<div class="zlove">💞 Hôm nay bạn hợp nhất với <b>'+love.e+' '+love.n+'</b></div>'
+        +'<div class="zacts"><button class="zswap">↺ Đổi cung</button><button class="zshare">Chia sẻ ✦</button></div>';
+      body.querySelector('.zswap').addEventListener('click',function(){ picker(); body.scrollTop=0; });
+      body.querySelector('.zorder').addEventListener('click',function(){ orderDrink(z.dr); });
+      body.querySelector('.zshare').addEventListener('click',function(){
+        var txt='🔮 '+z.e+' '+z.n+' — vận ngày '+ds+': '+daily+'\nSố may mắn '+num+' · đồ uống hợp cung: '+z.dr+' ☕\n— Bói vui cùng gUlEm';
+        if(navigator.share){ navigator.share({title:'Cung hoàng đạo gUlEm',text:txt}).catch(function(){}); }
+        else if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ miniToast('✓ Đã sao chép — dán chia sẻ nhé!'); },function(){ miniToast('Hãy chụp màn hình để chia sẻ nhé'); }); }
+        else miniToast('Hãy chụp màn hình để chia sẻ nhé');
       });
     }
-    function miniToast(m){ var t=document.createElement('div'); t.textContent=m; t.style.cssText='position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:1340;background:#e9486a;color:#fff;font:600 13px "Plus Jakarta Sans",sans-serif;padding:10px 18px;border-radius:999px;box-shadow:0 10px 24px rgba(180,40,90,.4);max-width:86vw;text-align:center'; document.body.appendChild(t); setTimeout(function(){ if(t.parentNode)t.parentNode.removeChild(t); },2200); }
-    function open(){ var saved=null; try{saved=localStorage.getItem('gu_zodiac');}catch(e){} if(saved!==null && Z[+saved]) result(+saved); else picker(); ov.classList.add('on'); }
+    function orderDrink(name){ close(); if(window.__go)window.__go('screen-menu'); setTimeout(function(){ var b=null; document.querySelectorAll('#screen-menu .btn-add[data-name]').forEach(function(x){ if(x.getAttribute('data-name')===name)b=x; }); var card=b&&b.closest('.rounded-2xl'); if(card){ card.scrollIntoView({behavior:'smooth',block:'center'}); card.style.transition='box-shadow .4s'; card.style.boxShadow='0 0 0 3px #e9486a'; setTimeout(function(){ card.style.boxShadow=''; },1700); } else { var el=document.getElementById('cat-tea'); if(el)el.scrollIntoView({behavior:'smooth'}); } },300); }
+    function miniToast(m){ var t=document.createElement('div'); t.textContent=m; t.style.cssText='position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:100012;background:#e9486a;color:#fff;font:600 13px "Plus Jakarta Sans",sans-serif;padding:10px 18px;border-radius:999px;box-shadow:0 10px 24px rgba(180,40,90,.4);max-width:86vw;text-align:center'; document.body.appendChild(t); setTimeout(function(){ if(t.parentNode)t.parentNode.removeChild(t); },2200); }
+    function open(){ var saved=null; try{saved=localStorage.getItem('gu_zodiac');}catch(e){} if(saved!==null && Z[+saved]) result(+saved); else picker(); ov.classList.add('on'); body.scrollTop=0; }
 
     /* trợ lý concierge gọi qua window.__guZodiac (chip "Gợi ý theo cung") */
     window.__guZodiac=open;
