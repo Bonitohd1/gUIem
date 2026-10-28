@@ -2,7 +2,7 @@
 // Trình duyệt khách chỉ gọi /api/ntfy (cùng tên miền app) -> không bị mạng chặn.
 // Máy chủ Vercel mới là bên gọi ntfy.sh (không bị chặn). Zero setup.
 const BASE = process.env.GULEM_NTFY || 'gulem-ord-45dce218aa';
-const SUF = { orders: '', status: '-st', menu: '-menu' };
+const SUF = { orders: '', status: '-st', menu: '-menu', review: '-rv' };
 
 function readBody(req) {
   if (req.body && typeof req.body === 'object') return Promise.resolve(req.body);
