@@ -3698,25 +3698,45 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   // ===== Âm báo đơn mới (độc lập cờ tắt tiếng của khách) =====
   var admAC=null, admAlarm=null;
   function admCtx(){ try{ if(!admAC){ var A=window.AudioContext||window.webkitAudioContext; if(!A)return null; admAC=new A(); } if(admAC.state==='suspended'){ admAC.resume(); } return admAC; }catch(e){ return null; } }
-  function beepURL(){ // tạo WAV beep ngắn (dùng cho thẻ <audio>, bền trên mobile)
-    try{ var sr=8000,dur=0.6,n=Math.floor(sr*dur); var bytes=44+n; var b=new Uint8Array(bytes); var dv=new DataView(b.buffer);
+  function beepURL(){ // chuông marimba 4 nốt + nền ấm (cho thẻ <audio>, bền trên mobile)
+    try{ var sr=11025,dur=1.3,n=Math.floor(sr*dur); var bytes=44+n; var b=new Uint8Array(bytes); var dv=new DataView(b.buffer);
       function ws(o,s){ for(var i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i)); }
       ws(0,'RIFF'); dv.setUint32(4,36+n,true); ws(8,'WAVE'); ws(12,'fmt '); dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true); dv.setUint32(24,sr,true); dv.setUint32(28,sr,true); dv.setUint16(32,1,true); dv.setUint16(34,8,true); ws(36,'data'); dv.setUint32(40,n,true);
-      for(var i=0;i<n;i++){ var t=i/sr; var f=(t%0.3<0.15)?880:1320; var env=Math.min(1,(0.3-(t%0.3))*6)*Math.min(1,(t%0.3)*20); var s=Math.sin(2*Math.PI*f*t)*env*0.6; b[44+i]=128+Math.round(s*110); }
+      // melody C6–E6–G6–C7 (+ nền C5), mỗi nốt có hài âm & decay kiểu chuông
+      var notes=[[523.25,0.00,1.20,0.30],[1046.5,0.00,0.78,0.55],[1318.5,0.12,0.78,0.55],[1568.0,0.24,0.90,0.60],[2093.0,0.40,1.05,0.64]];
+      for(var i=0;i<n;i++){ var t=i/sr, s=0;
+        for(var k=0;k<notes.length;k++){ var f=notes[k][0], st=notes[k][1], du=notes[k][2], vol=notes[k][3], lt=t-st; if(lt<0||lt>du)continue;
+          var env=(1-Math.exp(-lt*260))*Math.exp(-lt*3.6);
+          s+=env*vol*(Math.sin(6.2831853*f*lt)+0.35*Math.sin(6.2831853*2*f*lt)+0.12*Math.sin(6.2831853*3*f*lt));
+        }
+        s*=0.32; if(s>1)s=1; else if(s<-1)s=-1; b[44+i]=128+Math.round(s*120);
+      }
       var bin=''; for(var j=0;j<bytes;j++)bin+=String.fromCharCode(b[j]); return 'data:audio/wav;base64,'+btoa(bin);
     }catch(e){ return ''; }
   }
   function ensureAlarm(){ if(admAlarm)return admAlarm; try{ admAlarm=document.createElement('audio'); admAlarm.id='gu-admin-alarm'; var u=beepURL(); if(u)admAlarm.src=u; admAlarm.preload='auto'; document.body.appendChild(admAlarm); }catch(e){} return admAlarm; }
   function unlockAudio(){ admCtx(); try{ var a=ensureAlarm(); if(a){ a.muted=true; var p=a.play(); if(p&&p.then)p.then(function(){ a.pause(); a.currentTime=0; a.muted=false; }).catch(function(){ a.muted=false; }); } }catch(e){} }
+  // một "nốt chuông": sóng cơ bản + 2 hài âm, vào nhanh - ngân chậm (timbre marimba/bell)
+  function bell(c,dest,f,t0,dur,vol){
+    [[1,1],[2,0.35],[3,0.12]].forEach(function(h){ var o=c.createOscillator(),g=c.createGain(); o.type='sine'; o.frequency.value=f*h[0]; o.connect(g); g.connect(dest);
+      g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(Math.max(0.0002,vol*h[1]),t0+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); o.start(t0); o.stop(t0+dur+0.03); });
+  }
   function chime(){ if(!soundOn)return;
-    try{ if(navigator.vibrate)navigator.vibrate([30,70,30,70,40]); }catch(e){}
-    // 1) thử WebAudio (2 nhịp ding-dong)
-    var c=admCtx(); var played=false;
-    if(c){ try{ var base=c.currentTime+0.03;
-      [0,0.45].forEach(function(off){ [880,1320].forEach(function(f,i){ var o=c.createOscillator(),g=c.createGain(); o.type='sine'; o.frequency.value=f; o.connect(g); g.connect(c.destination); var t=base+off+i*0.14; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.3,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.32); o.start(t); o.stop(t+0.34); }); });
-      played=(c.state==='running'); }catch(e){} }
-    // 2) fallback thẻ <audio> (bền khi WebAudio bị treo trên mobile)
-    try{ var a=ensureAlarm(); if(a&&a.src){ a.currentTime=0; var pr=a.play(); if(pr&&pr.catch)pr.catch(function(){}); } }catch(e){}
+    try{ if(navigator.vibrate)navigator.vibrate([25,60,25,60,45]); }catch(e){}
+    // 1) WebAudio: chuông marimba 4 nốt ngân (qua master + lọc mượt)
+    var c=admCtx(), usedWA=false;
+    if(c){ try{
+      var master=c.createGain(); master.gain.value=0.95; var lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=5200; lp.Q.value=0.4; master.connect(lp); lp.connect(c.destination);
+      var base=c.currentTime+0.04;
+      bell(c,master,523.25,base,1.1,0.10);        // nền ấm C5
+      bell(c,master,1046.5,base,0.72,0.20);        // C6
+      bell(c,master,1318.5,base+0.12,0.72,0.20);   // E6
+      bell(c,master,1568.0,base+0.24,0.82,0.22);   // G6
+      bell(c,master,2093.0,base+0.40,1.00,0.24);   // C7 ngân cuối
+      usedWA=(c.state==='running');
+    }catch(e){} }
+    // 2) fallback thẻ <audio> CHỈ khi WebAudio chưa chạy (tránh kêu đôi)
+    if(!usedWA){ try{ var a=ensureAlarm(); if(a&&a.src){ a.currentTime=0; var pr=a.play(); if(pr&&pr.catch)pr.catch(function(){}); } }catch(e){} }
   }
   function toast(m){ var t=$('gu-toast')||(function(){var d=document.createElement('div');d.id='gu-toast';d.style.cssText='position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#3ddc84;color:#06281a;font-weight:700;padding:10px 16px;border-radius:999px;font-size:13px;z-index:100002;box-shadow:0 10px 30px -8px rgba(0,0,0,.5);transition:.3s;opacity:0;max-width:86vw;text-align:center';document.body.appendChild(d);return d;})(); t.style.background='#3ddc84';t.style.color='#06281a'; t.textContent=m; t.style.opacity='1'; clearTimeout(t.__h); t.__h=setTimeout(function(){t.style.opacity='0';},3000); }
   function notify(title,body){ try{ if('Notification'in window && Notification.permission==='granted' && document.hidden){ new Notification(title,{body:body,icon:'/favicon.ico'}); } }catch(e){} }
