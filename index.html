@@ -3318,6 +3318,20 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
         +'<div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-bold">Thanh toán: Tiền mặt khi nhận món</span>'
         +'<span class="font-body-sm text-body-sm text-on-surface-variant">Quán thu tiền khi giao / khi bạn nhận đồ uống</span></div></div>';
     }
+    // dọn rác template trên màn xác nhận: bỏ dòng giả (Tiền nước/Topping/Anh Minh/Bàn số 04)
+    var cf=document.getElementById('screen-confirm');
+    if(cf && !cf.__cleaned){ cf.__cleaned=true;
+      function rm(el){ if(el&&el.parentNode)el.parentNode.removeChild(el); }
+      Array.prototype.slice.call(cf.querySelectorAll('span,p')).forEach(function(s){
+        var t=(s.textContent||'').trim();
+        if(t==='Tiền nước (3 ly)'||t==='Topping thêm (2 phần)'){ var row=s.closest('.flex'); rm(row); }
+      });
+      var am=Array.prototype.slice.call(cf.querySelectorAll('p')).filter(function(p){return p.textContent.trim()==='Anh Minh';})[0];
+      if(am){ var r=am.closest('.flex.items-center.justify-between'); rm(r); }
+      // nếu còn 2 khối "Tổng thanh toán" trùng nhau -> ẩn bớt 1
+      var tts=Array.prototype.slice.call(cf.querySelectorAll('span')).filter(function(s){return s.textContent.trim()==='Tổng thanh toán';});
+      if(tts.length>1){ var dupRow=tts[1].closest('.flex.flex-col'); rm(dupRow); }
+    }
 
     // 2) Thẻ chọn thanh toán nhỏ (màn giỏ): làm mờ nút VietQR, gắn nhãn, mặc định chọn tiền mặt
     var btns=Array.prototype.slice.call(document.querySelectorAll('#screen-cart button')).filter(function(b){ return /Chuyển khoản VietQR|Tiền mặt/.test(b.textContent); });
