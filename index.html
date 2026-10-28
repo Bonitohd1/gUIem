@@ -2658,13 +2658,14 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   // gUlEm: nạp URL webhook + kênh đơn từ /cfg.json lúc tải trang (đổi URL không cần build lại app)
   try{ fetch("/cfg.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(c){ if(c){ if(c.webhook)WEBHOOK=c.webhook; if(c.ntfy)ORD_TOPIC=c.ntfy; } }).catch(function(){}); }catch(e){}
   // phát đơn thẳng lên kênh admin (ntfy) — không phụ thuộc webhook/tunnel; kèm trừ tồn kho theo ngày
-  function pubSend(topic,p){ if(!topic)return; try{
-    fetch('https://ntfy.sh/'+topic,{method:'POST',body:JSON.stringify(p),headers:{'Title':'Don moi gUlEm','Tags':'bell','Priority':'high'}}).catch(function(){});
+  function pubSend(topic,p){ if(!topic)return Promise.resolve(false);
+    var main=fetch('https://ntfy.sh/'+topic,{method:'POST',body:JSON.stringify(p),headers:{'Title':'Don moi gUlEm','Tags':'bell','Priority':'high'}}).then(function(r){return !!r.ok;}).catch(function(){return false;});
     if(p&&p.recvDate){ var si={}; (p.items||[]).forEach(function(it){ si[it.name]=(si[it.name]||0)+(it.qty||0); }); fetch('https://ntfy.sh/'+topic+'-menu',{method:'POST',body:JSON.stringify({t:'sold',date:p.recvDate,items:si,ts:Date.now()})}).catch(function(){}); }
-  }catch(e){} }
-  function pubAdmin(p){ if(ORD_TOPIC){ pubSend(ORD_TOPIC,p); return; }
+    return main;
+  }
+  function pubAdmin(p){ if(ORD_TOPIC) return pubSend(ORD_TOPIC,p);
     // phòng trường hợp cfg chưa kịp nạp: lấy kênh rồi phát ngay, không để rớt đơn
-    try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy){ ORD_TOPIC=c.ntfy; pubSend(c.ntfy,p); } }).catch(function(){}); }catch(e){}
+    return fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy){ ORD_TOPIC=c.ntfy; return pubSend(c.ntfy,p); } return false; }).catch(function(){return false;});
   }
   var SHOP="gUlEm - Tiệm nhà chị em Thùy";
 
@@ -2759,9 +2760,9 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     var rv=window.__GU_RECV||{}; p.recvDate=rv.date||''; p.recvLabel=rv.label||'Hôm nay';
     window.__GU_ORDER_CODE=p.code; try{sessionStorage.setItem('gu_order_code',p.code);}catch(e){}
     renderConfirm();
-    try{ var ce=document.getElementById('gu-order-code'); if(ce){ ce.textContent='Mã đơn: '+p.code; ce.classList.remove('hidden'); } }catch(e){}
-    // 1) LUÔN báo đơn về admin qua ntfy (ổn định, không cần webhook/tunnel)
-    pubAdmin(p);
+    try{ var ce=document.getElementById('gu-order-code'); if(ce){ ce.textContent='Mã đơn: '+p.code+' · đang gửi…'; ce.classList.remove('hidden'); } }catch(e){}
+    // 1) LUÔN báo đơn về admin qua ntfy (ổn định, không cần webhook/tunnel) + hiện trạng thái gửi
+    pubAdmin(p).then(function(ok){ try{ var ce=document.getElementById('gu-order-code'); if(ce){ ce.textContent='Mã đơn: '+p.code+(ok?' · ✓ đã lên hệ thống':' · ⚠️ chưa gửi được (mạng?)'); ce.style.background=ok?'':'rgba(255,90,82,.18)'; ce.style.color=ok?'':'#b23b48'; } }catch(e){} });
     // 2) gửi n8n (Telegram/Sheet) nếu có webhook — chạy nền, không chặn
     if(WEBHOOK){ try{ fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}).catch(function(){}); }catch(e){} }
     toast('✓ Đã gửi đơn tới quán!');
@@ -3796,7 +3797,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function boot(){
     $('ga-close').addEventListener('click',closeAdmin);
     var me=$('ga-menued'); if(me) me.addEventListener('click',function(){ if(window.guMenuEditor)window.guMenuEditor(); });
-    $('ga-refresh').addEventListener('click',function(){ loadHistory(); });
+    $('ga-refresh').addEventListener('click',function(){ var ic=this.querySelector('.material-symbols-outlined'); if(ic){ ic.style.transition='transform .6s'; ic.style.transform='rotate(360deg)'; setTimeout(function(){ ic.style.transition='none'; ic.style.transform='none'; },620); } toast('🔄 Đang làm mới…'); ORDERS=[]; seenIds=Object.create(null); loadHistory(); });
     $('ga-list').addEventListener('click',function(e){
       var fd=e.target.closest&&e.target.closest('.ga-forcedone');
       if(fd){ e.preventDefault(); e.stopPropagation(); setStatus(fd.getAttribute('data-code'),'received'); toast('✅ Đã đánh dấu hoàn tất'); return; }
