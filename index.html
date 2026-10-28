@@ -3678,7 +3678,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c){ if(c.orders)CFG.orders=c.orders; if(c.ntfy)CFG.ntfy=c.ntfy; if(c.adminPin)CFG.pin=String(c.adminPin); } }).catch(function(){}); }catch(e){}
 
   var $=function(id){return document.getElementById(id);};
-  var pollTimer=null, seenMax=0, soundOn=true, ORDERS=[], seenIds=Object.create(null), es=null, esSt=null;
+  var pollTimer=null, seenMax=0, soundOn=true, ORDERS=[], seenIds=Object.create(null), es=null, esSt=null, firstLoad=true;
   try{ seenMax=parseInt(localStorage.getItem('gu_admin_seen')||'0',10)||0; }catch(e){}
   try{ soundOn=localStorage.getItem('gu_admin_sound')!=='0'; }catch(e){}
 
@@ -3751,7 +3751,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     var q=SEARCH.trim().toLowerCase();
     var shown='';
     list.forEach(function(o){
-      var ts=tparse(o.at); var isNew=ts>seenMax; var st=getStatus(o.code);
+      var ts=tparse(o.at); var st=getStatus(o.code); var isNew=(st===''); /* chưa xử lý = còn MỚI, giữ badge tới khi admin bắt đầu pha */
       var closed = st==='received';
       var em=elapsedMin(ts); var isLate = !closed && st!=='delivered' && em>=LATE_MIN;
       if(isNew)newCnt++;
@@ -3823,7 +3823,9 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     ORDERS.push(o);
     refresh();
     var ts=tparse(o.at);
-    if(isLive && ts>seenMax){
+    // Báo đơn mới KỂ CẢ qua đường poll (không chỉ SSE) -> không sót đơn khi mạng chặn SSE.
+    // Lần nạp đầu (firstLoad) im lặng để không dồn chuông; các vòng poll sau mới báo.
+    if((isLive || !firstLoad) && ts>seenMax){
       chime();
       toast('🔔 Đơn mới từ '+(o.customerName||'khách')+' · '+money(o.total));
       notify('🔔 Đơn mới gUlEm', (o.customerName||'Khách')+' · '+money(o.total)+' · '+(o.itemsText||''));
@@ -3838,6 +3840,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
         });
         ORDERS.forEach(function(o){ var t=tparse(o.at); if(t>seenMax)seenMax=t; });
         try{ localStorage.setItem('gu_admin_seen',String(seenMax)); }catch(e){}
+        firstLoad=false; // từ vòng poll sau, đơn mới sẽ kêu chuông/thông báo
         $('ga-status').textContent='🟢 Đang nhận đơn · '+hhmm(Date.now());
         refresh();
       })
@@ -4354,8 +4357,11 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <script>
 /* gUlEm · render lịch sử đơn của khách từ localStorage + trạng thái realtime (qua proxy) */
 (function(){
-  var PILL={'':{t:'Chờ xử lý',c:'#f0a500'},making:{t:'Đang pha',c:'#e9486a'},done:{t:'Đã xong',c:'#f0a500'},delivered:{t:'Đã giao',c:'#5b9cff'},received:{t:'Hoàn tất ✓',c:'#2fae6a'}};
-  var statusMap={};
+  var PILL={'':{t:'Chờ xử lý',c:'#9a8aa0'},making:{t:'Đang pha',c:'#e9486a'},done:{t:'Đã xong',c:'#f0a500'},delivered:{t:'Đã giao',c:'#5b9cff'},received:{t:'Hoàn tất ✓',c:'#2fae6a'}};
+  var SKEY='gu_ostatus_cust';
+  function loadMap(){ try{ return JSON.parse(localStorage.getItem(SKEY)||'{}')||{}; }catch(e){ return {}; } }
+  function saveMap(){ try{ localStorage.setItem(SKEY,JSON.stringify(statusMap)); }catch(e){} }
+  var statusMap=loadMap();
   function money(n){ return (Number(n)||0).toLocaleString('vi-VN')+'đ'; }
   function dt(at){ var d=new Date(at); if(isNaN(d))return ''; return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+' · '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
@@ -4372,7 +4378,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     list.forEach(function(o,idx){ var st=statusMap[o.code]||''; var p=PILL[st]||PILL[''];
       var rv=(window.guGetReview?window.guGetReview(o.code):null);
       var action='';
-      if(st==='delivered'){
+      if(st==='delivered'||st==='done'){
         action='<button class="gu-hist-receive" data-receive="'+esc(o.code)+'"><span class="material-symbols-outlined">check_circle</span>Đã nhận hàng</button>';
       } else if(st==='received'){
         if(rv){ action='<div class="gu-hist-rv">'+[1,2,3,4,5].map(function(i){return '<span class="gu-hist-rvstar'+(i<=rv.rating?' on':'')+'">★</span>';}).join('')+'<span class="gu-hist-rvtxt">Bạn đã đánh giá</span></div>'; }
@@ -4392,14 +4398,14 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 
   function pollStatus(){ if(!window.GUX)return; window.GUX.poll('status','48h').then(function(txt){
     (txt.split('\n').filter(Boolean)).forEach(function(ln){ try{ var m=JSON.parse(ln); if(m.event==='message'&&m.message){ var d=JSON.parse(m.message); if(d.code&&d.status)statusMap[d.code]=d.status; } }catch(e){} });
-    render();
+    saveMap(); render();
   }).catch(function(){}); }
 
   // reorder: nạp lại món vào giỏ rồi sang giỏ hàng
   document.addEventListener('click',function(e){
     var home=e.target.closest&&e.target.closest('[data-gohome]'); if(home){ if(window.__go)window.__go('screen-menu'); return; }
     var rcv=e.target.closest&&e.target.closest('[data-receive]'); if(rcv){ var code=rcv.getAttribute('data-receive');
-      statusMap[code]='received'; if(window.GUX)window.GUX.pub('status',{code:code,status:'received'});
+      statusMap[code]='received'; saveMap(); if(window.GUX)window.GUX.pub('status',{code:code,status:'received'});
       try{ if(window.GU_SFX&&window.GU_SFX.success)window.GU_SFX.success(); if(navigator.vibrate)navigator.vibrate([10,30,15]); }catch(_){ }
       render(); setTimeout(function(){ if(window.guOpenReview)window.guOpenReview(code); }, 500); return; }
     var rvw=e.target.closest&&e.target.closest('[data-review]'); if(rvw){ if(window.guOpenReview)window.guOpenReview(rvw.getAttribute('data-review')); return; }
