@@ -72,6 +72,14 @@ module.exports = async (req, res) => {
         res.status(200).json({ ok: true, orders });
         return;
       }
+      if (op === 'top') {
+        const n = Math.min(10, parseInt((req.query && req.query.n) || '5', 10) || 5);
+        const arr = (await cmd(c, ['ZREVRANGE', 'gu:top', '0', String(n - 1), 'WITHSCORES'])) || [];
+        const top = [];
+        for (let i = 0; i < arr.length; i += 2) { top.push({ name: arr[i], sold: parseInt(arr[i + 1], 10) || 0 }); }
+        res.status(200).json({ ok: true, top });
+        return;
+      }
       if (op === 'menu') {
         const dates = String((req.query && req.query.dates) || '').split(',').map(dateKey).filter(Boolean).slice(0, 7);
         const plans = {}, sold = {};
@@ -118,6 +126,10 @@ module.exports = async (req, res) => {
       if (rd && Array.isArray(data.items)) {
         for (const it of data.items) { if (it && it.name) await cmd(c, ['HINCRBY', 'gu:sold:' + rd, it.name, String(it.qty || 0)]); }
       }
+      // Xếp hạng bán chạy (mọi đơn) để gợi ý "Top bán chạy"
+      if (Array.isArray(data.items)) {
+        for (const it of data.items) { if (it && it.name && (it.qty || 0) > 0) await cmd(c, ['ZINCRBY', 'gu:top', String(it.qty || 0), it.name]); }
+      }
       res.status(200).json({ ok: true, code });
       return;
     }
@@ -136,7 +148,9 @@ module.exports = async (req, res) => {
       if (!code) { res.status(400).json({ ok: false, error: 'no code' }); return; }
       let ph = '';
       const cur = await cmd(c, ['GET', 'gu:o:' + code]);
-      if (cur) { try { ph = digits(JSON.parse(cur).customer && JSON.parse(cur).customer.phone); } catch (e) {} }
+      if (cur) { try { const o = JSON.parse(cur); ph = digits(o.customer && o.customer.phone);
+        if (Array.isArray(o.items)) { for (const it of o.items) { if (it && it.name && (it.qty || 0) > 0) await cmd(c, ['ZINCRBY', 'gu:top', String(-(it.qty || 0)), it.name]); } }
+      } catch (e) {} }
       await cmd(c, ['DEL', 'gu:o:' + code]);
       await cmd(c, ['LREM', 'gu:orec', '0', code]);
       if (ph) await cmd(c, ['LREM', 'gu:op:' + ph, '0', code]);
