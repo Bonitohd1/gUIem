@@ -2922,6 +2922,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
           if(nm.length<2){ E('#gu-err').textContent='Vui lòng nhập tên.'; return; }
           if(digits.length<9){ E('#gu-err').textContent='Số điện thoại chưa hợp lệ.'; return; }
           put({name:nm,phone:ph}); prefill(); syncBtns(); render();
+          try{ if(window.guSyncOrders) window.guSyncOrders(); }catch(e){} // kéo đơn gần đây của SĐT này về (đa thiết bị)
         });
         var inp=E('#gu-in-name'); if(inp) setTimeout(function(){inp.focus();},300);
       }
@@ -3646,6 +3647,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     </div>
     <button class="ga-ico" id="ga-menued" title="Thực đơn theo ngày"><span class="material-symbols-outlined">restaurant_menu</span></button>
     <button class="ga-ico" id="ga-sound" title="Bật/tắt chuông"><span class="material-symbols-outlined">notifications_active</span></button>
+    <button class="ga-ico" id="ga-push" title="Thông báo nền (khi đóng app)"><span class="material-symbols-outlined">notification_add</span></button>
     <button class="ga-ico" id="ga-refresh" title="Làm mới"><span class="material-symbols-outlined">refresh</span></button>
     <button class="ga-ico" id="ga-close" title="Đóng"><span class="material-symbols-outlined">close</span></button>
   </div>
@@ -3693,7 +3695,29 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function tickClock(){ var el=$('ga-clock'); if(!el)return; var d=new Date(); var days=['CN','T2','T3','T4','T5','T6','T7'];
     el.textContent='· '+days[d.getDay()]+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
 
-  function chime(){ if(!soundOn)return; try{ if(window.GU_SFX&&window.GU_SFX.ding)return window.GU_SFX.ding(); var A=window.AudioContext||window.webkitAudioContext; if(!A)return; var c=new A(); [880,1320].forEach(function(f,i){ var o=c.createOscillator(),g=c.createGain(); o.frequency.value=f; o.connect(g); g.connect(c.destination); var t=c.currentTime+i*0.14; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.3); o.start(t); o.stop(t+0.32); }); }catch(e){} }
+  // ===== Âm báo đơn mới (độc lập cờ tắt tiếng của khách) =====
+  var admAC=null, admAlarm=null;
+  function admCtx(){ try{ if(!admAC){ var A=window.AudioContext||window.webkitAudioContext; if(!A)return null; admAC=new A(); } if(admAC.state==='suspended'){ admAC.resume(); } return admAC; }catch(e){ return null; } }
+  function beepURL(){ // tạo WAV beep ngắn (dùng cho thẻ <audio>, bền trên mobile)
+    try{ var sr=8000,dur=0.6,n=Math.floor(sr*dur); var bytes=44+n; var b=new Uint8Array(bytes); var dv=new DataView(b.buffer);
+      function ws(o,s){ for(var i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i)); }
+      ws(0,'RIFF'); dv.setUint32(4,36+n,true); ws(8,'WAVE'); ws(12,'fmt '); dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true); dv.setUint32(24,sr,true); dv.setUint32(28,sr,true); dv.setUint16(32,1,true); dv.setUint16(34,8,true); ws(36,'data'); dv.setUint32(40,n,true);
+      for(var i=0;i<n;i++){ var t=i/sr; var f=(t%0.3<0.15)?880:1320; var env=Math.min(1,(0.3-(t%0.3))*6)*Math.min(1,(t%0.3)*20); var s=Math.sin(2*Math.PI*f*t)*env*0.6; b[44+i]=128+Math.round(s*110); }
+      var bin=''; for(var j=0;j<bytes;j++)bin+=String.fromCharCode(b[j]); return 'data:audio/wav;base64,'+btoa(bin);
+    }catch(e){ return ''; }
+  }
+  function ensureAlarm(){ if(admAlarm)return admAlarm; try{ admAlarm=document.createElement('audio'); admAlarm.id='gu-admin-alarm'; var u=beepURL(); if(u)admAlarm.src=u; admAlarm.preload='auto'; document.body.appendChild(admAlarm); }catch(e){} return admAlarm; }
+  function unlockAudio(){ admCtx(); try{ var a=ensureAlarm(); if(a){ a.muted=true; var p=a.play(); if(p&&p.then)p.then(function(){ a.pause(); a.currentTime=0; a.muted=false; }).catch(function(){ a.muted=false; }); } }catch(e){} }
+  function chime(){ if(!soundOn)return;
+    try{ if(navigator.vibrate)navigator.vibrate([30,70,30,70,40]); }catch(e){}
+    // 1) thử WebAudio (2 nhịp ding-dong)
+    var c=admCtx(); var played=false;
+    if(c){ try{ var base=c.currentTime+0.03;
+      [0,0.45].forEach(function(off){ [880,1320].forEach(function(f,i){ var o=c.createOscillator(),g=c.createGain(); o.type='sine'; o.frequency.value=f; o.connect(g); g.connect(c.destination); var t=base+off+i*0.14; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.3,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.32); o.start(t); o.stop(t+0.34); }); });
+      played=(c.state==='running'); }catch(e){} }
+    // 2) fallback thẻ <audio> (bền khi WebAudio bị treo trên mobile)
+    try{ var a=ensureAlarm(); if(a&&a.src){ a.currentTime=0; var pr=a.play(); if(pr&&pr.catch)pr.catch(function(){}); } }catch(e){}
+  }
   function toast(m){ var t=$('gu-toast')||(function(){var d=document.createElement('div');d.id='gu-toast';d.style.cssText='position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#3ddc84;color:#06281a;font-weight:700;padding:10px 16px;border-radius:999px;font-size:13px;z-index:100002;box-shadow:0 10px 30px -8px rgba(0,0,0,.5);transition:.3s;opacity:0;max-width:86vw;text-align:center';document.body.appendChild(d);return d;})(); t.style.background='#3ddc84';t.style.color='#06281a'; t.textContent=m; t.style.opacity='1'; clearTimeout(t.__h); t.__h=setTimeout(function(){t.style.opacity='0';},3000); }
   function notify(title,body){ try{ if('Notification'in window && Notification.permission==='granted' && document.hidden){ new Notification(title,{body:body,icon:'/favicon.ico'}); } }catch(e){} }
 
@@ -3887,6 +3911,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   var clockTimer=null, elapTimer=null;
   function openAdmin(){
     $('gu-admin').classList.add('on');
+    unlockAudio(); // mở console là có thao tác chạm -> mồi âm báo
     try{ if('Notification'in window && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
     ORDERS=[]; seenIds=Object.create(null);
     loadHistory(); loadStatus(); loadReviews();
@@ -3896,6 +3921,40 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     clearInterval(elapTimer); elapTimer=setInterval(function(){ if($('gu-admin').classList.contains('on')) refresh(); }, 60000);
   }
   function closeAdmin(){ $('gu-admin').classList.remove('on'); clearInterval(pollTimer); clearInterval(clockTimer); clearInterval(elapTimer); if(es){try{es.close();}catch(e){} es=null;} if(esSt){try{esSt.close();}catch(e){} esSt=null;} }
+
+  // ===== Thông báo nền (đẩy khi đóng app) =====
+  function openPush(){
+    var topic=(CFG.ntfy||'gulem-ord-45dce218aa')+'-push';
+    var ov=$('gu-push-ov');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='gu-push-ov';
+      ov.style.cssText='position:fixed;inset:0;z-index:100010;display:none;align-items:flex-end;justify-content:center;background:rgba(10,6,10,.6);backdrop-filter:blur(3px)';
+      ov.innerHTML='<div style="width:100%;max-width:460px;background:#191219;color:#f3e9ee;border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -18px 50px -18px rgba(0,0,0,.7);font-family:\'Plus Jakarta Sans\',sans-serif">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font:800 17px \'Plus Jakarta Sans\';color:#ffd98a">🔔 Nhận đơn kể cả khi đóng app</div><button id="gpx-x" style="width:32px;height:32px;border-radius:50%;border:0;background:#2c1e28;color:#f3e9ee;cursor:pointer">✕</button></div>'
+        +'<div style="font:500 12.5px/1.5 \'Plus Jakarta Sans\';color:#cdb6c0;margin-bottom:14px">Để không bỏ sót đơn khi tắt màn hình hay đóng app, chủ quán bật 2 lớp dưới đây:</div>'
+        +'<button id="gpx-perm" style="width:100%;padding:13px;border-radius:13px;border:0;background:linear-gradient(135deg,#e7c48a,#d9ad6f);color:#2a1a10;font:800 14px \'Plus Jakarta Sans\';cursor:pointer;margin-bottom:10px">① Bật thông báo trình duyệt</button>'
+        +'<div style="background:#221722;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:13px;margin-bottom:10px">'
+        +'<div style="font:800 13px \'Plus Jakarta Sans\';color:#f3e9ee;margin-bottom:6px">② Đẩy nền thật qua app “ntfy” (khuyên dùng)</div>'
+        +'<div style="font:500 12px/1.5 \'Plus Jakarta Sans\';color:#cdb6c0">Cài app <b style="color:#ffd98a">ntfy</b> (miễn phí) rồi đăng ký đúng chủ đề sau để nhận chuông đẩy nền kể cả khi app web đã đóng:</div>'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-top:9px"><code style="flex:1;background:#140f14;border:1px dashed rgba(255,255,255,.18);border-radius:9px;padding:9px 10px;font:700 12.5px monospace;color:#8ff0bf;overflow:auto;white-space:nowrap">'+topic+'</code><button id="gpx-copy" style="padding:9px 12px;border-radius:9px;border:0;background:#3a2a34;color:#f3e9ee;font:700 12px \'Plus Jakarta Sans\';cursor:pointer">Chép</button></div>'
+        +'<a id="gpx-open" href="https://ntfy.sh/'+topic+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:10px;padding:11px;border-radius:11px;background:#2c1e28;color:#ffd98a;font:800 13px \'Plus Jakarta Sans\';text-decoration:none">Mở ntfy để đăng ký nhanh →</a>'
+        +'<div style="display:flex;gap:8px;margin-top:8px"><a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener" style="flex:1;text-align:center;padding:9px;border-radius:10px;background:#140f14;color:#cdb6c0;font:700 11.5px \'Plus Jakarta Sans\';text-decoration:none">Android (Play)</a><a href="https://apps.apple.com/app/ntfy/id1625396347" target="_blank" rel="noopener" style="flex:1;text-align:center;padding:9px;border-radius:10px;background:#140f14;color:#cdb6c0;font:700 11.5px \'Plus Jakarta Sans\';text-decoration:none">iPhone (App Store)</a></div>'
+        +'</div>'
+        +'<button id="gpx-test" style="width:100%;padding:12px;border-radius:13px;border:1px solid rgba(255,255,255,.14);background:transparent;color:#cdb6c0;font:700 13px \'Plus Jakarta Sans\';cursor:pointer">Thử chuông ngay</button>'
+        +'<div id="gpx-note" style="font:600 11.5px \'Plus Jakarta Sans\';color:#8ff0bf;text-align:center;margin-top:10px;min-height:14px"></div>'
+        +'</div>';
+      document.body.appendChild(ov);
+      ov.addEventListener('click',function(e){ if(e.target===ov||e.target.closest('#gpx-x')) ov.style.display='none'; });
+      ov.querySelector('#gpx-perm').addEventListener('click',function(){ var n=ov.querySelector('#gpx-note'); unlockAudio();
+        try{ if(!('Notification'in window)){ n.textContent='Trình duyệt không hỗ trợ thông báo.'; return; }
+          Notification.requestPermission().then(function(p){ if(p==='granted'){ n.textContent='✓ Đã bật thông báo trình duyệt'; try{ new Notification('gUlEm',{body:'Thông báo đã bật — bạn sẽ nhận báo đơn mới',icon:'/logo.png?v=1'}); }catch(e){} } else { n.textContent='Bạn chưa cho phép thông báo.'; } });
+        }catch(e){ n.textContent='Không bật được thông báo.'; } });
+      ov.querySelector('#gpx-copy').addEventListener('click',function(){ try{ navigator.clipboard.writeText(topic); }catch(e){} ov.querySelector('#gpx-note').textContent='✓ Đã chép chủ đề — dán vào app ntfy'; });
+      ov.querySelector('#gpx-test').addEventListener('click',function(){ unlockAudio(); setTimeout(chime,60); ov.querySelector('#gpx-note').textContent='Nghe thấy chuông chứ? Nếu không, bấm ① và kiểm tra âm lượng.'; });
+    }
+    ov.style.display='flex';
+  }
+  window.guOpenPush=openPush;
 
   // PIN gate
   function askPin(){
@@ -3923,7 +3982,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       FILTER=t.getAttribute('data-f'); Array.prototype.forEach.call(fbar.querySelectorAll('.ga-ftab'),function(x){x.classList.toggle('on',x===t);}); refresh(); });
     var sInp=$('ga-search'); if(sInp) sInp.addEventListener('input',function(){ SEARCH=this.value||''; refresh(); });
     var sBtn=$('ga-sort'); if(sBtn) sBtn.addEventListener('click',function(){ SORT=SORT==='new'?'old':'new'; $('ga-sort-lbl').textContent=SORT==='new'?'Mới nhất':'Cũ nhất'; refresh(); });
-    $('ga-sound').addEventListener('click',function(){ soundOn=!soundOn; try{localStorage.setItem('gu_admin_sound',soundOn?'1':'0');}catch(e){} this.querySelector('.material-symbols-outlined').textContent=soundOn?'notifications_active':'notifications_off'; if(soundOn)chime(); });
+    $('ga-sound').addEventListener('click',function(){ soundOn=!soundOn; try{localStorage.setItem('gu_admin_sound',soundOn?'1':'0');}catch(e){} this.querySelector('.material-symbols-outlined').textContent=soundOn?'notifications_active':'notifications_off'; if(soundOn){ unlockAudio(); chime(); } });
+    var gp=$('ga-push'); if(gp) gp.addEventListener('click',openPush);
     $('gu-pin-ok').addEventListener('click',tryPin);
     $('gu-pin-inp').addEventListener('keydown',function(e){ if(e.key==='Enter')tryPin(); });
     $('gu-pin-cancel').addEventListener('click',function(){ $('gu-pin').classList.remove('on'); });
@@ -3936,6 +3996,9 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       if(!hit)return; var now=Date.now(); if(now-last<700)taps++; else taps=1; last=now; if(taps>=5){ taps=0; enter(); }
     }, true);
     window.guAdmin=enter; // cho phép gọi tay
+    // mồi/bật lại âm báo theo mọi thao tác chạm và khi quay lại tab
+    document.addEventListener('pointerdown',function(){ if($('gu-admin').classList.contains('on')) unlockAudio(); }, true);
+    document.addEventListener('visibilitychange',function(){ if(!document.hidden && $('gu-admin').classList.contains('on')) admCtx(); });
   }
   if(document.readyState!=='loading')boot(); else document.addEventListener('DOMContentLoaded',boot);
 })();
@@ -4366,6 +4429,24 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function dt(at){ var d=new Date(at); if(isNaN(d))return ''; return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+' · '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function orders(){ try{ return JSON.parse(localStorage.getItem('gu_orders')||'[]'); }catch(e){ return []; } }
+  function myPhone(){ try{ var a=JSON.parse(localStorage.getItem('gu_account')||'null'); return a&&a.phone?String(a.phone).replace(/[^0-9]/g,''):''; }catch(e){ return ''; } }
+  // Đồng bộ đa thiết bị: kéo đơn gần đây của CHÍNH SĐT này từ kênh chung, gộp vào lịch sử máy
+  function mergeRemote(cb){ var ph=myPhone(); if(!ph||!window.GUX){ cb&&cb(); return; }
+    window.GUX.poll('orders','48h').then(function(txt){
+      var local=orders(); var byCode={}; local.forEach(function(o){ if(o&&o.code)byCode[o.code]=o; }); var added=0;
+      txt.split('\n').filter(Boolean).forEach(function(ln){ try{ var m=JSON.parse(ln); if(m.event==='message'&&m.message){ var d=JSON.parse(m.message);
+        var dph=(d.customer&&d.customer.phone?String(d.customer.phone):'').replace(/[^0-9]/g,'');
+        if(d.code && dph && dph===ph && !byCode[d.code]){
+          var o={code:d.code,at:d.at,itemsText:(d.items||[]).map(function(i){return i.name+(i.opts?'('+i.opts+')':'')+' x'+i.qty;}).join(', '),items:(d.items||[]).map(function(i){return {name:i.name,price:i.price,qty:i.qty,opts:i.opts||''};}),total:d.total,count:d.count,recvDate:d.recvDate||'',recvLabel:d.recvLabel||'',phone:dph,payment:d.payment||''};
+          byCode[d.code]=o; local.push(o); added++;
+        }
+      } }catch(e){} });
+      if(added){ local.sort(function(a,b){ return (new Date(b.at))-(new Date(a.at)); }); local=local.slice(0,40); try{localStorage.setItem('gu_orders',JSON.stringify(local));}catch(e){} }
+      cb&&cb();
+    }).catch(function(){ cb&&cb(); });
+  }
+  function syncAndRender(){ render(); mergeRemote(function(){ pollStatus(); }); }
+  window.guSyncOrders=syncAndRender; // gọi sau khi đăng nhập SĐT
 
   function hostDiv(){ var s=document.getElementById('screen-history'); if(!s)return null; return s.querySelector('main > div'); }
   function build(){ var m=hostDiv(); if(!m)return null; var c=document.getElementById('gu-hist'); if(c)return c;
@@ -4410,11 +4491,11 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       render(); setTimeout(function(){ if(window.guOpenReview)window.guOpenReview(code); }, 500); return; }
     var rvw=e.target.closest&&e.target.closest('[data-review]'); if(rvw){ if(window.guOpenReview)window.guOpenReview(rvw.getAttribute('data-review')); return; }
     var rb=e.target.closest&&e.target.closest('[data-reorder]'); if(rb){ var i=parseInt(rb.getAttribute('data-reorder'),10); var o=orders()[i]; if(o&&o.items&&window.guAddToCart){ o.items.forEach(function(it){ window.guAddToCart(it.name,it.price,it.qty,it.opts); }); } else if(o&&o.items&&window.__guAdd){ o.items.forEach(function(it){ window.__guAdd(it.name,it.price,it.qty,it.opts); }); } if(window.__go)window.__go('screen-cart'); return; }
-    var nav=e.target.closest&&e.target.closest('[data-path="orders-history"]'); if(nav){ setTimeout(function(){ render(); pollStatus(); },140); }
+    var nav=e.target.closest&&e.target.closest('[data-path="orders-history"]'); if(nav){ setTimeout(syncAndRender,140); }
   });
 
-  var _go=window.__go; if(typeof _go==='function'){ window.__go=function(x){ var r=_go.apply(this,arguments); if(x==='screen-history'){ render(); pollStatus(); } return r; }; }
-  setInterval(function(){ var s=document.getElementById('screen-history'); if(s && (s.classList.contains('active')||s.style.display==='block')) pollStatus(); }, 10000);
+  var _go=window.__go; if(typeof _go==='function'){ window.__go=function(x){ var r=_go.apply(this,arguments); if(x==='screen-history'){ syncAndRender(); } return r; }; }
+  setInterval(function(){ var s=document.getElementById('screen-history'); if(s && (s.classList.contains('active')||s.style.display==='block')){ mergeRemote(function(){ pollStatus(); }); } }, 10000);
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',render); else render();
 })();
 </script>

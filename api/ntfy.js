@@ -47,6 +47,17 @@ module.exports = async (req, res) => {
         data.items.forEach((it) => { si[it.name] = (si[it.name] || 0) + (it.qty || 0); });
         try { await fetch(`https://ntfy.sh/${BASE}-menu`, { method: 'POST', body: JSON.stringify({ t: 'sold', date: data.recvDate, items: si, ts: Date.now() }) }); } catch (e) {}
       }
+      // Phát thêm bản tin DỄ ĐỌC sang topic -push để chủ quán nhận ĐẨY NỀN qua app ntfy (kể cả khi đóng app web)
+      if (kind === 'orders' && data && typeof data === 'object') {
+        try {
+          const nm = (data.customer && data.customer.name) || 'Khach';
+          const items = (data.items || []).map((it) => `${it.name} x${it.qty}`).join(', ');
+          const tot = (Number(data.total) || 0).toLocaleString('vi-VN') + 'd';
+          const recv = (data.recvLabel && data.recvLabel !== 'Hôm nay') ? (' | ' + data.recvLabel) : '';
+          const body = `${nm} - ${tot}${recv}\n${items}`;
+          await fetch(`https://ntfy.sh/${BASE}-push`, { method: 'POST', body, headers: { 'Title': 'gUlEm - Don moi' + (data.code ? (' ' + data.code) : ''), 'Tags': 'bell', 'Priority': 'urgent', 'Click': 'https://guiem-blue.vercel.app/?admin=1' } });
+        } catch (e) {}
+      }
       res.status(pr.ok ? 200 : 502).json({ ok: pr.ok, code: (data && data.code) || null });
       return;
     }
