@@ -30,6 +30,29 @@ window.GUX=(function(){
   return { pub:pub, poll:poll };
 })();
 </script>
+<script>
+/* gUlEm · GUSTORE: kho dữ liệu BỀN (lịch sử đơn/menu/tồn lâu dài) qua /api/store.
+   Nếu chưa cấu hình kho -> tự tắt, app dùng ntfy như cũ (không hỏng gì). */
+window.GUSTORE=(function(){
+  var base='/api/store', enabled=null; // null=chưa rõ, true/false
+  function on(){ return enabled!==false; }
+  function j(u,opt){ return fetch(u,opt).then(function(r){return r.json();}).then(function(d){
+      if(d&&d.disabled){ enabled=false; return null; }
+      if(d&&(d.ok||d.configured)){ enabled=true; }
+      return d;
+    }).catch(function(){ return null; }); }
+  return {
+    isEnabled:function(){ return enabled; },
+    ping:function(){ return j(base+'?op=ping'); },
+    saveOrder:function(p){ if(!on())return Promise.resolve(null); return j(base+'?op=order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}); },
+    setStatus:function(code,status){ if(!on())return Promise.resolve(null); return j(base+'?op=status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code,status:status})}); },
+    history:function(phone,n){ if(!on())return Promise.resolve(null); return j(base+'?op=history&phone='+encodeURIComponent(phone||'')+'&n='+(n||40)); },
+    orders:function(n){ if(!on())return Promise.resolve(null); return j(base+'?op=orders&n='+(n||150)); },
+    savePlan:function(date,items,note){ if(!on())return Promise.resolve(null); return j(base+'?op=plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:date,items:items,note:note||''})}); },
+    menu:function(dates){ if(!on())return Promise.resolve(null); return j(base+'?op=menu&dates='+encodeURIComponent(dates)); }
+  };
+})();
+</script>
 <meta name="apple-mobile-web-app-title" content="gUlEm">
 <meta name="application-name" content="gUlEm">
 <meta name="theme-color" content="#e9486a">
@@ -2776,6 +2799,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   }catch(e){} }
   function onSent(p){
     try{ saveHistory(p); }catch(e){}
+    try{ if(window.GUSTORE) window.GUSTORE.saveOrder(p); }catch(e){} // lưu bền vào kho (đa thiết bị, lâu dài)
     try{ var cu=p.customer||{}; if(cu.name && cu.phone && window.guSetAccount) window.guSetAccount(cu.name, cu.phone); }catch(e){}
     try{ if(window.guAwardPoints) window.guAwardPoints(p); }catch(e){}
     try{ if(window.GU_SFX&&window.GU_SFX.celebrate) window.GU_SFX.celebrate(); }catch(e){}
@@ -3755,6 +3779,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     if(!code) return;
     statusMap[code]=k; try{ localStorage.setItem('gu_ostatus',JSON.stringify(statusMap)); }catch(e){}
     if(publish!==false && window.GUX){ window.GUX.pub('status',{code:code,status:k}); }
+    if(publish!==false){ try{ if(window.GUSTORE)window.GUSTORE.setStatus(code,k); }catch(e){} } // lưu bền trạng thái
     refresh();
   }
 
@@ -3864,6 +3889,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     if(id && seenIds[id]) return;
     if(id) seenIds[id]=1;
     var o=normalize(order); if(!o) return;
+    if(o.code){ for(var ii=0;ii<ORDERS.length;ii++){ if(ORDERS[ii].code===o.code) return; } } // khử trùng theo mã (ntfy ↔ kho)
     ORDERS.push(o);
     refresh();
     var ts=tparse(o.at);
@@ -3889,6 +3915,17 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
         refresh();
       })
       .catch(function(){ $('ga-status').textContent='Đang kết nối lại…'; });
+  }
+  // Nạp đơn từ KHO BỀN (đầy đủ, lâu dài) — bổ sung cho ntfy (chỉ ~12h)
+  function loadStore(){
+    if(!window.GUSTORE) return;
+    window.GUSTORE.orders(250).then(function(d){ if(!d||!d.orders||!d.orders.length) return;
+      d.orders.forEach(function(doc){ try{ if(doc.code && doc.status && !statusMap[doc.code]){ statusMap[doc.code]=doc.status; } ingest(doc, null, false); }catch(e){} });
+      try{ localStorage.setItem('gu_ostatus',JSON.stringify(statusMap)); }catch(e){}
+      ORDERS.forEach(function(o){ var t=tparse(o.at); if(t>seenMax)seenMax=t; });
+      try{ localStorage.setItem('gu_admin_seen',String(seenMax)); }catch(e){}
+      refresh();
+    }).catch(function(){});
   }
   var stSeen=Object.create(null);
   function loadStatus(){
@@ -3934,9 +3971,9 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     unlockAudio(); // mở console là có thao tác chạm -> mồi âm báo
     try{ if('Notification'in window && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
     ORDERS=[]; seenIds=Object.create(null);
-    loadHistory(); loadStatus(); loadReviews();
+    loadStore(); loadHistory(); loadStatus(); loadReviews();
     subscribe();
-    clearInterval(pollTimer); pollTimer=setInterval(function(){ loadHistory(); loadStatus(); loadReviews(); }, 8000);
+    clearInterval(pollTimer); pollTimer=setInterval(function(){ loadStore(); loadHistory(); loadStatus(); loadReviews(); }, 8000);
     tickClock(); clearInterval(clockTimer); clockTimer=setInterval(tickClock, 20000);
     clearInterval(elapTimer); elapTimer=setInterval(function(){ if($('gu-admin').classList.contains('on')) refresh(); }, 60000);
   }
@@ -3952,6 +3989,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       ov.innerHTML='<div style="width:100%;max-width:460px;background:#191219;color:#f3e9ee;border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -18px 50px -18px rgba(0,0,0,.7);font-family:\'Plus Jakarta Sans\',sans-serif">'
         +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font:800 17px \'Plus Jakarta Sans\';color:#ffd98a">🔔 Nhận đơn kể cả khi đóng app</div><button id="gpx-x" style="width:32px;height:32px;border-radius:50%;border:0;background:#2c1e28;color:#f3e9ee;cursor:pointer">✕</button></div>'
         +'<div style="font:500 12.5px/1.5 \'Plus Jakarta Sans\';color:#cdb6c0;margin-bottom:14px">Để không bỏ sót đơn khi tắt màn hình hay đóng app, chủ quán bật 2 lớp dưới đây:</div>'
+        +'<div id="gpx-store" style="display:flex;align-items:center;gap:7px;background:#221722;border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:9px 12px;margin-bottom:10px;font:700 12px \'Plus Jakarta Sans\';color:#cdb6c0"><span class="material-symbols-outlined" style="font-size:17px">database</span><span id="gpx-store-t">Kho dữ liệu bền: đang kiểm tra…</span></div>'
         +'<button id="gpx-perm" style="width:100%;padding:13px;border-radius:13px;border:0;background:linear-gradient(135deg,#e7c48a,#d9ad6f);color:#2a1a10;font:800 14px \'Plus Jakarta Sans\';cursor:pointer;margin-bottom:10px">① Bật thông báo trình duyệt</button>'
         +'<div style="background:#221722;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:13px;margin-bottom:10px">'
         +'<div style="font:800 13px \'Plus Jakarta Sans\';color:#f3e9ee;margin-bottom:6px">② Đẩy nền thật qua app “ntfy” (khuyên dùng)</div>'
@@ -3973,6 +4011,13 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       ov.querySelector('#gpx-test').addEventListener('click',function(){ unlockAudio(); setTimeout(chime,60); ov.querySelector('#gpx-note').textContent='Nghe thấy chuông chứ? Nếu không, bấm ① và kiểm tra âm lượng.'; });
     }
     ov.style.display='flex';
+    // kiểm tra kết nối kho dữ liệu bền
+    try{ var st=ov.querySelector('#gpx-store-t'), box=ov.querySelector('#gpx-store');
+      if(window.GUSTORE&&window.GUSTORE.ping){ window.GUSTORE.ping().then(function(d){
+        if(d&&d.configured){ st.textContent='Kho dữ liệu bền: ✓ đã kết nối (lưu lâu dài)'; box.style.color='#8ff0bf'; box.style.borderColor='rgba(143,240,191,.3)'; }
+        else { st.textContent='Kho dữ liệu bền: chưa bật — đang dùng chế độ tạm (~12h)'; box.style.color='#ffce8a'; }
+      }).catch(function(){ st.textContent='Kho dữ liệu bền: chưa bật — đang dùng chế độ tạm (~12h)'; }); }
+    }catch(e){}
   }
   window.guOpenPush=openPush;
 
@@ -4150,6 +4195,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     if(!myCode){ try{ myCode=window.__GU_ORDER_CODE||sessionStorage.getItem('gu_order_code')||''; }catch(e){} }
     lastSt='received'; applyStatus('received'); stop();
     if(myCode && window.GUX){ window.GUX.pub('status',{code:myCode,status:'received'}); }
+    try{ if(myCode && window.GUSTORE) window.GUSTORE.setStatus(myCode,'received'); }catch(e){}
     try{ if(window.GU_SFX&&window.GU_SFX.celebrate)window.GU_SFX.celebrate(); if(navigator.vibrate)navigator.vibrate([12,40,18]); }catch(_){ }
     setTimeout(function(){ if(window.guOpenReview)window.guOpenReview(myCode); }, 800);
   }
@@ -4350,7 +4396,13 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function load(){
     (window.GUX?window.GUX.poll('menu','48h'):Promise.resolve('')).then(function(tx){
       plans={}; sold={}; tx.split('\n').filter(Boolean).forEach(function(ln){ try{ var m=JSON.parse(ln); if(m.event==='message'&&m.message)ingest(m.message); }catch(e){} });
-      updateNote(); apply();
+      // KHO BỀN là nguồn chuẩn (lâu dài): phủ đè plan + tồn kho khi có
+      if(window.GUSTORE){ window.GUSTORE.menu(today()+','+tomorrow()).then(function(d){
+          if(d&&d.plans){ for(var k in d.plans){ if(d.plans[k]&&d.plans[k].items)plans[k]=d.plans[k]; } }
+          if(d&&d.sold){ for(var dd in d.sold){ sold[dd]=d.sold[dd]||{}; } }
+          updateNote(); apply();
+        }).catch(function(){ updateNote(); apply(); });
+      } else { updateNote(); apply(); }
     }).catch(function(){});
   }
   function sub(){ /* thay SSE bằng poll định kỳ qua proxy (mạng không chặn) */ }
@@ -4395,7 +4447,11 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     });
   }
   function collectPlan(){ var items={}; Array.prototype.forEach.call(document.querySelectorAll('#gu-menued .me-row'),function(row){ var nm=row.getAttribute('data-name'); var on=row.querySelector('[data-tog]').classList.contains('on'); var q=parseInt(row.querySelector('[data-q]').value,10)||0; if(on&&q>0) items[nm]={on:1,qty:q}; }); return items; }
-  function publishPlan(date,items,note){ if(window.GUX){ window.GUX.pub('menu',{t:'plan',date:date,items:items,note:note||'',ts:Date.now()}).then(function(){ setTimeout(load,800); }); } }
+  function publishPlan(date,items,note){
+    try{ if(window.GUSTORE) window.GUSTORE.savePlan(date,items,note||''); }catch(e){} // lưu bền kế hoạch ngày
+    if(window.GUX){ window.GUX.pub('menu',{t:'plan',date:date,items:items,note:note||'',ts:Date.now()}).then(function(){ setTimeout(load,800); }); }
+    else { setTimeout(load,400); }
+  }
   function saveEditor(){ var items=collectPlan(); publishPlan(EDATE,items); plans[EDATE]={t:'plan',date:EDATE,items:items,note:''}; apply(); updateNote();
     var b=document.getElementById('me-save'); b.textContent='✓ Đã lưu'; setTimeout(function(){ b.textContent='Lưu & công khai'; document.getElementById('gu-menued').classList.remove('on'); },700); }
   function clearEditor(){ publishPlan(EDATE,{}); plans[EDATE]={t:'plan',date:EDATE,items:{},note:''}; renderEditor(); apply(); }
@@ -4450,20 +4506,27 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function orders(){ try{ return JSON.parse(localStorage.getItem('gu_orders')||'[]'); }catch(e){ return []; } }
   function myPhone(){ try{ var a=JSON.parse(localStorage.getItem('gu_account')||'null'); return a&&a.phone?String(a.phone).replace(/[^0-9]/g,''):''; }catch(e){ return ''; } }
-  // Đồng bộ đa thiết bị: kéo đơn gần đây của CHÍNH SĐT này từ kênh chung, gộp vào lịch sử máy
-  function mergeRemote(cb){ var ph=myPhone(); if(!ph||!window.GUX){ cb&&cb(); return; }
-    window.GUX.poll('orders','48h').then(function(txt){
-      var local=orders(); var byCode={}; local.forEach(function(o){ if(o&&o.code)byCode[o.code]=o; }); var added=0;
-      txt.split('\n').filter(Boolean).forEach(function(ln){ try{ var m=JSON.parse(ln); if(m.event==='message'&&m.message){ var d=JSON.parse(m.message);
-        var dph=(d.customer&&d.customer.phone?String(d.customer.phone):'').replace(/[^0-9]/g,'');
-        if(d.code && dph && dph===ph && !byCode[d.code]){
-          var o={code:d.code,at:d.at,itemsText:(d.items||[]).map(function(i){return i.name+(i.opts?'('+i.opts+')':'')+' x'+i.qty;}).join(', '),items:(d.items||[]).map(function(i){return {name:i.name,price:i.price,qty:i.qty,opts:i.opts||''};}),total:d.total,count:d.count,recvDate:d.recvDate||'',recvLabel:d.recvLabel||'',phone:dph,payment:d.payment||''};
-          byCode[d.code]=o; local.push(o); added++;
-        }
-      } }catch(e){} });
-      if(added){ local.sort(function(a,b){ return (new Date(b.at))-(new Date(a.at)); }); local=local.slice(0,40); try{localStorage.setItem('gu_orders',JSON.stringify(local));}catch(e){} }
-      cb&&cb();
-    }).catch(function(){ cb&&cb(); });
+  // Gộp danh sách đơn (doc) vào lịch sử máy, khử trùng theo mã, seed trạng thái từ kho
+  function mergeLocal(arr){ if(!arr||!arr.length)return 0;
+    var local=orders(); var byCode={}; local.forEach(function(o){ if(o&&o.code)byCode[o.code]=o; }); var added=0;
+    arr.forEach(function(d){ if(!d||!d.code)return;
+      var dph=(d.customer&&d.customer.phone?String(d.customer.phone):'').replace(/[^0-9]/g,'');
+      if(d.status && !statusMap[d.code]){ statusMap[d.code]=d.status; }
+      if(byCode[d.code])return;
+      var o={code:d.code,at:d.at,itemsText:(d.items||[]).map(function(i){return i.name+(i.opts?'('+i.opts+')':'')+' x'+i.qty;}).join(', '),items:(d.items||[]).map(function(i){return {name:i.name,price:i.price,qty:i.qty,opts:i.opts||''};}),total:d.total,count:d.count,recvDate:d.recvDate||'',recvLabel:d.recvLabel||'',phone:dph,payment:d.payment||''};
+      byCode[d.code]=o; local.push(o); added++;
+    });
+    if(added){ local.sort(function(a,b){ return (new Date(b.at))-(new Date(a.at)); }); local=local.slice(0,40); try{localStorage.setItem('gu_orders',JSON.stringify(local));}catch(e){} }
+    return added;
+  }
+  // Đồng bộ đa thiết bị theo SĐT: ưu tiên KHO BỀN (đầy đủ, lâu dài) + ntfy (đơn rất mới ~48h)
+  function mergeRemote(cb){ var ph=myPhone(); if(!ph){ cb&&cb(); return; }
+    var done=0, total=2; function step(){ done++; if(done>=total){ saveMap(); cb&&cb(); } }
+    if(window.GUSTORE){ window.GUSTORE.history(ph,40).then(function(d){ if(d&&d.orders)mergeLocal(d.orders); step(); }).catch(step); } else step();
+    if(window.GUX){ window.GUX.poll('orders','48h').then(function(txt){ var arr=[];
+        txt.split('\n').filter(Boolean).forEach(function(ln){ try{ var m=JSON.parse(ln); if(m.event==='message'&&m.message){ var dd=JSON.parse(m.message); var dph=(dd.customer&&dd.customer.phone?String(dd.customer.phone):'').replace(/[^0-9]/g,''); if(dph===ph) arr.push(dd); } }catch(e){} });
+        mergeLocal(arr); step();
+      }).catch(step); } else step();
   }
   function syncAndRender(){ render(); mergeRemote(function(){ pollStatus(); }); }
   window.guSyncOrders=syncAndRender; // gọi sau khi đăng nhập SĐT
@@ -4506,7 +4569,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   document.addEventListener('click',function(e){
     var home=e.target.closest&&e.target.closest('[data-gohome]'); if(home){ if(window.__go)window.__go('screen-menu'); return; }
     var rcv=e.target.closest&&e.target.closest('[data-receive]'); if(rcv){ var code=rcv.getAttribute('data-receive');
-      statusMap[code]='received'; saveMap(); if(window.GUX)window.GUX.pub('status',{code:code,status:'received'});
+      statusMap[code]='received'; saveMap(); if(window.GUX)window.GUX.pub('status',{code:code,status:'received'}); try{ if(window.GUSTORE)window.GUSTORE.setStatus(code,'received'); }catch(e){}
       try{ if(window.GU_SFX&&window.GU_SFX.success)window.GU_SFX.success(); if(navigator.vibrate)navigator.vibrate([10,30,15]); }catch(_){ }
       render(); setTimeout(function(){ if(window.guOpenReview)window.guOpenReview(code); }, 500); return; }
     var rvw=e.target.closest&&e.target.closest('[data-review]'); if(rvw){ if(window.guOpenReview)window.guOpenReview(rvw.getAttribute('data-review')); return; }
