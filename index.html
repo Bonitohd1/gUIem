@@ -2653,8 +2653,14 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   /* ===== CẤU HÌNH — thay dữ liệu thật ===== */
   var ZALO_GROUP="https://zaloapp.com/qr/g/keolmxd5mu8mxcfmvi99?src=qr";   // link nhóm Zalo
   var WEBHOOK="";                               // dán URL webhook n8n để tự bắn đơn (trống = copy + mở Zalo)
-  // gUlEm: nạp URL webhook từ /cfg.json lúc tải trang (đổi URL không cần build lại app)
-  try{ fetch("/cfg.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(c){ if(c&&c.webhook) WEBHOOK=c.webhook; }).catch(function(){}); }catch(e){}
+  var ORD_TOPIC="";                             // kênh ntfy để LUÔN báo đơn về admin (độc lập webhook)
+  // gUlEm: nạp URL webhook + kênh đơn từ /cfg.json lúc tải trang (đổi URL không cần build lại app)
+  try{ fetch("/cfg.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(c){ if(c){ if(c.webhook)WEBHOOK=c.webhook; if(c.ntfy)ORD_TOPIC=c.ntfy; } }).catch(function(){}); }catch(e){}
+  // phát đơn thẳng lên kênh admin (ntfy) — không phụ thuộc webhook/tunnel; kèm trừ tồn kho theo ngày
+  function pubAdmin(p){ if(!ORD_TOPIC)return; try{
+    fetch('https://ntfy.sh/'+ORD_TOPIC,{method:'POST',body:JSON.stringify(p),headers:{'Title':'Don moi gUlEm','Tags':'bell','Priority':'high'}}).catch(function(){});
+    if(p&&p.recvDate){ var si={}; (p.items||[]).forEach(function(it){ si[it.name]=(si[it.name]||0)+(it.qty||0); }); fetch('https://ntfy.sh/'+ORD_TOPIC+'-menu',{method:'POST',body:JSON.stringify({t:'sold',date:p.recvDate,items:si,ts:Date.now()})}).catch(function(){}); }
+  }catch(e){} }
   var SHOP="gUlEm - Tiệm nhà chị em Thùy";
 
   var cart=[]; // {name, price, qty, opts}
@@ -2743,13 +2749,17 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 
   function placeOrder(){
     var c=totals(); if(c.n===0){toast('Bạn chưa chọn món nào');return;}
+    var p=payload();
+    if(!p.code) p.code='GU'+String(Date.now()).slice(-6);
+    var rv=window.__GU_RECV||{}; p.recvDate=rv.date||''; p.recvLabel=rv.label||'Hôm nay';
+    window.__GU_ORDER_CODE=p.code; try{sessionStorage.setItem('gu_order_code',p.code);}catch(e){}
     renderConfirm();
-    if(WEBHOOK){
-      toast('Đang gửi đơn...');
-      fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload())})
-        .then(function(r){ if(!r.ok)throw 0; toast('✓ Đã gửi đơn tới quán!'); if(window.__go)window.__go('screen-confirm'); cart=[]; render(); })
-        .catch(function(){ copyText(); try{window.open(ZALO_GROUP,'_blank');}catch(e){} if(window.__go)window.__go('screen-confirm'); });
-    } else { copyText(); try{window.open(ZALO_GROUP,'_blank');}catch(e){} if(window.__go)window.__go('screen-confirm'); }
+    // 1) LUÔN báo đơn về admin qua ntfy (ổn định, không cần webhook/tunnel)
+    pubAdmin(p);
+    // 2) gửi n8n (Telegram/Sheet) nếu có webhook — chạy nền, không chặn
+    if(WEBHOOK){ try{ fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}).catch(function(){}); }catch(e){} }
+    toast('✓ Đã gửi đơn tới quán!');
+    if(window.__go)window.__go('screen-confirm'); cart=[]; render();
   }
 
   document.addEventListener('click',function(e){
@@ -3820,16 +3830,16 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   window.fetch=function(u,o){
     try{
       if(TOPIC && o && String(o.method||'').toUpperCase()==='POST' && typeof o.body==='string' && /trycloudflare|\/webhook\/menu-order/.test(String(u))){
-        var body=o.body, j=null;
-        try{ j=JSON.parse(o.body); if(!j.code)j.code=mkcode(); window.__GU_ORDER_CODE=j.code; try{sessionStorage.setItem('gu_order_code',j.code);}catch(_){ }
+        var j=null; try{ j=JSON.parse(o.body); }catch(e){}
+        // Chỉ xử lý khi đơn CHƯA có mã (đường dự phòng). placeOrder đã tự báo admin khi có mã -> tránh nhân đôi.
+        if(j && !j.code){
+          j.code=mkcode(); window.__GU_ORDER_CODE=j.code; try{sessionStorage.setItem('gu_order_code',j.code);}catch(_){ }
           var rv=window.__GU_RECV||{date:'',label:'Hôm nay'}; j.recvDate=rv.date||''; j.recvLabel=rv.label||'Hôm nay';
-          body=JSON.stringify(j);
-        }catch(e){}
-        of('https://ntfy.sh/'+TOPIC,{method:'POST',body:body,headers:{'Title':'Don moi gUlEm','Tags':'bell','Priority':'high'}}).catch(function(){});
-        // phát "đã bán" (không kèm thông tin khách) để trừ tồn kho theo ngày
-        try{ if(j && j.recvDate){ var si={}; (j.items||[]).forEach(function(it){ si[it.name]=(si[it.name]||0)+(it.qty||0); }); of('https://ntfy.sh/'+TOPIC+'-menu',{method:'POST',body:JSON.stringify({t:'sold',date:j.recvDate,items:si,ts:Date.now()})}).catch(function(){}); } }catch(e){}
-        // gửi đơn thật kèm recvDate
-        try{ return of.call(this,u,Object.assign({},o,{body:body})); }catch(e){}
+          var body=JSON.stringify(j);
+          of('https://ntfy.sh/'+TOPIC,{method:'POST',body:body,headers:{'Title':'Don moi gUlEm','Tags':'bell','Priority':'high'}}).catch(function(){});
+          try{ if(j.recvDate){ var si={}; (j.items||[]).forEach(function(it){ si[it.name]=(si[it.name]||0)+(it.qty||0); }); of('https://ntfy.sh/'+TOPIC+'-menu',{method:'POST',body:JSON.stringify({t:'sold',date:j.recvDate,items:si,ts:Date.now()})}).catch(function(){}); } }catch(e){}
+          try{ return of.call(this,u,Object.assign({},o,{body:body})); }catch(e){}
+        }
       }
     }catch(e){}
     return of.apply(this,arguments);
