@@ -1182,8 +1182,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <div class="space-y-2 pt-2 border-t border-surface-variant/60"><div class="flex items-center justify-between"><div class="flex items-center gap-1.5 text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-secondary">payments</span><span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">Phương thức thanh toán</span></div><span class="text-[11px] font-body-sm text-secondary font-medium">An toàn &amp; nhanh</span></div><div class="grid grid-cols-2 gap-2.5"><button type="button" class="relative p-3 rounded-xl bg-surface-container-lowest border-2 border-secondary flex flex-col items-start gap-1.5 text-left shadow-sm active:scale-95 transition-all"><div class="flex items-center justify-between w-full"><div class="w-7 h-7 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary shrink-0"><span class="material-symbols-outlined text-[18px]">qr_code_2</span></div><span class="px-1.5 py-0.5 rounded-full bg-secondary text-on-secondary text-[9px] font-label-sm font-bold uppercase tracking-wider">Khuyên dùng</span></div><div class="min-w-0"><span class="font-label-md text-label-md font-bold text-primary block truncate">Chuyển khoản VietQR</span><p class="text-[11px] font-body-sm text-on-surface-variant mt-0.5 line-clamp-1">Quét mã nhanh, tự động duyệt</p></div><div class="absolute top-2 right-2 text-secondary pointer-events-none"><span class="material-symbols-outlined text-[16px]">check_circle</span></div></button><button type="button" class="relative p-3 rounded-xl bg-surface-container-low hover:bg-surface-container border border-outline-variant/60 flex flex-col items-start gap-1.5 text-left active:scale-95 transition-all"><div class="flex items-center justify-between w-full"><div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">account_balance_wallet</span></div></div><div class="min-w-0"><span class="font-label-md text-label-md font-bold text-on-surface-variant block truncate">Tiền mặt</span><p class="text-[11px] font-body-sm text-outline mt-0.5 line-clamp-1">Tại quầy / khi nhận món</p></div></button></div></div><div class="space-y-2.5 pt-2">
 <!-- Primary Zalo CTA -->
 <button class="w-full h-13 py-3.5 px-4 rounded-full bg-[#e9486a] text-on-tertiary font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(0,104,255,0.28)] active:scale-[0.98] transition-transform" id="place-order" type="button">
-<span class="material-symbols-outlined text-[20px]">chat</span>
-<span class="">Đặt qua Zalo</span>
+<span class="material-symbols-outlined text-[20px]">send</span>
+<span class="">Đặt đơn ngay</span>
 </button>
 <!-- Copy Order Secondary CTA -->
 <button class="w-full py-3 px-4 rounded-full bg-surface-container text-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all" id="btn-copy"  type="button">
@@ -3307,19 +3307,17 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     // mặc định phương thức = tiền mặt khi nhận
     window.guPay='Tiền mặt (khi nhận)';
 
-    // 1) Panel lớn trên màn xác nhận: thay nội dung VietQR = thẻ "đang phát triển"
-    var vq=document.getElementById('payVietQrContent');
-    if(vq && !vq.__dev){
-      vq.__dev=true;
-      vq.innerHTML='<div class="gu-devpay">'
-        +'<div class="gu-devic"><span class="material-symbols-outlined">construction</span></div>'
-        +'<span class="gu-devbadge">Đang phát triển</span>'
-        +'<div class="gu-devh">Chuyển khoản / VietQR sắp ra mắt</div>'
-        +'<p class="gu-devs">Hiện quán nhận <b>thanh toán tiền mặt khi nhận món</b>. Cảm ơn bạn đã ghé gUlEm 🤎</p>'
-        +'</div>';
+    // 1) Màn XÁC NHẬN (sau khi gửi đơn): BỎ bảng chọn thanh toán (đã chọn ở giỏ rồi)
+    //    -> thay bằng dòng tóm tắt chỉ-đọc cho gọn, đúng luồng.
+    var tb=document.getElementById('tabVietQrBtn');
+    var panel=tb?tb.closest('.px-margin'):null;
+    if(panel && !panel.__dev){
+      panel.__dev=true;
+      panel.innerHTML='<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex items-center gap-3">'
+        +'<div class="w-10 h-10 rounded-full bg-secondary-container/40 text-secondary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[20px]">payments</span></div>'
+        +'<div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-bold">Thanh toán: Tiền mặt khi nhận món</span>'
+        +'<span class="font-body-sm text-body-sm text-on-surface-variant">Quán thu tiền khi giao / khi bạn nhận đồ uống</span></div></div>';
     }
-    // mở sẵn tab tiền mặt
-    try{ if(typeof switchPayTab==='function') switchPayTab('cash'); }catch(e){}
 
     // 2) Thẻ chọn thanh toán nhỏ (màn giỏ): làm mờ nút VietQR, gắn nhãn, mặc định chọn tiền mặt
     var btns=Array.prototype.slice.call(document.querySelectorAll('#screen-cart button')).filter(function(b){ return /Chuyển khoản VietQR|Tiền mặt/.test(b.textContent); });
