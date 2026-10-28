@@ -76,7 +76,7 @@ module.exports = async (req, res) => {
         const n = Math.min(10, parseInt((req.query && req.query.n) || '5', 10) || 5);
         const arr = (await cmd(c, ['ZREVRANGE', 'gu:top', '0', String(n - 1), 'WITHSCORES'])) || [];
         const top = [];
-        for (let i = 0; i < arr.length; i += 2) { top.push({ name: arr[i], sold: parseInt(arr[i + 1], 10) || 0 }); }
+        for (let i = 0; i < arr.length; i += 2) { const sold = parseInt(arr[i + 1], 10) || 0; if (sold > 0) top.push({ name: arr[i], sold }); }
         res.status(200).json({ ok: true, top });
         return;
       }
