@@ -3264,6 +3264,8 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       '.gu-zsky{position:fixed;inset:0;z-index:100008;display:none;flex-direction:column;background:linear-gradient(180deg,#fff6f9 0%,#ffe9f1 46%,#ffdcec 100%);color:#5a2a3a;overflow:hidden;}'
       +'.gu-zsky::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 55% at 50% -6%,rgba(255,190,220,.55),transparent 62%);pointer-events:none;}'
       +'.gu-zsky.on{display:flex;animation:guZin .3s ease;}@keyframes guZin{from{opacity:0}to{opacity:1}}'
+      +'.gu-zsky .zbg{position:absolute;inset:0 0 auto 0;height:54%;background-position:center top;background-size:cover;background-repeat:no-repeat;z-index:0;opacity:0;transition:opacity .5s ease;-webkit-mask-image:linear-gradient(#000 52%,transparent);mask-image:linear-gradient(#000 52%,transparent);pointer-events:none;}'
+      +'.gu-zsky .zbg.on{opacity:.95;}'
       +'.gu-zsky .zstar{position:absolute;border-radius:50%;background:#e7c48a;box-shadow:0 0 6px rgba(231,196,138,.9);animation:guTwk 3s ease-in-out infinite;z-index:1;}'
       +'@keyframes guTwk{0%,100%{opacity:.25;}50%{opacity:.95;}}'
       +'.gu-zsky-top{position:relative;z-index:3;display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top)) 16px 8px;}'
@@ -3329,7 +3331,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     var zst=document.createElement('style'); zst.textContent=ZCSS; document.head.appendChild(zst);
 
     var ov=document.createElement('div'); ov.className='gu-zsky';
-    ov.innerHTML='<div class="gu-zsky-top"><button class="zback" aria-label="Đóng"><span class="material-symbols-outlined">arrow_back</span></button><div class="ztt">Góc cung hoàng đạo</div></div><div class="gu-zsky-body"></div>';
+    ov.innerHTML='<div class="zbg"></div><div class="gu-zsky-top"><button class="zback" aria-label="Đóng"><span class="material-symbols-outlined">arrow_back</span></button><div class="ztt">Góc cung hoàng đạo</div></div><div class="gu-zsky-body"></div>';
     document.body.appendChild(ov);
     for(var s=0;s<26;s++){ var sp=document.createElement('span'); sp.className='zstar'; var sz=1+Math.random()*2.3; sp.style.width=sz+'px'; sp.style.height=sz+'px'; sp.style.left=(Math.random()*100)+'%'; sp.style.top=(Math.random()*72)+'%'; sp.style.animationDelay=(Math.random()*3)+'s'; ov.appendChild(sp); }
     var body=ov.querySelector('.gu-zsky-body');
@@ -3337,12 +3339,14 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     ov.querySelector('.zback').addEventListener('click',close);
 
     function picker(){
+      var zb=ov.querySelector('.zbg'); if(zb)zb.classList.remove('on');
       body.innerHTML='<div class="zsub">Chọn cung của bạn để nhận vận hôm nay & đồ uống hợp mệnh ✨</div><div class="zgrid"></div>';
       var g=body.querySelector('.zgrid');
       Z.forEach(function(z,i){ var it=document.createElement('div'); it.className='zitem'; it.style.setProperty('--zc',zel(i).soft); it.innerHTML='<span class="e">'+z.e+'</span><span class="n">'+z.n+'</span><span class="d">'+z.d+'</span>'; it.addEventListener('click',function(){ try{localStorage.setItem('gu_zodiac',String(i));}catch(e){} try{ if(window.GU_SFX&&window.GU_SFX.ting)window.GU_SFX.ting(); }catch(e){} result(i); body.scrollTop=0; }); g.appendChild(it); });
     }
     function result(i){
       var z=Z[i], dk=zday(), el=zel(i);
+      var zb=ov.querySelector('.zbg'); if(zb){ zb.classList.remove('on'); var src='/zodiac/'+i+'.jpg'; var pim=new Image(); pim.onload=function(){ zb.style.backgroundImage="url('"+src+"')"; zb.classList.add('on'); }; pim.onerror=function(){ zb.style.backgroundImage=''; zb.classList.remove('on'); }; pim.src=src; }
       var daily=DAILY[zhash(z.n+dk)%DAILY.length];
       var num=(zhash(z.n+dk+'n')%9)+1;
       var col=ZCOLORS[zhash(z.n+dk+'c')%ZCOLORS.length];
