@@ -1200,6 +1200,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 <span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm tracking-widest uppercase mb-2">
       Đơn hàng được ghi nhận
     </span>
+<span id="gu-order-code" class="hidden px-3 py-1 rounded-full bg-primary-container/40 text-primary font-label-md text-label-md font-bold mb-2 tracking-wide"></span>
 <h2 class="font-headline-md text-headline-md text-primary font-bold mb-2">
       Đã gửi đơn tới quán! Cảm ơn bạn
     </h2>
@@ -2758,6 +2759,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     var rv=window.__GU_RECV||{}; p.recvDate=rv.date||''; p.recvLabel=rv.label||'Hôm nay';
     window.__GU_ORDER_CODE=p.code; try{sessionStorage.setItem('gu_order_code',p.code);}catch(e){}
     renderConfirm();
+    try{ var ce=document.getElementById('gu-order-code'); if(ce){ ce.textContent='Mã đơn: '+p.code; ce.classList.remove('hidden'); } }catch(e){}
     // 1) LUÔN báo đơn về admin qua ntfy (ổn định, không cần webhook/tunnel)
     pubAdmin(p);
     // 2) gửi n8n (Telegram/Sheet) nếu có webhook — chạy nền, không chặn
