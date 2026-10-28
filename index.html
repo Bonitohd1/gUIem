@@ -3238,46 +3238,55 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   ];
   var ZCOLORS=[{n:'Hồng pastel',c:'#ff9ebb'},{n:'Xanh mint',c:'#7fe0c3'},{n:'Vàng nắng',c:'#ffd36e'},{n:'Tím lavender',c:'#b9a6ff'},{n:'Cam đào',c:'#ff9e7a'},{n:'Xanh biển',c:'#6cc5ff'},{n:'Đỏ ruby',c:'#ff6b81'},{n:'Nâu caramel',c:'#c79b6e'}];
   var ZMOODS=[{e:'😌',w:'An yên'},{e:'🤩',w:'Hứng khởi'},{e:'🥰',w:'Ấm áp'},{e:'😎',w:'Tự tin'},{e:'🌈',w:'Lạc quan'},{e:'🧘',w:'Thư thái'},{e:'✨',w:'May mắn'},{e:'💪',w:'Quyết tâm'}];
+  /* Nguyên tố theo cung (chu kỳ Hỏa–Thổ–Phong–Thủy từ Bạch Dương) — dùng trang trí hào quang/mề đay */
+  var ZELS=[{k:'Hỏa',c:'#ff7a59',soft:'#ffe1d4',ic:'🔥'},{k:'Thổ',c:'#51b488',soft:'#d7efe1',ic:'🌿'},{k:'Phong',c:'#7aa7ff',soft:'#dde7ff',ic:'🌬️'},{k:'Thủy',c:'#3fbfd4',soft:'#d2eef3',ic:'💧'}];
+  function zel(i){ return ZELS[i%4]; }
   function zhash(s){ var h=5381; for(var i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0; } return h; }
   function zday(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
   ready(function(){
     var ZCSS=
-      '.gu-zsky{position:fixed;inset:0;z-index:100008;display:none;flex-direction:column;background:radial-gradient(130% 80% at 50% -10%,#3a2254,#1b1030 55%,#120a22);color:#f3e9ff;overflow:hidden;}'
+      '.gu-zsky{position:fixed;inset:0;z-index:100008;display:none;flex-direction:column;background:linear-gradient(180deg,#fff6f9 0%,#ffe9f1 46%,#ffdcec 100%);color:#5a2a3a;overflow:hidden;}'
+      +'.gu-zsky::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 55% at 50% -6%,rgba(255,190,220,.55),transparent 62%);pointer-events:none;}'
       +'.gu-zsky.on{display:flex;animation:guZin .3s ease;}@keyframes guZin{from{opacity:0}to{opacity:1}}'
-      +'.gu-zsky .zstar{position:absolute;border-radius:50%;background:#fff;animation:guTwk 3s ease-in-out infinite;}'
-      +'@keyframes guTwk{0%,100%{opacity:.2;}50%{opacity:.9;}}'
-      +'.gu-zsky-top{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top)) 16px 10px;}'
-      +'.gu-zsky-top .zback{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;border:0;display:flex;align-items:center;justify-content:center;cursor:pointer;}'
-      +'.gu-zsky-top .ztt{font:800 16px \'Fraunces\',serif;}'
-      +'.gu-zsky-body{position:relative;z-index:2;flex:1;overflow-y:auto;padding:6px 18px calc(28px + env(safe-area-inset-bottom));}'
-      +'.zsub{text-align:center;font:600 12.5px \'Plus Jakarta Sans\',sans-serif;color:#c7b8e8;margin:6px 0 4px;}'
-      +'.zgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px;}'
-      +'.zitem{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px 6px;text-align:center;cursor:pointer;transition:.2s;}'
-      +'.zitem:active{transform:scale(.94);}.zitem .e{font-size:30px;display:block;}'
-      +'.zitem .n{display:block;font:800 12.5px \'Plus Jakarta Sans\',sans-serif;margin-top:5px;color:#fff;}'
-      +'.zitem .d{display:block;font:600 9.5px \'Plus Jakarta Sans\',sans-serif;color:#c7b8e8;margin-top:2px;}'
-      +'.zhero{text-align:center;padding:10px 0 2px;}'
-      +'.zmascot{font-size:72px;line-height:1;filter:drop-shadow(0 10px 24px rgba(0,0,0,.5));animation:guHeroPop .6s var(--ease) both, guCupFloat 3.6s ease-in-out .6s infinite;}'
-      +'.zname{font:800 25px \'Fraunces\',serif;margin-top:4px;}.zrange{font:600 12px \'Plus Jakarta Sans\',sans-serif;color:#c7b8e8;margin-top:2px;}'
-      +'.zdate{display:inline-block;margin-top:10px;font:700 11px \'Plus Jakarta Sans\',sans-serif;color:#ffd98a;background:rgba(255,217,138,.12);padding:4px 12px;border-radius:999px;}'
-      +'.zcard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px;margin-top:14px;}'
-      +'.zlabel{font:800 11px \'Plus Jakarta Sans\',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#c7b8e8;}'
-      +'.zhoro{font:500 15px/1.6 \'Plus Jakarta Sans\',sans-serif;color:#fff;margin-top:8px;}'
-      +'.ztrait{font:500 12.5px/1.5 \'Plus Jakarta Sans\',sans-serif;color:#c7b8e8;margin-top:10px;font-style:italic;}'
+      +'.gu-zsky .zstar{position:absolute;border-radius:50%;background:#e7c48a;box-shadow:0 0 6px rgba(231,196,138,.9);animation:guTwk 3s ease-in-out infinite;z-index:1;}'
+      +'@keyframes guTwk{0%,100%{opacity:.25;}50%{opacity:.95;}}'
+      +'.gu-zsky-top{position:relative;z-index:3;display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top)) 16px 8px;}'
+      +'.gu-zsky-top .zback{width:38px;height:38px;border-radius:50%;background:#fff;color:#8a1e42;border:1px solid #ffd7e2;box-shadow:0 6px 16px -8px rgba(180,40,90,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;}'
+      +'.gu-zsky-top .ztt{font:800 17px \'Fraunces\',serif;color:#8a1e42;}'
+      +'.gu-zsky-body{position:relative;z-index:2;flex:1;overflow-y:auto;padding:4px 18px calc(28px + env(safe-area-inset-bottom));}'
+      +'.zsub{text-align:center;font:600 12.5px \'Plus Jakarta Sans\',sans-serif;color:#b06a7e;margin:6px 0 6px;}'
+      +'.zgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:8px;}'
+      +'.zitem{position:relative;overflow:hidden;background:#fff;border:1px solid #ffe0e9;border-radius:18px;padding:14px 6px;text-align:center;cursor:pointer;transition:.2s;box-shadow:0 10px 24px -16px rgba(180,40,90,.45);}'
+      +'.zitem::before{content:"";position:absolute;top:-34%;left:50%;transform:translateX(-50%);width:76%;height:64%;border-radius:50%;background:var(--zc,#ffd9ea);opacity:.5;filter:blur(13px);}'
+      +'.zitem:active{transform:scale(.94);}.zitem .e{font-size:30px;display:block;position:relative;}'
+      +'.zitem .n{display:block;font:800 12.5px \'Plus Jakarta Sans\',sans-serif;margin-top:5px;color:#78082a;position:relative;}'
+      +'.zitem .d{display:block;font:600 9.5px \'Plus Jakarta Sans\',sans-serif;color:#b06a7e;margin-top:2px;position:relative;}'
+      +'.zhero{text-align:center;padding:12px 0 2px;}'
+      +'.zmedal{width:148px;height:148px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;background:radial-gradient(circle at 50% 36%,#ffffff,var(--zsoft,#ffe0ec) 74%);box-shadow:0 18px 40px -18px rgba(180,40,90,.55),inset 0 0 0 3px #fff;}'
+      +'.zmedal::before{content:"";position:absolute;inset:-7px;border-radius:50%;background:conic-gradient(from 210deg,var(--zc,#e9486a),#e7c48a,#ff9ebb,var(--zc,#e9486a));opacity:.6;z-index:-1;filter:blur(1px);}'
+      +'.zmascot{font-size:68px;line-height:1;filter:drop-shadow(0 8px 16px rgba(180,40,90,.3));animation:guCupFloat 3.6s ease-in-out infinite;}'
+      +'.zname{font:800 25px \'Fraunces\',serif;color:#78082a;margin-top:12px;}.zrange{font:600 12px \'Plus Jakarta Sans\',sans-serif;color:#b06a7e;margin-top:2px;}'
+      +'.zbadges{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:9px;flex-wrap:wrap;}'
+      +'.zelbadge{display:inline-flex;align-items:center;gap:5px;font:800 11px \'Plus Jakarta Sans\',sans-serif;color:#fff;background:var(--zc,#e9486a);padding:4px 12px;border-radius:999px;box-shadow:0 8px 18px -8px var(--zc,#e9486a);}'
+      +'.zdate{display:inline-block;font:700 11px \'Plus Jakarta Sans\',sans-serif;color:#9a6a0a;background:#fff3d6;border:1px solid #ffe3a8;padding:4px 12px;border-radius:999px;}'
+      +'.zcard{background:#fff;border:1px solid #ffe0e9;border-radius:18px;padding:16px;margin-top:14px;box-shadow:0 12px 30px -20px rgba(180,40,90,.4);}'
+      +'.zlabel{font:800 11px \'Plus Jakarta Sans\',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#c2335a;}'
+      +'.zhoro{font:500 15px/1.6 \'Plus Jakarta Sans\',sans-serif;color:#3a1620;margin-top:8px;}'
+      +'.ztrait{font:500 12.5px/1.5 \'Plus Jakarta Sans\',sans-serif;color:#b06a7e;margin-top:10px;font-style:italic;}'
       +'.zstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}'
-      +'.zstat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:13px 6px;text-align:center;}'
-      +'.zstat .v{font:800 20px \'Fraunces\',serif;color:#fff;line-height:1;}'
+      +'.zstat{background:#fff;border:1px solid #ffe0e9;border-radius:16px;padding:13px 6px;text-align:center;box-shadow:0 10px 24px -18px rgba(180,40,90,.4);}'
+      +'.zstat .v{font:800 20px \'Fraunces\',serif;color:#78082a;line-height:1;}'
       +'.zstat .v .dot{display:inline-block;width:18px;height:18px;border-radius:50%;vertical-align:-3px;box-shadow:0 0 10px currentColor;}'
-      +'.zstat .k{font:700 9.5px \'Plus Jakarta Sans\',sans-serif;color:#c7b8e8;margin-top:5px;text-transform:uppercase;letter-spacing:.03em;}'
-      +'.zdrink{display:flex;align-items:center;gap:12px;margin-top:14px;background:linear-gradient(135deg,rgba(233,72,106,.28),rgba(255,134,171,.12));border:1px solid rgba(255,134,171,.32);border-radius:18px;padding:13px 14px;}'
+      +'.zstat .k{font:700 9.5px \'Plus Jakarta Sans\',sans-serif;color:#b06a7e;margin-top:5px;text-transform:uppercase;letter-spacing:.03em;}'
+      +'.zdrink{display:flex;align-items:center;gap:12px;margin-top:14px;background:linear-gradient(135deg,#fff0f5,#ffe3ee);border:1px solid #ffd0de;border-radius:18px;padding:13px 14px;box-shadow:0 12px 30px -20px rgba(180,40,90,.4);}'
       +'.zdrink .zdemo{font-size:30px;}.zdrink .zdt{flex:1;min-width:0;}'
-      +'.zdrink .zdt small{display:block;font:700 9.5px \'Plus Jakarta Sans\',sans-serif;color:#ffc3d6;text-transform:uppercase;letter-spacing:.04em;}'
-      +'.zdrink .zdt b{font:800 15px \'Plus Jakarta Sans\',sans-serif;color:#fff;}'
-      +'.zdrink .zorder{flex:0 0 auto;padding:9px 14px;border-radius:999px;border:0;background:#fff;color:#8a1e42;font:800 12.5px \'Plus Jakarta Sans\',sans-serif;cursor:pointer;}'
-      +'.zlove{text-align:center;margin-top:14px;font:600 12.5px \'Plus Jakarta Sans\',sans-serif;color:#ffc3d6;}'
+      +'.zdrink .zdt small{display:block;font:700 9.5px \'Plus Jakarta Sans\',sans-serif;color:#c98aa0;text-transform:uppercase;letter-spacing:.04em;}'
+      +'.zdrink .zdt b{font:800 15px \'Plus Jakarta Sans\',sans-serif;color:#78082a;}'
+      +'.zdrink .zorder{flex:0 0 auto;padding:9px 15px;border-radius:999px;border:0;background:#e9486a;color:#fff;font:800 12.5px \'Plus Jakarta Sans\',sans-serif;cursor:pointer;box-shadow:0 10px 22px -10px rgba(233,72,106,.7);}'
+      +'.zlove{text-align:center;margin-top:14px;font:600 12.5px \'Plus Jakarta Sans\',sans-serif;color:#c2335a;}'
       +'.zacts{display:flex;gap:10px;margin-top:16px;}.zacts button{flex:1;padding:13px;border-radius:14px;font:800 13px \'Plus Jakarta Sans\',sans-serif;cursor:pointer;}'
-      +'.zacts .zshare{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.2);}'
-      +'.zacts .zswap{background:transparent;color:#c7b8e8;border:1px solid rgba(255,255,255,.16);}';
+      +'.zacts .zshare{background:#e9486a;color:#fff;border:0;box-shadow:0 10px 22px -10px rgba(233,72,106,.7);}'
+      +'.zacts .zswap{background:#fff;color:#8a1e42;border:1.5px solid #ffd0de;}';
     var zst=document.createElement('style'); zst.textContent=ZCSS; document.head.appendChild(zst);
 
     var ov=document.createElement('div'); ov.className='gu-zsky';
@@ -3291,17 +3300,17 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     function picker(){
       body.innerHTML='<div class="zsub">Chọn cung của bạn để nhận vận hôm nay & đồ uống hợp mệnh ✨</div><div class="zgrid"></div>';
       var g=body.querySelector('.zgrid');
-      Z.forEach(function(z,i){ var it=document.createElement('div'); it.className='zitem'; it.innerHTML='<span class="e">'+z.e+'</span><span class="n">'+z.n+'</span><span class="d">'+z.d+'</span>'; it.addEventListener('click',function(){ try{localStorage.setItem('gu_zodiac',String(i));}catch(e){} try{ if(window.GU_SFX&&window.GU_SFX.ting)window.GU_SFX.ting(); }catch(e){} result(i); body.scrollTop=0; }); g.appendChild(it); });
+      Z.forEach(function(z,i){ var it=document.createElement('div'); it.className='zitem'; it.style.setProperty('--zc',zel(i).soft); it.innerHTML='<span class="e">'+z.e+'</span><span class="n">'+z.n+'</span><span class="d">'+z.d+'</span>'; it.addEventListener('click',function(){ try{localStorage.setItem('gu_zodiac',String(i));}catch(e){} try{ if(window.GU_SFX&&window.GU_SFX.ting)window.GU_SFX.ting(); }catch(e){} result(i); body.scrollTop=0; }); g.appendChild(it); });
     }
     function result(i){
-      var z=Z[i], dk=zday();
+      var z=Z[i], dk=zday(), el=zel(i);
       var daily=DAILY[zhash(z.n+dk)%DAILY.length];
       var num=(zhash(z.n+dk+'n')%9)+1;
       var col=ZCOLORS[zhash(z.n+dk+'c')%ZCOLORS.length];
       var mood=ZMOODS[zhash(z.n+dk+'m')%ZMOODS.length];
       var li=zhash(z.n+dk+'l')%12; if(li===i)li=(li+1)%12; var love=Z[li];
       var dd=new Date(); var ds=('0'+dd.getDate()).slice(-2)+'/'+('0'+(dd.getMonth()+1)).slice(-2);
-      body.innerHTML='<div class="zhero"><div class="zmascot">'+z.e+'</div><div class="zname">'+z.n+'</div><div class="zrange">'+z.d+'</div><div class="zdate">✦ Vận ngày '+ds+'</div></div>'
+      body.innerHTML='<div class="zhero" style="--zc:'+el.c+';--zsoft:'+el.soft+'"><div class="zmedal"><div class="zmascot">'+z.e+'</div></div><div class="zname">'+z.n+'</div><div class="zrange">'+z.d+'</div><div class="zbadges"><span class="zelbadge">'+el.ic+' Cung '+el.k+'</span><span class="zdate">✦ Vận ngày '+ds+'</span></div></div>'
         +'<div class="zcard"><div class="zlabel">🔮 Lời nhắn hôm nay</div><div class="zhoro">'+daily+'</div><div class="ztrait">Nét '+z.n+': '+z.h+'</div></div>'
         +'<div class="zstats"><div class="zstat"><div class="v">'+num+'</div><div class="k">Số may mắn</div></div>'
         +'<div class="zstat"><div class="v"><span class="dot" style="background:'+col.c+';color:'+col.c+'"></span></div><div class="k">'+col.n+'</div></div>'
