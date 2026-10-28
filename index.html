@@ -3474,6 +3474,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 #gu-admin .ga-phone{ font-size:12.5px; color:#e7c48a; text-decoration:none; }
 #gu-admin .ga-time{ font-size:11px; color:#9c8690; white-space:nowrap; text-align:right; }
 #gu-admin .ga-badge-new{ font-size:9px; font-weight:800; letter-spacing:.04em; color:#06281a; background:#3ddc84; padding:2px 7px; border-radius:999px; }
+#gu-admin .ga-recv{ font-size:10px; font-weight:800; color:#ffd58a; background:rgba(240,165,0,.16); border:1px solid rgba(240,165,0,.3); padding:2px 8px; border-radius:999px; }
 /* elapsed badge */
 #gu-admin .ga-elapsed{ display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:999px; white-space:nowrap; margin-top:6px; }
 #gu-admin .ga-elapsed .material-symbols-outlined{ font-size:13px; }
@@ -3538,6 +3539,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
         <div class="ga-sub"><span class="ga-live"></span><span id="ga-status">Đang kết nối…</span> <span class="ga-clock" id="ga-clock"></span></div>
       </div>
     </div>
+    <button class="ga-ico" id="ga-menued" title="Thực đơn theo ngày"><span class="material-symbols-outlined">restaurant_menu</span></button>
     <button class="ga-ico" id="ga-sound" title="Bật/tắt chuông"><span class="material-symbols-outlined">notifications_active</span></button>
     <button class="ga-ico" id="ga-refresh" title="Làm mới"><span class="material-symbols-outlined">refresh</span></button>
     <button class="ga-ico" id="ga-close" title="Đóng"><span class="material-symbols-outlined">close</span></button>
@@ -3661,7 +3663,9 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
         +'</div>';
       shown+='<div class="ga-card'+(isNew&&!closed?' new':'')+(isLate?' late':'')+(closed?' closed':'')+'">'
         +'<div class="ga-ch"><div style="min-width:0">'
-        +'<div class="ga-codeline"><span class="ga-code">'+esc(o.code||'—')+'</span>'+(isNew&&!closed?'<span class="ga-badge-new">MỚI</span>':'')+'</div>'
+        +'<div class="ga-codeline"><span class="ga-code">'+esc(o.code||'—')+'</span>'+(isNew&&!closed?'<span class="ga-badge-new">MỚI</span>':'')
+        +((function(){ var td=new Date(); var tds=td.getFullYear()+'-'+('0'+(td.getMonth()+1)).slice(-2)+'-'+('0'+td.getDate()).slice(-2); if(o.recvDate && o.recvDate!==tds){ return '<span class="ga-recv">📅 '+esc(o.recvLabel||('Nhận '+o.recvDate))+'</span>'; } return ''; })())
+        +'</div>'
         +'<div class="ga-name">'+esc(o.customerName||'Khách')+'</div>'
         +(o.customerPhone?'<a class="ga-phone" href="tel:'+esc(o.customerPhone)+'">'+esc(o.customerPhone)+'</a>':'')+'</div>'
         +'<div style="text-align:right"><span class="ga-pill" style="color:'+pill.c+';background:'+pill.c+'22"><i></i>'+pill.t+'</span>'
@@ -3699,7 +3703,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     var itemsText=(p.items||[]).map(function(i){return i.name+(i.opts?'('+i.opts+')':'')+' x'+i.qty;}).join(', ');
     return { code:p.code||'', at:p.at||new Date().toISOString(), customerName:cus.name||p.customerName||'', customerPhone:cus.phone||p.customerPhone||'',
       address:cus.address||p.address||'', itemsText:itemsText||p.itemsText||'', count:p.count||0, total:p.total||0,
-      payment:p.payment||'', note:p.note||'' };
+      payment:p.payment||'', note:p.note||'', recvDate:p.recvDate||'', recvLabel:p.recvLabel||'' };
   }
   function refresh(){ render(ORDERS.slice()); }
   function ingest(order, id, isLive){
@@ -3775,6 +3779,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 
   function boot(){
     $('ga-close').addEventListener('click',closeAdmin);
+    var me=$('ga-menued'); if(me) me.addEventListener('click',function(){ if(window.guMenuEditor)window.guMenuEditor(); });
     $('ga-refresh').addEventListener('click',function(){ loadHistory(); });
     $('ga-list').addEventListener('click',function(e){
       var fd=e.target.closest&&e.target.closest('.ga-forcedone');
@@ -3815,9 +3820,16 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   window.fetch=function(u,o){
     try{
       if(TOPIC && o && String(o.method||'').toUpperCase()==='POST' && typeof o.body==='string' && /trycloudflare|\/webhook\/menu-order/.test(String(u))){
-        var body=o.body;
-        try{ var j=JSON.parse(o.body); if(!j.code)j.code=mkcode(); window.__GU_ORDER_CODE=j.code; try{sessionStorage.setItem('gu_order_code',j.code);}catch(_){ } body=JSON.stringify(j); }catch(e){}
+        var body=o.body, j=null;
+        try{ j=JSON.parse(o.body); if(!j.code)j.code=mkcode(); window.__GU_ORDER_CODE=j.code; try{sessionStorage.setItem('gu_order_code',j.code);}catch(_){ }
+          var rv=window.__GU_RECV||{date:'',label:'Hôm nay'}; j.recvDate=rv.date||''; j.recvLabel=rv.label||'Hôm nay';
+          body=JSON.stringify(j);
+        }catch(e){}
         of('https://ntfy.sh/'+TOPIC,{method:'POST',body:body,headers:{'Title':'Don moi gUlEm','Tags':'bell','Priority':'high'}}).catch(function(){});
+        // phát "đã bán" (không kèm thông tin khách) để trừ tồn kho theo ngày
+        try{ if(j && j.recvDate){ var si={}; (j.items||[]).forEach(function(it){ si[it.name]=(si[it.name]||0)+(it.qty||0); }); of('https://ntfy.sh/'+TOPIC+'-menu',{method:'POST',body:JSON.stringify({t:'sold',date:j.recvDate,items:si,ts:Date.now()})}).catch(function(){}); } }catch(e){}
+        // gửi đơn thật kèm recvDate
+        try{ return of.call(this,u,Object.assign({},o,{body:body})); }catch(e){}
       }
     }catch(e){}
     return of.apply(this,arguments);
@@ -3914,3 +3926,192 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   .gu-pc-deco.l{ justify-content:center; }
 }
 </style>
+
+<style>
+/* ===== gUlEm · Thực đơn theo ngày (daily menu + đặt trước) ===== */
+#gu-daybar{ display:flex; gap:8px; align-items:center; padding:12px 16px 2px; }
+#gu-daybar .gd-seg{ display:flex; background:#ffe9f0; border:1px solid #ffd0de; border-radius:15px; padding:4px; gap:4px; flex:1; }
+#gu-daybar .gd-tab{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; padding:8px 6px; border-radius:11px; border:0; background:transparent; color:#b06a7e; font:800 12.5px 'Plus Jakarta Sans',sans-serif; cursor:pointer; line-height:1.15; }
+#gu-daybar .gd-tab small{ font-size:10px; font-weight:600; opacity:.82; }
+#gu-daybar .gd-tab.on{ background:#fff; color:#8a1e42; box-shadow:0 5px 14px -7px rgba(233,72,106,.6); }
+#gu-daybar .gd-tab.on small{ color:#c2335a; }
+.gu-avail{ display:inline-flex; align-items:center; gap:4px; font:800 11px 'Plus Jakarta Sans',sans-serif; padding:3px 9px; border-radius:999px; white-space:nowrap; margin-right:4px; }
+.gu-avail.ok{ color:#2a8a57; background:#dcf6e8; }
+.gu-avail.low{ color:#b4791a; background:#fdeecb; }
+.gu-avail.out{ color:#b23b48; background:#ffe0e0; }
+.gu-avail .material-symbols-outlined{ font-size:13px; }
+.gu-item-out{ opacity:.55; filter:grayscale(.3); }
+.gu-item-out .btn-add{ background:#d9c2ca !important; pointer-events:none; box-shadow:none !important; }
+#gu-daynote{ margin:9px 16px 0; padding:9px 13px; border-radius:12px; background:#fff4e8; border:1px solid #ffe0c2; color:#9a6a3c; font:600 12px 'Plus Jakarta Sans',sans-serif; display:none; align-items:center; gap:8px; }
+#gu-daynote.on{ display:flex; }
+/* admin daily-menu editor */
+#gu-menued{ position:fixed; inset:0; z-index:100003; display:none; align-items:flex-end; justify-content:center; background:rgba(15,10,14,.74); backdrop-filter:blur(4px); }
+#gu-menued.on{ display:flex; }
+#gu-menued .me-box{ width:100%; max-width:560px; max-height:92vh; display:flex; flex-direction:column; background:linear-gradient(180deg,#271a23,#1a1015); border:1px solid rgba(231,196,138,.25); border-radius:24px 24px 0 0; color:#f3e9ee; font-family:'Plus Jakarta Sans',sans-serif; }
+@media(min-width:560px){ #gu-menued{ align-items:center } #gu-menued .me-box{ border-radius:22px } }
+#gu-menued .me-top{ display:flex; align-items:center; gap:10px; padding:16px 18px 12px; }
+#gu-menued .me-ttl{ font-family:Fraunces,serif; font-weight:700; font-size:17.5px; color:#f0d9a8; flex:1; line-height:1.1; }
+#gu-menued .me-ttl small{ display:block; font:600 11px 'Plus Jakarta Sans',sans-serif; color:#9c8690; margin-top:2px; }
+#gu-menued .me-x{ width:34px;height:34px;border-radius:10px;border:0;background:rgba(255,255,255,.08);color:#f0d9a8;cursor:pointer;flex:none; }
+#gu-menued .me-tabs{ display:flex; gap:8px; padding:0 18px 6px; }
+#gu-menued .me-tab{ flex:1; padding:9px; border-radius:12px; border:1px solid rgba(231,196,138,.2); background:rgba(255,255,255,.05); color:#cdb6c0; font:800 12.5px 'Plus Jakarta Sans',sans-serif; cursor:pointer; line-height:1.15; }
+#gu-menued .me-tab small{ display:block; font-weight:600; font-size:10px; opacity:.8; }
+#gu-menued .me-tab.on{ background:linear-gradient(135deg,#e7c48a,#d9ad6f); color:#2a1a10; border-color:transparent; }
+#gu-menued .me-tab.on small{ color:#5a3f1e; }
+#gu-menued .me-list{ overflow-y:auto; padding:8px 18px; display:flex; flex-direction:column; gap:9px; }
+#gu-menued .me-row{ display:flex; align-items:center; gap:11px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:11px 12px; }
+#gu-menued .me-row.off{ opacity:.5; }
+#gu-menued .me-nm{ flex:1; font:700 13px 'Plus Jakarta Sans',sans-serif; color:#f3e9ee; min-width:0; }
+#gu-menued .me-nm small{ display:block; font-weight:600; font-size:10.5px; color:#9c8690; margin-top:2px; }
+#gu-menued .me-tog{ width:46px;height:27px;border-radius:999px;border:0;background:rgba(255,255,255,.14);position:relative;cursor:pointer;flex:none;transition:.2s; }
+#gu-menued .me-tog::after{ content:'';position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:.2s; }
+#gu-menued .me-tog.on{ background:#2fae6a; } #gu-menued .me-tog.on::after{ left:22px; }
+#gu-menued .me-qty{ display:flex; align-items:center; gap:7px; flex:none; }
+#gu-menued .me-qty button{ width:30px;height:30px;border-radius:9px;border:1px solid rgba(231,196,138,.25);background:rgba(231,196,138,.08);color:#f0d9a8;font-size:15px;cursor:pointer; }
+#gu-menued .me-qty input{ width:48px;height:30px;text-align:center;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;font:800 14px 'Plus Jakarta Sans',sans-serif; }
+#gu-menued .me-foot{ padding:14px 18px calc(16px + env(safe-area-inset-bottom)); border-top:1px solid rgba(255,255,255,.08); display:flex; gap:10px; }
+#gu-menued .me-save{ flex:1; padding:13px; border-radius:13px; border:0; background:linear-gradient(135deg,#e7c48a,#d9ad6f); color:#2a1a10; font:800 14px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+#gu-menued .me-clear{ padding:13px 15px; border-radius:13px; border:1px solid rgba(255,255,255,.14); background:transparent; color:#cdb6c0; font:700 12.5px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+</style>
+<script>
+/* gUlEm · thực đơn theo ngày + đặt trước (ntfy -menu) */
+(function(){
+  var TOPIC='', booted=false;
+  try{ fetch('/cfg.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(c){ if(c&&c.ntfy){ TOPIC=c.ntfy; if(document.readyState!=='loading')boot(); else document.addEventListener('DOMContentLoaded',boot); } }).catch(function(){}); }catch(e){}
+
+  function ds(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+  function today(){ return ds(new Date()); }
+  function tomorrow(){ var d=new Date(); d.setDate(d.getDate()+1); return ds(d); }
+  function ddmm(s){ var p=(s||'').split('-'); return p.length===3?(p[2]+'/'+p[1]):s; }
+  function wd(s){ var p=(s||'').split('-'); if(p.length!==3)return ''; var dt=new Date(+p[0],+p[1]-1,+p[2]); return ['CN','T2','T3','T4','T5','T6','T7'][dt.getDay()]; }
+
+  var plans={}, sold={}, SEL=today(), es=null;
+  window.__GU_RECV={ date:today(), label:'Hôm nay' };
+
+  function soldOf(d,n){ return (sold[d]&&sold[d][n])||0; }
+  function planOf(d){ return plans[d]||null; }
+  function remSold(d,n){ var p=planOf(d); if(!p)return null; var it=p.items&&p.items[n]; if(!it||!it.on)return 0; return Math.max(0,(it.qty||0)-soldOf(d,n)); }
+  function inCart(n){ try{ return window.guGetQty?window.guGetQty(n):0; }catch(e){ return 0; } }
+  function cards(){ var out=[]; document.querySelectorAll('#screen-menu .btn-add[data-name]').forEach(function(b){ out.push({n:b.getAttribute('data-name'),btn:b,card:b.closest('.rounded-2xl')}); }); return out; }
+
+  function apply(){
+    var p=planOf(SEL), isToday=SEL===today();
+    cards().forEach(function(c){
+      var row=c.btn.parentElement, badge=c.card&&c.card.querySelector('.gu-avail');
+      if(!badge && row){ badge=document.createElement('span'); badge.className='gu-avail'; row.insertBefore(badge,c.btn); }
+      var rs=remSold(SEL,c.n), avail, cls, txt;
+      if(p===null){
+        if(isToday){ if(badge)badge.style.display='none'; if(c.card)c.card.classList.remove('gu-item-out'); c.btn.disabled=false; return; }
+        avail=false; cls='out'; txt='Chưa mở đặt';
+      } else {
+        var show=rs-inCart(c.n);
+        if(rs<=0){ avail=false; cls='out'; txt=(isToday?'Tạm hết hôm nay':'Tạm hết'); }
+        else if(show<=0){ avail=false; cls='low'; txt='Đã lấy hết phần'; }
+        else { avail=true; cls=(show<=3?'low':'ok'); txt='Còn '+show+' ly'; }
+      }
+      if(badge){ badge.style.display=''; badge.className='gu-avail '+cls; badge.innerHTML='<span class="material-symbols-outlined">'+(cls==='out'?'block':(cls==='low'?'local_fire_department':'check_circle'))+'</span>'+txt; }
+      if(c.card) c.card.classList.toggle('gu-item-out',!avail);
+      c.btn.disabled=!avail;
+    });
+  }
+  function canAdd(name){ var p=planOf(SEL); if(p===null)return SEL===today(); return (remSold(SEL,name)-inCart(name))>0; }
+
+  document.addEventListener('click',function(e){
+    var add=e.target.closest('#screen-menu .btn-add[data-name]'); if(!add)return;
+    var name=add.getAttribute('data-name');
+    if(!canAdd(name)){ e.preventDefault(); e.stopImmediatePropagation(); tw('⚠️ '+name+' đã hết cho '+(SEL===today()?'hôm nay':'ngày '+ddmm(SEL))); }
+  }, true);
+  document.addEventListener('click',function(e){
+    var inc=e.target.closest('#screen-cart [data-inc]'); if(!inc)return;
+    var row=inc.closest('.rounded-2xl'); var nmEl=row&&row.querySelector('.text-label-lg'); var name=nmEl?nmEl.textContent.trim():'';
+    if(name && !canAdd(name)){ e.preventDefault(); e.stopImmediatePropagation(); tw('⚠️ '+name+' đã đạt số lượng còn lại'); }
+  }, true);
+
+  function tw(m){ var t=document.getElementById('gu-toast-day')||(function(){var d=document.createElement('div');d.id='gu-toast-day';d.style.cssText='position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#8a1e42;color:#fff;font:700 13px "Plus Jakarta Sans",sans-serif;padding:10px 16px;border-radius:999px;z-index:100005;box-shadow:0 10px 30px -8px rgba(0,0,0,.5);transition:.3s;opacity:0;max-width:88vw;text-align:center';document.body.appendChild(d);return d;})(); t.textContent=m; t.style.opacity='1'; clearTimeout(t.__h); t.__h=setTimeout(function(){t.style.opacity='0';},2800); }
+
+  function injectBar(n){
+    var host=document.querySelector('#screen-menu main > div'); if(!host){ if(n<30)setTimeout(function(){injectBar(n+1);},300); return; }
+    if(document.getElementById('gu-daybar'))return;
+    var bar=document.createElement('div'); bar.id='gu-daybar';
+    bar.innerHTML='<div class="gd-seg">'
+      +'<button class="gd-tab on" data-d="'+today()+'">Nhận hôm nay<small>'+wd(today())+' · '+ddmm(today())+'</small></button>'
+      +'<button class="gd-tab" data-d="'+tomorrow()+'">Đặt trước · mai<small>'+wd(tomorrow())+' · '+ddmm(tomorrow())+'</small></button>'
+      +'</div>';
+    host.insertBefore(bar,host.firstChild);
+    var note=document.createElement('div'); note.id='gu-daynote'; note.innerHTML='<span class="material-symbols-outlined" style="font-size:16px">info</span><span id="gu-daynote-t"></span>';
+    host.insertBefore(note,bar.nextSibling);
+    bar.addEventListener('click',function(e){ var t=e.target.closest('.gd-tab'); if(!t)return;
+      Array.prototype.forEach.call(bar.querySelectorAll('.gd-tab'),function(x){x.classList.toggle('on',x===t);});
+      SEL=t.getAttribute('data-d'); window.__GU_RECV={date:SEL,label:(SEL===today()?'Hôm nay':'Đặt trước · '+wd(SEL)+' '+ddmm(SEL))};
+      updateNote(); apply();
+    });
+    updateNote();
+  }
+  function updateNote(){
+    var n=document.getElementById('gu-daynote'), t=document.getElementById('gu-daynote-t'); if(!n)return; var p=planOf(SEL);
+    if(SEL!==today() && p===null){ n.classList.add('on'); t.textContent='Quán chưa mở đặt trước cho ngày '+ddmm(SEL)+'. Bạn quay lại sau nhé 🌸'; }
+    else if(p && p.note){ n.classList.add('on'); t.textContent=p.note; }
+    else if(SEL!==today() && p){ n.classList.add('on'); t.textContent='Đặt trước cho '+wd(SEL)+' '+ddmm(SEL)+' — quán chuẩn bị & giao đúng ngày.'; }
+    else n.classList.remove('on');
+  }
+
+  function ingest(m){ try{ var d=JSON.parse(m); if(!d||!d.date)return;
+    if(d.t==='plan') plans[d.date]=d;
+    else if(d.t==='sold'){ sold[d.date]=sold[d.date]||{}; var it=d.items||{}; for(var k in it) sold[d.date][k]=(sold[d.date][k]||0)+(it[k]||0); }
+  }catch(e){} }
+  function load(){ if(!TOPIC)return;
+    fetch('https://ntfy.sh/'+TOPIC+'-menu/json?poll=1&since=48h',{cache:'no-store'}).then(function(r){return r.text();}).then(function(tx){
+      plans={}; sold={}; tx.split('\n').filter(Boolean).forEach(function(ln){ try{ var m=JSON.parse(ln); if(m.event==='message'&&m.message)ingest(m.message); }catch(e){} });
+      updateNote(); apply();
+    }).catch(function(){});
+  }
+  function sub(){ if(es||!TOPIC)return; try{ es=new EventSource('https://ntfy.sh/'+TOPIC+'-menu/sse'); es.onmessage=function(ev){ try{ var m=JSON.parse(ev.data); if(m.event==='message'&&m.message){ ingest(m.message); updateNote(); apply(); } }catch(e){} }; }catch(e){} }
+
+  var prevOR=window.guOnRender; window.guOnRender=function(){ try{ if(prevOR)prevOR(); }catch(e){} apply(); };
+
+  /* ---------- Admin editor ---------- */
+  function buildEditor(){
+    if(document.getElementById('gu-menued'))return;
+    var ov=document.createElement('div'); ov.id='gu-menued';
+    ov.innerHTML='<div class="me-box">'
+      +'<div class="me-top"><div class="me-ttl">Thực đơn theo ngày<small>Bật/tắt món & đặt số lượng bán ra</small></div><button class="me-x" id="me-x"><span class="material-symbols-outlined">close</span></button></div>'
+      +'<div class="me-tabs" id="me-tabs"></div>'
+      +'<div class="me-list" id="me-list"></div>'
+      +'<div class="me-foot"><button class="me-clear" id="me-clear">Nghỉ bán ngày này</button><button class="me-save" id="me-save">Lưu & công khai</button></div>'
+      +'</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){ if(e.target===ov||e.target.closest('#me-x')) ov.classList.remove('on'); });
+    document.getElementById('me-save').addEventListener('click',saveEditor);
+    document.getElementById('me-clear').addEventListener('click',clearEditor);
+  }
+  var EDATE=today();
+  function renderEditor(){
+    var tabs=document.getElementById('me-tabs'); if(!tabs)return;
+    var td=today(), tm=tomorrow();
+    tabs.innerHTML='<button class="me-tab'+(EDATE===td?' on':'')+'" data-d="'+td+'">Hôm nay<small>'+wd(td)+' · '+ddmm(td)+'</small></button>'
+      +'<button class="me-tab'+(EDATE===tm?' on':'')+'" data-d="'+tm+'">Ngày mai<small>'+wd(tm)+' · '+ddmm(tm)+'</small></button>';
+    Array.prototype.forEach.call(tabs.querySelectorAll('.me-tab'),function(b){ b.addEventListener('click',function(){ EDATE=b.getAttribute('data-d'); renderEditor(); }); });
+    var p=planOf(EDATE); var list=document.getElementById('me-list'); list.innerHTML='';
+    cards().forEach(function(c){
+      var it=p&&p.items&&p.items[c.n]; var on=it?!!it.on:false; var qty=it?(it.qty||0):0; var sd=soldOf(EDATE,c.n);
+      var row=document.createElement('div'); row.className='me-row'+(on?'':' off'); row.setAttribute('data-name',c.n);
+      row.innerHTML='<button class="me-tog'+(on?' on':'')+'" data-tog></button>'
+        +'<div class="me-nm">'+c.n+'<small>Đã bán: '+sd+' · còn '+Math.max(0,qty-sd)+'</small></div>'
+        +'<div class="me-qty"><button data-m>−</button><input type="number" min="0" value="'+qty+'" data-q><button data-p>+</button></div>';
+      row.querySelector('[data-tog]').addEventListener('click',function(){ this.classList.toggle('on'); row.classList.toggle('off',!this.classList.contains('on')); });
+      row.querySelector('[data-m]').addEventListener('click',function(){ var i=row.querySelector('[data-q]'); i.value=Math.max(0,(parseInt(i.value,10)||0)-1); });
+      row.querySelector('[data-p]').addEventListener('click',function(){ var i=row.querySelector('[data-q]'); i.value=(parseInt(i.value,10)||0)+1; var t=row.querySelector('[data-tog]'); if(!t.classList.contains('on')){ t.classList.add('on'); row.classList.remove('off'); } });
+      list.appendChild(row);
+    });
+  }
+  function collectPlan(){ var items={}; Array.prototype.forEach.call(document.querySelectorAll('#gu-menued .me-row'),function(row){ var nm=row.getAttribute('data-name'); var on=row.querySelector('[data-tog]').classList.contains('on'); var q=parseInt(row.querySelector('[data-q]').value,10)||0; if(on&&q>0) items[nm]={on:1,qty:q}; }); return items; }
+  function publishPlan(date,items,note){ if(!TOPIC)return; fetch('https://ntfy.sh/'+TOPIC+'-menu',{method:'POST',body:JSON.stringify({t:'plan',date:date,items:items,note:note||'',ts:Date.now()}),headers:{'Tags':'calendar'}}).then(function(){ setTimeout(load,600); }).catch(function(){}); }
+  function saveEditor(){ var items=collectPlan(); publishPlan(EDATE,items); plans[EDATE]={t:'plan',date:EDATE,items:items,note:''}; apply(); updateNote();
+    var b=document.getElementById('me-save'); b.textContent='✓ Đã lưu'; setTimeout(function(){ b.textContent='Lưu & công khai'; document.getElementById('gu-menued').classList.remove('on'); },700); }
+  function clearEditor(){ publishPlan(EDATE,{}); plans[EDATE]={t:'plan',date:EDATE,items:{},note:''}; renderEditor(); apply(); }
+  function openEditor(){ buildEditor(); EDATE=today(); renderEditor(); document.getElementById('gu-menued').classList.add('on'); }
+  window.guMenuEditor=openEditor;
+
+  function boot(){ if(booted)return; booted=true; injectBar(0); load(); sub(); setInterval(load,45000); }
+})();
+</script>
