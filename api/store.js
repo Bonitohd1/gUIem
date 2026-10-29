@@ -80,6 +80,13 @@ module.exports = async (req, res) => {
         res.status(200).json({ ok: true, top });
         return;
       }
+      if (op === 'cost') { // giá vốn mỗi món (dùng chung mọi máy admin)
+        const h = (await cmd(c, ['HGETALL', 'gu:cost'])) || [];
+        const cost = {};
+        for (let i = 0; i < h.length; i += 2) cost[h[i]] = parseInt(h[i + 1], 10) || 0;
+        res.status(200).json({ ok: true, cost });
+        return;
+      }
       if (op === 'menu') {
         const dates = String((req.query && req.query.dates) || '').split(',').map(dateKey).filter(Boolean).slice(0, 7);
         const plans = {}, sold = {};
@@ -154,6 +161,15 @@ module.exports = async (req, res) => {
       await cmd(c, ['DEL', 'gu:o:' + code]);
       await cmd(c, ['LREM', 'gu:orec', '0', code]);
       if (ph) await cmd(c, ['LREM', 'gu:op:' + ph, '0', code]);
+      res.status(200).json({ ok: true });
+      return;
+    }
+
+    if (op === 'cost') { // lưu giá vốn 1 món: {name, cost}
+      const name = String((data && data.name) || '').slice(0, 80);
+      const cost = Math.max(0, parseInt((data && data.cost), 10) || 0);
+      if (!name) { res.status(400).json({ ok: false, error: 'no name' }); return; }
+      await cmd(c, ['HSET', 'gu:cost', name, String(cost)]);
       res.status(200).json({ ok: true });
       return;
     }

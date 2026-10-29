@@ -50,7 +50,9 @@ window.GUSTORE=(function(){
     orders:function(n){ if(!on())return Promise.resolve(null); return j(base+'?op=orders&n='+(n||150)); },
     savePlan:function(date,items,note){ if(!on())return Promise.resolve(null); return j(base+'?op=plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:date,items:items,note:note||''})}); },
     menu:function(dates){ if(!on())return Promise.resolve(null); return j(base+'?op=menu&dates='+encodeURIComponent(dates)); },
-    top:function(n){ if(!on())return Promise.resolve(null); return j(base+'?op=top&n='+(n||5)); }
+    top:function(n){ if(!on())return Promise.resolve(null); return j(base+'?op=top&n='+(n||5)); },
+    costGet:function(){ if(!on())return Promise.resolve(null); return j(base+'?op=cost'); },
+    costSet:function(name,cost){ if(!on())return Promise.resolve(null); return j(base+'?op=cost',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,cost:cost})}); }
   };
 })();
 </script>
@@ -3882,6 +3884,11 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     <button class="ga-ico" id="ga-refresh" title="Làm mới"><span class="material-symbols-outlined">refresh</span></button>
     <button class="ga-ico" id="ga-close" title="Đóng"><span class="material-symbols-outlined">close</span></button>
   </div>
+  <div class="ga-tabs">
+    <button class="ga-tab on" data-v="orders"><span class="material-symbols-outlined">receipt_long</span>Đơn hàng</button>
+    <button class="ga-tab" data-v="manage"><span class="material-symbols-outlined">insights</span>Quản trị</button>
+  </div>
+  <div class="ga-view" id="ga-view-orders">
   <div class="ga-stats">
     <div class="ga-stat" style="--sc:#e7c48a"><b id="ga-cnt">0</b><span>Đơn hôm nay</span></div>
     <div class="ga-stat rev" style="--sc:#2fae6a"><b id="ga-rev">0đ</b><span>Doanh thu</span><small id="ga-rev-split">TM 0 · CK 0</small></div>
@@ -3902,8 +3909,70 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     <button class="ga-ftab" data-f="done">Hoàn tất <span class="ga-fct" id="fc-done">0</span></button>
   </div>
   <div class="ga-list" id="ga-list"><div class="ga-empty"><span class="material-symbols-outlined">hourglass_empty</span>Đang tải đơn…</div></div>
+  </div>
+  <div class="ga-view" id="ga-view-manage" hidden></div>
  </div>
 </div>
+<style>
+/* ===== gUlEm · Admin: thanh tab + view Quản trị ===== */
+#gu-admin .ga-tabs{ display:flex; gap:8px; padding:12px 18px 2px; }
+#gu-admin .ga-tab{ flex:1; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:11px; border-radius:13px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); color:#cbb3bc; font:800 13.5px 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:.18s; }
+#gu-admin .ga-tab .material-symbols-outlined{ font-size:18px; }
+#gu-admin .ga-tab:active{ transform:scale(.97); }
+#gu-admin .ga-tab.on{ background:linear-gradient(135deg,#e7c48a,#d9ad6f); color:#2a1a10; border-color:transparent; box-shadow:0 8px 20px -10px rgba(231,196,138,.6); }
+#gu-admin .ga-view{ display:flex; flex-direction:column; flex:1; min-height:0; }
+#gu-admin .ga-view[hidden]{ display:none; }
+#gu-admin #ga-view-manage{ overflow-y:auto; padding:14px 16px 42px; }
+#gu-admin #ga-view-manage>*+*{ margin-top:16px; }
+#gu-admin .gm-period{ display:flex; gap:7px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:13px; padding:5px; }
+#gu-admin .gm-period button{ flex:1; padding:9px 4px; border-radius:9px; border:0; background:transparent; color:#b8a1ab; font:800 12.5px 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:.15s; }
+#gu-admin .gm-period button.on{ background:rgba(231,196,138,.16); color:#f0d9a8; }
+#gu-admin .gm-cards{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+#gu-admin .gm-card{ position:relative; background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025)); border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:14px 14px 13px; overflow:hidden; }
+#gu-admin .gm-card::before{ content:''; position:absolute; left:0; top:12px; bottom:12px; width:3px; border-radius:3px; background:var(--gc,#e7c48a); }
+#gu-admin .gm-card span{ font-size:11px; color:#b8a1ab; display:block; letter-spacing:.01em; }
+#gu-admin .gm-card b{ display:block; margin-top:7px; font:800 19px/1 Fraunces,serif; color:#f3e3c4; font-variant-numeric:tabular-nums; }
+#gu-admin .gm-card small{ display:block; margin-top:5px; font:700 11px 'Plus Jakarta Sans',sans-serif; color:#8ff0bf; }
+#gu-admin .gm-card.rev{ --gc:#2fae6a; grid-column:1 / -1; }
+#gu-admin .gm-card.rev b{ color:#9ff0c2; }
+#gu-admin .gm-card.cost{ --gc:#ff9d6a; }
+#gu-admin .gm-card.cost b{ color:#ffcba3; }
+#gu-admin .gm-card.profit{ --gc:#e7c48a; }
+#gu-admin .gm-warn{ display:flex; align-items:flex-start; gap:9px; background:rgba(240,165,0,.1); border:1px solid rgba(240,165,0,.28); border-radius:13px; padding:11px 13px; font:600 12px/1.5 'Plus Jakarta Sans',sans-serif; color:#ffd58a; }
+#gu-admin .gm-warn .material-symbols-outlined{ font-size:18px; flex:none; margin-top:1px; }
+#gu-admin .gm-sec{ background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.07); border-radius:17px; padding:15px 15px 16px; }
+#gu-admin .gm-sec-t{ font:800 14px 'Plus Jakarta Sans',sans-serif; color:#f0d9a8; margin-bottom:13px; }
+#gu-admin .gm-sec-t small{ display:block; margin-top:3px; font:500 11px 'Plus Jakarta Sans',sans-serif; color:#9c8690; }
+#gu-admin .gm-chart{ display:flex; align-items:flex-end; gap:7px; height:128px; padding-top:14px; }
+#gu-admin .gm-bar{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:4px; }
+#gu-admin .gm-bar-v{ width:68%; max-width:34px; min-height:3px; border-radius:6px 6px 3px 3px; background:linear-gradient(180deg,#e7c48a,#c98f52); box-shadow:0 6px 14px -8px rgba(231,196,138,.7); }
+#gu-admin .gm-bar-n{ font:800 9.5px 'Plus Jakarta Sans',sans-serif; color:#cbb3bc; font-variant-numeric:tabular-nums; min-height:12px; }
+#gu-admin .gm-bar-l{ font:700 10px 'Plus Jakarta Sans',sans-serif; color:#8f7a84; }
+#gu-admin .gm-tblwrap{ overflow-x:auto; }
+#gu-admin .gm-tbl{ width:100%; border-collapse:collapse; font:600 12px 'Plus Jakarta Sans',sans-serif; }
+#gu-admin .gm-tbl th{ text-align:right; font:700 10.5px 'Plus Jakarta Sans',sans-serif; color:#9c8690; padding:0 0 9px; letter-spacing:.02em; white-space:nowrap; }
+#gu-admin .gm-tbl th:first-child{ text-align:left; }
+#gu-admin .gm-tbl td{ text-align:right; padding:9px 0; color:#e6d3db; border-top:1px solid rgba(255,255,255,.06); white-space:nowrap; font-variant-numeric:tabular-nums; }
+#gu-admin .gm-tbl td small{ font-size:10px; opacity:.8; }
+#gu-admin .gm-tbl td.gm-nm{ text-align:left; color:#fff; font-weight:700; white-space:normal; padding-right:10px; }
+#gu-admin .gm-tbl tr.loss td.gm-nm::after{ content:' ⚠'; color:#ff9d97; }
+#gu-admin .gm-na{ color:#8f7a84; font-weight:600; }
+#gu-admin .gm-empty2{ text-align:center !important; color:#9c8690; padding:18px 0 !important; }
+#gu-admin .gm-costlist{ display:flex; flex-direction:column; gap:9px; }
+#gu-admin .gm-crow{ display:flex; align-items:center; gap:11px; }
+#gu-admin .gm-thumb{ width:44px; height:44px; flex:none; border-radius:12px; border:1px dashed rgba(231,196,138,.35); background:rgba(255,255,255,.05); color:#e7c48a; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; padding:0; }
+#gu-admin .gm-thumb .material-symbols-outlined{ font-size:19px; }
+#gu-admin .gm-thumb.has{ border-style:solid; border-color:rgba(231,196,138,.5); }
+#gu-admin .gm-thumb img{ width:100%; height:100%; object-fit:cover; }
+#gu-admin .gm-cn{ flex:1; min-width:0; font:700 13.5px 'Plus Jakarta Sans',sans-serif; color:#f3e9ee; }
+#gu-admin .gm-cin{ flex:none; display:flex; align-items:center; gap:4px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:11px; padding:0 11px; height:42px; width:118px; }
+#gu-admin .gm-cin input{ width:100%; background:none; border:0; outline:none; color:#f3e3c4; font:800 14px 'Plus Jakarta Sans',sans-serif; text-align:right; font-variant-numeric:tabular-nums; }
+#gu-admin .gm-cin span{ color:#9c8690; font:700 13px 'Plus Jakarta Sans',sans-serif; }
+#gu-admin .gm-save{ width:100%; margin-top:14px; padding:13px; border-radius:13px; border:0; background:linear-gradient(135deg,#e7c48a,#d9ad6f); color:#2a1a10; font:800 14px 'Plus Jakarta Sans',sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; }
+#gu-admin .gm-save:active{ transform:scale(.98); }
+#gu-admin .gm-save .material-symbols-outlined{ font-size:18px; }
+#gu-admin .gm-cnote{ font:500 11px/1.5 'Plus Jakarta Sans',sans-serif; color:#8f7a84; text-align:center; margin-top:11px; }
+</style>
 <script>
 /* ===== gUlEm · Admin console logic ===== */
 (function(){
@@ -4087,11 +4156,14 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     if(!p || typeof p!=='object') return null;
     var cus=p.customer||{};
     var itemsText=(p.items||[]).map(function(i){return i.name+(i.opts?'('+i.opts+')':'')+' x'+i.qty;}).join(', ');
+    var rawItems=(p.items||[]).map(function(i){ return { name:i.name||'Món', qty:Number(i.qty)||0, price:(i.price!=null?Number(i.price):50000)||0 }; });
     return { code:p.code||'', at:p.at||new Date().toISOString(), customerName:cus.name||p.customerName||'', customerPhone:cus.phone||p.customerPhone||'',
-      address:cus.address||p.address||'', itemsText:itemsText||p.itemsText||'', count:p.count||0, total:p.total||0,
+      address:cus.address||p.address||'', itemsText:itemsText||p.itemsText||'', items:rawItems, count:p.count||0, total:p.total||0,
       payment:p.payment||'', note:p.note||'', recvDate:p.recvDate||'', recvLabel:p.recvLabel||'' };
   }
-  function refresh(){ render(ORDERS.slice()); }
+  function refresh(){ render(ORDERS.slice());
+    try{ if(typeof manageActive==='function' && manageActive()){ var ae=document.activeElement; if(!(ae&&ae.closest&&ae.closest('#ga-view-manage'))) renderManage(); } }catch(e){}
+  }
   function ingest(order, id, isLive){
     if(id && seenIds[id]) return;
     if(id) seenIds[id]=1;
@@ -4172,9 +4244,121 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     catch(e){}
   }
 
+  // ===================== QUẢN TRỊ: doanh thu · giá vốn · lãi gộp =====================
+  var COST={}; try{ COST=JSON.parse(localStorage.getItem('gu_cost')||'{}'); }catch(e){}
+  function costOf(n){ return (COST[n]&&Number(COST[n].c))||0; }
+  function imgOf(n){ return (COST[n]&&COST[n].img)||''; }
+  function saveCostLocal(){ try{ localStorage.setItem('gu_cost',JSON.stringify(COST)); }catch(e){} }
+  function loadCostStore(){ try{ if(window.GUSTORE&&GUSTORE.costGet) GUSTORE.costGet().then(function(d){ if(d&&d.cost){ Object.keys(d.cost).forEach(function(k){ if(!COST[k])COST[k]={}; if(COST[k].c==null) COST[k].c=Number(d.cost[k])||0; }); saveCostLocal(); if(manageActive())renderManage(); } }); }catch(e){} }
+  var MPERIOD='today';
+  function manageActive(){ var v=$('ga-view-manage'); return v&&!v.hasAttribute('hidden'); }
+  function startOfToday(){ var n=new Date(); n.setHours(0,0,0,0); return n.getTime(); }
+  function periodStart(p){ var n=new Date(); n.setHours(0,0,0,0); if(p==='7d'){ n.setDate(n.getDate()-6); return n.getTime(); } if(p==='month'){ return new Date(n.getFullYear(),n.getMonth(),1).getTime(); } return n.getTime(); }
+  function menuNames(){ var s=[]; try{ document.querySelectorAll('#screen-menu .btn-add[data-name]').forEach(function(b){ var n=b.getAttribute('data-name'); if(n&&s.indexOf(n)<0)s.push(n); }); }catch(e){}
+    ORDERS.forEach(function(o){ (o.items||[]).forEach(function(it){ if(it.name&&s.indexOf(it.name)<0)s.push(it.name); }); }); return s; }
+  function computeManage(p){
+    var start=periodStart(p), rev=0, cogs=0, per={};
+    ORDERS.forEach(function(o){ var ts=tparse(o.at); if(ts<start)return;
+      (o.items||[]).forEach(function(it){ var nm=it.name||'Món', q=Number(it.qty)||0, pr=Number(it.price)||0; var r=q*pr, cu=costOf(nm), c=q*cu;
+        rev+=r; cogs+=c; if(!per[nm])per[nm]={q:0,rev:0,cost:0,unit:cu,has:cu>0}; per[nm].q+=q; per[nm].rev+=r; per[nm].cost+=c; });
+    });
+    return {rev:rev,cogs:cogs,profit:rev-cogs,per:per};
+  }
+  function daily7(){ var out=[], base=new Date(); base.setHours(0,0,0,0); var D=['CN','T2','T3','T4','T5','T6','T7'];
+    for(var i=6;i>=0;i--){ var d=new Date(base); d.setDate(d.getDate()-i); out.push({s:d.getTime(),label:D[d.getDay()],rev:0}); }
+    ORDERS.forEach(function(o){ var ts=tparse(o.at); for(var i=0;i<out.length;i++){ if(ts>=out[i].s&&ts<out[i].s+86400000){ out[i].rev+=Number(o.total)||0; break; } } });
+    return out; }
+  function kshort(n){ n=Number(n)||0; if(n>=1000000)return (n/1000000).toFixed(n%1000000?1:0)+'tr'; if(n>=1000)return Math.round(n/1000)+'k'; return String(n); }
+  function renderManage(){
+    var box=$('ga-view-manage'); if(!box)return;
+    var m=computeManage(MPERIOD);
+    var names=menuNames(); var missing=names.filter(function(n){return costOf(n)<=0;}).length;
+    var margin=m.rev>0?Math.round(m.profit/m.rev*100):0;
+    var plabel={today:'Hôm nay','7d':'7 ngày qua',month:'Tháng này'}[MPERIOD];
+    // chart
+    var dd=daily7(), mx=Math.max(1,Math.max.apply(null,dd.map(function(x){return x.rev;})));
+    var bars=dd.map(function(x){ var h=Math.round(x.rev/mx*100); return '<div class="gm-bar"><div class="gm-bar-v" style="height:'+Math.max(3,h)+'%" title="'+money(x.rev)+'"></div><span class="gm-bar-n">'+(x.rev?kshort(x.rev):'')+'</span><span class="gm-bar-l">'+x.label+'</span></div>'; }).join('');
+    // bảng hiệu quả theo món
+    var rows=Object.keys(m.per).map(function(nm){ var it=m.per[nm]; it.name=nm; it.profit=it.rev-it.cost; return it; });
+    rows.sort(function(a,b){ return b.profit-a.profit; });
+    var tbody = rows.length? rows.map(function(it){
+      var mg=it.rev>0?Math.round(it.profit/it.rev*100):0;
+      var loss=it.has&&it.profit<0;
+      var pcol=!it.has?'#8f7a84':(loss?'#ff9d97':'#8ff0bf');
+      return '<tr'+(loss?' class="loss"':'')+'><td class="gm-nm">'+esc(it.name)+'</td><td>'+it.q+'</td><td>'+money(it.rev)+'</td><td>'+(it.has?money(it.cost):'<span class="gm-na">—</span>')+'</td><td style="color:'+pcol+';font-weight:800">'+(it.has?money(it.profit)+' <small>'+mg+'%</small>':'<span class="gm-na">chưa có vốn</span>')+'</td></tr>';
+    }).join('') : '<tr><td colspan="5" class="gm-empty2">Chưa có món nào bán trong kỳ này</td></tr>';
+    // trình quản lý giá vốn
+    var costRows=names.map(function(nm){
+      var im=imgOf(nm), cu=costOf(nm);
+      return '<div class="gm-crow" data-name="'+esc(nm)+'">'
+        +'<button class="gm-thumb'+(im?' has':'')+'" data-photo title="Đính ảnh chụp giá vốn / hoá đơn">'+(im?'<img src="'+im+'">':'<span class="material-symbols-outlined">add_a_photo</span>')+'</button>'
+        +'<div class="gm-cn">'+esc(nm)+'</div>'
+        +'<div class="gm-cin"><input type="tel" inputmode="numeric" data-cost value="'+(cu||'')+'" placeholder="0"><span>đ</span></div>'
+        +'<input type="file" accept="image/*" capture="environment" data-file hidden>'
+        +'</div>';
+    }).join('');
+    box.innerHTML=
+      '<div class="gm-period">'
+        +'<button data-p="today" class="'+(MPERIOD==='today'?'on':'')+'">Hôm nay</button>'
+        +'<button data-p="7d" class="'+(MPERIOD==='7d'?'on':'')+'">7 ngày</button>'
+        +'<button data-p="month" class="'+(MPERIOD==='month'?'on':'')+'">Tháng này</button>'
+      +'</div>'
+      +'<div class="gm-cards">'
+        +'<div class="gm-card rev"><span>Doanh thu · '+plabel+'</span><b>'+money(m.rev)+'</b></div>'
+        +'<div class="gm-card cost"><span>Giá vốn hàng bán</span><b>'+money(m.cogs)+'</b></div>'
+        +'<div class="gm-card profit"><span>Lãi gộp</span><b>'+money(m.profit)+'</b><small>Biên '+margin+'%</small></div>'
+      +'</div>'
+      +(missing>0?'<div class="gm-warn"><span class="material-symbols-outlined">info</span>'+missing+' món chưa nhập giá vốn — lãi gộp đang tính thiếu phần vốn của các món này. Nhập ở mục “Giá vốn mỗi món” bên dưới.</div>':'')
+      +'<div class="gm-sec"><div class="gm-sec-t">Doanh thu 7 ngày gần nhất</div><div class="gm-chart">'+bars+'</div></div>'
+      +'<div class="gm-sec"><div class="gm-sec-t">Hiệu quả theo món · '+plabel+'</div>'
+        +'<div class="gm-tblwrap"><table class="gm-tbl"><thead><tr><th>Món</th><th>SL</th><th>Doanh thu</th><th>Giá vốn</th><th>Lãi gộp</th></tr></thead><tbody>'+tbody+'</tbody></table></div></div>'
+      +'<div class="gm-sec"><div class="gm-sec-t">Giá vốn mỗi món <small>nhập số tiền vốn 1 ly · đính ảnh hoá đơn nếu cần</small></div>'
+        +'<div class="gm-costlist">'+costRows+'</div>'
+        +'<button class="gm-save" data-save><span class="material-symbols-outlined">save</span>Lưu giá vốn</button>'
+        +'<div class="gm-cnote">Giá vốn (số tiền) được lưu & dùng chung trên mọi máy admin. Ảnh chụp lưu trên máy này để tiện tra cứu.</div></div>';
+  }
+  function compressImg(file,cb){
+    try{ var r=new FileReader(); r.onload=function(){ var img=new Image(); img.onload=function(){ var mx=760, w=img.width,h=img.height; if(w>h&&w>mx){ h=Math.round(h*mx/w); w=mx; } else if(h>=w&&h>mx){ w=Math.round(w*mx/h); h=mx; } var cv=document.createElement('canvas'); cv.width=w; cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h); cb(cv.toDataURL('image/jpeg',0.6)); }; img.onerror=function(){cb('');}; img.src=r.result; }; r.onerror=function(){cb('');}; r.readAsDataURL(file); }catch(e){ cb(''); }
+  }
+  var manageBound=false;
+  function bindManage(){
+    if(manageBound)return; manageBound=true; var box=$('ga-view-manage'); if(!box)return;
+    box.addEventListener('click',function(e){
+      var pp=e.target.closest&&e.target.closest('.gm-period button');
+      if(pp){ MPERIOD=pp.getAttribute('data-p'); renderManage(); return; }
+      var ph=e.target.closest&&e.target.closest('[data-photo]');
+      if(ph){ var row=ph.closest('.gm-crow'); var f=row&&row.querySelector('[data-file]'); if(f)f.click(); return; }
+      var sv=e.target.closest&&e.target.closest('[data-save]');
+      if(sv){ saveAllCost(); return; }
+    });
+    box.addEventListener('change',function(e){
+      var f=e.target.closest&&e.target.closest('[data-file]'); if(!f||!f.files||!f.files[0])return;
+      var row=f.closest('.gm-crow'); var nm=row&&row.getAttribute('data-name'); if(!nm)return;
+      toast('Đang xử lý ảnh…');
+      compressImg(f.files[0],function(dataUrl){ if(!dataUrl){ toast('Không đọc được ảnh'); return; } if(!COST[nm])COST[nm]={}; COST[nm].img=dataUrl; saveCostLocal(); var tb=row.querySelector('.gm-thumb'); if(tb){ tb.classList.add('has'); tb.innerHTML='<img src="'+dataUrl+'">'; } toast('✓ Đã đính ảnh cho '+nm); });
+    });
+  }
+  function saveAllCost(){
+    var box=$('ga-view-manage'); if(!box)return; var changed=[];
+    Array.prototype.forEach.call(box.querySelectorAll('.gm-crow'),function(row){ var nm=row.getAttribute('data-name'); var inp=row.querySelector('[data-cost]'); var v=Math.max(0,parseInt((inp&&inp.value||'').replace(/[^0-9]/g,''),10)||0);
+      if(!COST[nm])COST[nm]={}; if((Number(COST[nm].c)||0)!==v){ COST[nm].c=v; changed.push(nm); } else { COST[nm].c=v; } });
+    saveCostLocal();
+    changed.forEach(function(nm){ try{ if(window.GUSTORE&&GUSTORE.costSet) GUSTORE.costSet(nm,costOf(nm)); }catch(e){} });
+    toast('✓ Đã lưu giá vốn'+(changed.length?(' ('+changed.length+' món)'):''));
+    renderManage();
+  }
+  function switchView(v){
+    var ov=$('ga-view-orders'), mv=$('ga-view-manage'); if(!ov||!mv)return;
+    var orders=(v!=='manage');
+    ov.toggleAttribute('hidden',!orders); mv.toggleAttribute('hidden',orders);
+    Array.prototype.forEach.call(document.querySelectorAll('#gu-admin .ga-tab'),function(t){ t.classList.toggle('on',t.getAttribute('data-v')===v); });
+    if(!orders){ bindManage(); renderManage(); loadCostStore(); }
+  }
+
   var clockTimer=null, elapTimer=null;
   function openAdmin(){
     $('gu-admin').classList.add('on');
+    try{ switchView('orders'); }catch(e){}
     unlockAudio(); // mở console là có thao tác chạm -> mồi âm báo
     try{ if('Notification'in window && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
     ORDERS=[]; seenIds=Object.create(null);
@@ -4242,6 +4426,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function boot(){
     $('ga-close').addEventListener('click',closeAdmin);
     var me=$('ga-menued'); if(me) me.addEventListener('click',function(){ if(window.guMenuEditor)window.guMenuEditor(); });
+    var tabbar=document.querySelector('#gu-admin .ga-tabs'); if(tabbar) tabbar.addEventListener('click',function(e){ var t=e.target.closest&&e.target.closest('.ga-tab'); if(!t)return; switchView(t.getAttribute('data-v')); });
     $('ga-refresh').addEventListener('click',function(){ var ic=this.querySelector('.material-symbols-outlined'); if(ic){ ic.style.transition='transform .6s'; ic.style.transform='rotate(360deg)'; setTimeout(function(){ ic.style.transition='none'; ic.style.transform='none'; },620); } toast('🔄 Đang làm mới…'); ORDERS=[]; seenIds=Object.create(null); loadHistory(); });
     $('ga-list').addEventListener('click',function(e){
       var fd=e.target.closest&&e.target.closest('.ga-forcedone');
