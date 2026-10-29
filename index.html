@@ -4249,7 +4249,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   function costOf(n){ return (COST[n]&&Number(COST[n].c))||0; }
   function imgOf(n){ return (COST[n]&&COST[n].img)||''; }
   function saveCostLocal(){ try{ localStorage.setItem('gu_cost',JSON.stringify(COST)); }catch(e){} }
-  function loadCostStore(){ try{ if(window.GUSTORE&&GUSTORE.costGet) GUSTORE.costGet().then(function(d){ if(d&&d.cost){ Object.keys(d.cost).forEach(function(k){ if(!COST[k])COST[k]={}; if(COST[k].c==null) COST[k].c=Number(d.cost[k])||0; }); saveCostLocal(); if(manageActive())renderManage(); } }); }catch(e){} }
+  function loadCostStore(){ try{ if(window.GUSTORE&&GUSTORE.costGet) GUSTORE.costGet().then(function(d){ if(d&&d.cost){ Object.keys(d.cost).forEach(function(k){ if(!COST[k])COST[k]={}; if(COST[k].c==null) COST[k].c=Number(d.cost[k])||0; }); saveCostLocal(); if(manageActive())renderManage(true); } }); }catch(e){} }
   var MPERIOD='today';
   function manageActive(){ var v=$('ga-view-manage'); return v&&!v.hasAttribute('hidden'); }
   function startOfToday(){ var n=new Date(); n.setHours(0,0,0,0); return n.getTime(); }
@@ -4269,16 +4269,14 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     ORDERS.forEach(function(o){ var ts=tparse(o.at); for(var i=0;i<out.length;i++){ if(ts>=out[i].s&&ts<out[i].s+86400000){ out[i].rev+=Number(o.total)||0; break; } } });
     return out; }
   function kshort(n){ n=Number(n)||0; if(n>=1000000)return (n/1000000).toFixed(n%1000000?1:0)+'tr'; if(n>=1000)return Math.round(n/1000)+'k'; return String(n); }
-  function renderManage(){
-    var box=$('ga-view-manage'); if(!box)return;
+  function renderSummary(){
+    var host=$('gm-summary'); if(!host)return;
     var m=computeManage(MPERIOD);
     var names=menuNames(); var missing=names.filter(function(n){return costOf(n)<=0;}).length;
     var margin=m.rev>0?Math.round(m.profit/m.rev*100):0;
     var plabel={today:'Hôm nay','7d':'7 ngày qua',month:'Tháng này'}[MPERIOD];
-    // chart
     var dd=daily7(), mx=Math.max(1,Math.max.apply(null,dd.map(function(x){return x.rev;})));
     var bars=dd.map(function(x){ var h=Math.round(x.rev/mx*100); return '<div class="gm-bar"><div class="gm-bar-v" style="height:'+Math.max(3,h)+'%" title="'+money(x.rev)+'"></div><span class="gm-bar-n">'+(x.rev?kshort(x.rev):'')+'</span><span class="gm-bar-l">'+x.label+'</span></div>'; }).join('');
-    // bảng hiệu quả theo món
     var rows=Object.keys(m.per).map(function(nm){ var it=m.per[nm]; it.name=nm; it.profit=it.rev-it.cost; return it; });
     rows.sort(function(a,b){ return b.profit-a.profit; });
     var tbody = rows.length? rows.map(function(it){
@@ -4287,17 +4285,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       var pcol=!it.has?'#8f7a84':(loss?'#ff9d97':'#8ff0bf');
       return '<tr'+(loss?' class="loss"':'')+'><td class="gm-nm">'+esc(it.name)+'</td><td>'+it.q+'</td><td>'+money(it.rev)+'</td><td>'+(it.has?money(it.cost):'<span class="gm-na">—</span>')+'</td><td style="color:'+pcol+';font-weight:800">'+(it.has?money(it.profit)+' <small>'+mg+'%</small>':'<span class="gm-na">chưa có vốn</span>')+'</td></tr>';
     }).join('') : '<tr><td colspan="5" class="gm-empty2">Chưa có món nào bán trong kỳ này</td></tr>';
-    // trình quản lý giá vốn
-    var costRows=names.map(function(nm){
-      var im=imgOf(nm), cu=costOf(nm);
-      return '<div class="gm-crow" data-name="'+esc(nm)+'">'
-        +'<button class="gm-thumb'+(im?' has':'')+'" data-photo title="Đính ảnh chụp giá vốn / hoá đơn">'+(im?'<img src="'+im+'">':'<span class="material-symbols-outlined">add_a_photo</span>')+'</button>'
-        +'<div class="gm-cn">'+esc(nm)+'</div>'
-        +'<div class="gm-cin"><input type="tel" inputmode="numeric" data-cost value="'+(cu||'')+'" placeholder="0"><span>đ</span></div>'
-        +'<input type="file" accept="image/*" capture="environment" data-file hidden>'
-        +'</div>';
-    }).join('');
-    box.innerHTML=
+    host.innerHTML=
       '<div class="gm-period">'
         +'<button data-p="today" class="'+(MPERIOD==='today'?'on':'')+'">Hôm nay</button>'
         +'<button data-p="7d" class="'+(MPERIOD==='7d'?'on':'')+'">7 ngày</button>'
@@ -4311,11 +4299,30 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       +(missing>0?'<div class="gm-warn"><span class="material-symbols-outlined">info</span>'+missing+' món chưa nhập giá vốn — lãi gộp đang tính thiếu phần vốn của các món này. Nhập ở mục “Giá vốn mỗi món” bên dưới.</div>':'')
       +'<div class="gm-sec"><div class="gm-sec-t">Doanh thu 7 ngày gần nhất</div><div class="gm-chart">'+bars+'</div></div>'
       +'<div class="gm-sec"><div class="gm-sec-t">Hiệu quả theo món · '+plabel+'</div>'
-        +'<div class="gm-tblwrap"><table class="gm-tbl"><thead><tr><th>Món</th><th>SL</th><th>Doanh thu</th><th>Giá vốn</th><th>Lãi gộp</th></tr></thead><tbody>'+tbody+'</tbody></table></div></div>'
-      +'<div class="gm-sec"><div class="gm-sec-t">Giá vốn mỗi món <small>nhập số tiền vốn 1 ly · đính ảnh hoá đơn nếu cần</small></div>'
-        +'<div class="gm-costlist">'+costRows+'</div>'
-        +'<button class="gm-save" data-save><span class="material-symbols-outlined">save</span>Lưu giá vốn</button>'
-        +'<div class="gm-cnote">Giá vốn (số tiền) được lưu & dùng chung trên mọi máy admin. Ảnh chụp lưu trên máy này để tiện tra cứu.</div></div>';
+        +'<div class="gm-tblwrap"><table class="gm-tbl"><thead><tr><th>Món</th><th>SL</th><th>Doanh thu</th><th>Giá vốn</th><th>Lãi gộp</th></tr></thead><tbody>'+tbody+'</tbody></table></div></div>';
+  }
+  function renderEditor(){
+    var host=$('gm-editor'); if(!host)return;
+    var names=menuNames();
+    var costRows=names.map(function(nm){
+      var im=imgOf(nm), cu=costOf(nm);
+      return '<div class="gm-crow" data-name="'+esc(nm)+'">'
+        +'<button class="gm-thumb'+(im?' has':'')+'" data-photo title="Đính ảnh chụp giá vốn / hoá đơn">'+(im?'<img src="'+im+'">':'<span class="material-symbols-outlined">add_a_photo</span>')+'</button>'
+        +'<div class="gm-cn">'+esc(nm)+'</div>'
+        +'<div class="gm-cin"><input type="tel" inputmode="numeric" data-cost value="'+(cu||'')+'" placeholder="0"><span>đ</span></div>'
+        +'<input type="file" accept="image/*" capture="environment" data-file hidden>'
+        +'</div>';
+    }).join('');
+    host.innerHTML='<div class="gm-sec"><div class="gm-sec-t">Giá vốn mỗi món <small>nhập số tiền vốn 1 ly · đính ảnh hoá đơn nếu cần</small></div>'
+      +'<div class="gm-costlist">'+costRows+'</div>'
+      +'<button class="gm-save" data-save><span class="material-symbols-outlined">save</span>Lưu giá vốn</button>'
+      +'<div class="gm-cnote">Giá vốn (số tiền) được lưu & dùng chung trên mọi máy admin. Ảnh chụp lưu trên máy này để tiện tra cứu.</div></div>';
+  }
+  function renderManage(rebuildEditor){
+    var box=$('ga-view-manage'); if(!box)return;
+    if(!$('gm-summary')||!$('gm-editor')){ box.innerHTML='<div id="gm-summary"></div><div id="gm-editor"></div>'; rebuildEditor=true; }
+    renderSummary();
+    if(rebuildEditor) renderEditor();
   }
   function compressImg(file,cb){
     try{ var r=new FileReader(); r.onload=function(){ var img=new Image(); img.onload=function(){ var mx=760, w=img.width,h=img.height; if(w>h&&w>mx){ h=Math.round(h*mx/w); w=mx; } else if(h>=w&&h>mx){ w=Math.round(w*mx/h); h=mx; } var cv=document.createElement('canvas'); cv.width=w; cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h); cb(cv.toDataURL('image/jpeg',0.6)); }; img.onerror=function(){cb('');}; img.src=r.result; }; r.onerror=function(){cb('');}; r.readAsDataURL(file); }catch(e){ cb(''); }
@@ -4345,7 +4352,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     saveCostLocal();
     changed.forEach(function(nm){ try{ if(window.GUSTORE&&GUSTORE.costSet) GUSTORE.costSet(nm,costOf(nm)); }catch(e){} });
     toast('✓ Đã lưu giá vốn'+(changed.length?(' ('+changed.length+' món)'):''));
-    renderManage();
+    renderManage(true);
   }
   function switchView(v){
     var ov=$('ga-view-orders'), mv=$('ga-view-manage'); if(!ov||!mv)return;
