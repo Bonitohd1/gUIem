@@ -3755,18 +3755,26 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 #gu-admin *{ box-sizing:border-box; }
 #gu-admin .ga-wrap{ width:100%; max-width:760px; margin:0 auto; display:flex; flex-direction:column; flex:1; min-height:0; }
 /* ---- top bar ---- */
-#gu-admin .ga-top{ display:flex; align-items:center; gap:12px; padding:15px 18px;
+#gu-admin .ga-top{ display:flex; align-items:center; gap:11px; padding:13px 15px;
   background:linear-gradient(135deg,#3a2531 0%,#271a23 100%); box-shadow:0 12px 34px -16px rgba(0,0,0,.8), inset 0 -1px 0 rgba(231,196,138,.28); }
-#gu-admin .ga-brand{ display:flex; align-items:center; gap:11px; flex:1; min-width:0; }
-#gu-admin .ga-seal{ width:42px; height:42px; border-radius:13px; object-fit:cover; box-shadow:0 0 0 1.5px rgba(231,196,138,.6), 0 6px 16px -6px rgba(0,0,0,.6); background:#fff; }
-#gu-admin .ga-top .ga-ttl{ font-family:Fraunces,serif; font-weight:700; font-size:18.5px; letter-spacing:.2px; line-height:1.05; color:#f0d9a8; }
-#gu-admin .ga-top .ga-sub{ display:flex; align-items:center; gap:6px; font-size:11px; color:#cdb6c0; margin-top:3px; }
-#gu-admin .ga-clock{ font-variant-numeric:tabular-nums; font-weight:700; color:#e7c48a; }
+#gu-admin .ga-brand{ display:flex; align-items:center; gap:10px; flex:1 1 auto; min-width:0; }
+#gu-admin .ga-bt{ min-width:0; flex:1; }
+#gu-admin .ga-seal{ width:40px; height:40px; border-radius:12px; object-fit:cover; box-shadow:0 0 0 1.5px rgba(231,196,138,.6), 0 6px 16px -6px rgba(0,0,0,.6); background:#fff; flex:none; }
+#gu-admin .ga-top .ga-ttl{ font-family:Fraunces,serif; font-weight:700; font-size:17px; letter-spacing:.2px; line-height:1.15; color:#f0d9a8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#gu-admin .ga-top .ga-sub{ display:flex; align-items:center; gap:6px; font-size:11px; color:#cdb6c0; margin-top:2px; white-space:nowrap; overflow:hidden; }
+#gu-admin .ga-top .ga-sub #ga-status{ overflow:hidden; text-overflow:ellipsis; min-width:0; }
+#gu-admin .ga-clock{ font-variant-numeric:tabular-nums; font-weight:700; color:#e7c48a; flex:none; }
 #gu-admin .ga-live{ width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.6);animation:guLive 1.6s infinite; flex:none; }
 @keyframes guLive{ 0%{box-shadow:0 0 0 0 rgba(61,220,132,.55)} 70%{box-shadow:0 0 0 7px rgba(61,220,132,0)} 100%{box-shadow:0 0 0 0 rgba(61,220,132,0)} }
-#gu-admin .ga-ico{ width:38px;height:38px;border-radius:11px;border:1px solid rgba(231,196,138,.18);background:rgba(255,255,255,.06);color:#f0d9a8;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s; flex:none; }
-#gu-admin .ga-ico:active{ transform:scale(.92); } #gu-admin .ga-ico:hover{ background:rgba(231,196,138,.16); }
+#gu-admin .ga-acts{ display:flex; align-items:center; gap:6px; flex:none; }
+#gu-admin .ga-ico{ width:35px;height:35px;border-radius:11px;border:1px solid rgba(231,196,138,.18);background:rgba(255,255,255,.06);color:#f0d9a8;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .14s,background .2s; flex:none; }
+#gu-admin .ga-ico .material-symbols-outlined{ font-size:19px; }
+#gu-admin .ga-ico:active{ transform:scale(.9); } #gu-admin .ga-ico:hover{ background:rgba(231,196,138,.16); }
+/* vào view/tab mượt + cuộn đà iOS */
+#gu-admin .ga-view:not([hidden]){ animation:gaViewIn .22s ease both; }
+@keyframes gaViewIn{ from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:none} }
+#gu-admin .ga-list, #gu-admin #ga-view-manage{ -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
 /* ---- KPI stats ---- */
 #gu-admin .ga-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:9px; padding:15px 18px 4px; }
 #gu-admin .ga-stat{ position:relative; background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025)); border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:13px 11px 12px; overflow:hidden; }
@@ -3873,16 +3881,18 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
   <div class="ga-top">
     <div class="ga-brand">
       <img class="ga-seal" src="/logo.png?v=1" alt="gUlEm">
-      <div style="min-width:0">
-        <div class="ga-ttl">gUlEm · Bảng vận hành</div>
+      <div class="ga-bt">
+        <div class="ga-ttl">gUlEm · Vận hành</div>
         <div class="ga-sub"><span class="ga-live"></span><span id="ga-status">Đang kết nối…</span> <span class="ga-clock" id="ga-clock"></span></div>
       </div>
     </div>
+    <div class="ga-acts">
     <button class="ga-ico" id="ga-menued" title="Thực đơn theo ngày"><span class="material-symbols-outlined">restaurant_menu</span></button>
     <button class="ga-ico" id="ga-sound" title="Bật/tắt chuông"><span class="material-symbols-outlined">notifications_active</span></button>
     <button class="ga-ico" id="ga-push" title="Thông báo nền (khi đóng app)"><span class="material-symbols-outlined">notification_add</span></button>
     <button class="ga-ico" id="ga-refresh" title="Làm mới"><span class="material-symbols-outlined">refresh</span></button>
     <button class="ga-ico" id="ga-close" title="Đóng"><span class="material-symbols-outlined">close</span></button>
+    </div>
   </div>
   <div class="ga-tabs">
     <button class="ga-tab on" data-v="orders"><span class="material-symbols-outlined">receipt_long</span>Đơn hàng</button>
@@ -4190,7 +4200,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
         ORDERS.forEach(function(o){ var t=tparse(o.at); if(t>seenMax)seenMax=t; });
         try{ localStorage.setItem('gu_admin_seen',String(seenMax)); }catch(e){}
         firstLoad=false; // từ vòng poll sau, đơn mới sẽ kêu chuông/thông báo
-        $('ga-status').textContent='🟢 Đang nhận đơn · '+hhmm(Date.now());
+        $('ga-status').textContent='Đang nhận đơn';
         refresh();
       })
       .catch(function(){ $('ga-status').textContent='Đang kết nối lại…'; });
@@ -4230,7 +4240,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     if(!CFG.ntfy || es) return;
     try{
       es=new EventSource('https://ntfy.sh/'+CFG.ntfy+'/sse');
-      es.onmessage=function(ev){ try{ var m=JSON.parse(ev.data); if(m.event==='message' && m.message){ ingest(JSON.parse(m.message), m.id, true); $('ga-status').textContent='🟢 Đang nhận trực tiếp · '+hhmm(Date.now()); } }catch(e){} };
+      es.onmessage=function(ev){ try{ var m=JSON.parse(ev.data); if(m.event==='message' && m.message){ ingest(JSON.parse(m.message), m.id, true); $('ga-status').textContent='Nhận đơn trực tiếp'; } }catch(e){} };
       es.onerror=function(){ $('ga-status').textContent='Kết nối lại trực tiếp…'; };
     }catch(e){}
     // kênh trạng thái: nhận xác nhận "Đã nhận" từ khách để đóng đơn
