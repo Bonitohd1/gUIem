@@ -3760,17 +3760,23 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
 #gu-admin .ga-brand{ display:flex; align-items:center; gap:10px; flex:1 1 auto; min-width:0; }
 #gu-admin .ga-bt{ min-width:0; flex:1; }
 #gu-admin .ga-seal{ width:40px; height:40px; border-radius:12px; object-fit:cover; box-shadow:0 0 0 1.5px rgba(231,196,138,.6), 0 6px 16px -6px rgba(0,0,0,.6); background:#fff; flex:none; }
-#gu-admin .ga-top .ga-ttl{ font-family:Fraunces,serif; font-weight:700; font-size:17px; letter-spacing:.2px; line-height:1.15; color:#f0d9a8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#gu-admin .ga-top .ga-ttl{ font-family:Fraunces,serif; font-weight:700; font-size:18px; letter-spacing:.2px; line-height:1.15; color:#f0d9a8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #gu-admin .ga-top .ga-sub{ display:flex; align-items:center; gap:6px; font-size:11px; color:#cdb6c0; margin-top:2px; white-space:nowrap; overflow:hidden; }
 #gu-admin .ga-top .ga-sub #ga-status{ overflow:hidden; text-overflow:ellipsis; min-width:0; }
 #gu-admin .ga-clock{ font-variant-numeric:tabular-nums; font-weight:700; color:#e7c48a; flex:none; }
 #gu-admin .ga-live{ width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.6);animation:guLive 1.6s infinite; flex:none; }
 @keyframes guLive{ 0%{box-shadow:0 0 0 0 rgba(61,220,132,.55)} 70%{box-shadow:0 0 0 7px rgba(61,220,132,0)} 100%{box-shadow:0 0 0 0 rgba(61,220,132,0)} }
-#gu-admin .ga-acts{ display:flex; align-items:center; gap:6px; flex:none; }
-#gu-admin .ga-ico{ width:35px;height:35px;border-radius:11px;border:1px solid rgba(231,196,138,.18);background:rgba(255,255,255,.06);color:#f0d9a8;
+#gu-admin .ga-ico{ width:36px;height:36px;border-radius:11px;border:1px solid rgba(231,196,138,.18);background:rgba(255,255,255,.06);color:#f0d9a8;
   display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .14s,background .2s; flex:none; }
-#gu-admin .ga-ico .material-symbols-outlined{ font-size:19px; }
+#gu-admin .ga-ico .material-symbols-outlined{ font-size:20px; }
 #gu-admin .ga-ico:active{ transform:scale(.9); } #gu-admin .ga-ico:hover{ background:rgba(231,196,138,.16); }
+/* thanh tác vụ (hàng riêng, không chèn ép tên) */
+#gu-admin .ga-actbar{ display:flex; align-items:stretch; gap:7px; padding:11px 15px 3px; }
+#gu-admin .ga-abtn{ flex:1; min-width:0; display:inline-flex; align-items:center; justify-content:center; gap:5px; height:40px; padding:0 6px; border-radius:12px;
+  border:1px solid rgba(231,196,138,.18); background:rgba(255,255,255,.05); color:#e9d4da; font:700 12px 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .14s,background .2s; white-space:nowrap; overflow:hidden; }
+#gu-admin .ga-abtn .material-symbols-outlined{ font-size:18px; color:#e7c48a; flex:none; }
+#gu-admin .ga-abtn:active{ transform:scale(.95); } #gu-admin .ga-abtn:hover{ background:rgba(231,196,138,.14); }
+#gu-admin .ga-abtn .ga-ablb{ overflow:hidden; text-overflow:ellipsis; }
 /* vào view/tab mượt + cuộn đà iOS */
 #gu-admin .ga-view:not([hidden]){ animation:gaViewIn .22s ease both; }
 @keyframes gaViewIn{ from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:none} }
@@ -3882,17 +3888,17 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
     <div class="ga-brand">
       <img class="ga-seal" src="/logo.png?v=1" alt="gUlEm">
       <div class="ga-bt">
-        <div class="ga-ttl">gUlEm · Vận hành</div>
+        <div class="ga-ttl">gUlEm · Bảng vận hành</div>
         <div class="ga-sub"><span class="ga-live"></span><span id="ga-status">Đang kết nối…</span> <span class="ga-clock" id="ga-clock"></span></div>
       </div>
     </div>
-    <div class="ga-acts">
-    <button class="ga-ico" id="ga-menued" title="Thực đơn theo ngày"><span class="material-symbols-outlined">restaurant_menu</span></button>
-    <button class="ga-ico" id="ga-sound" title="Bật/tắt chuông"><span class="material-symbols-outlined">notifications_active</span></button>
-    <button class="ga-ico" id="ga-push" title="Thông báo nền (khi đóng app)"><span class="material-symbols-outlined">notification_add</span></button>
-    <button class="ga-ico" id="ga-refresh" title="Làm mới"><span class="material-symbols-outlined">refresh</span></button>
-    <button class="ga-ico" id="ga-close" title="Đóng"><span class="material-symbols-outlined">close</span></button>
-    </div>
+    <button class="ga-ico ga-x" id="ga-close" title="Đóng"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="ga-actbar">
+    <button class="ga-abtn" id="ga-menued"><span class="material-symbols-outlined">restaurant_menu</span>Thực đơn</button>
+    <button class="ga-abtn" id="ga-sound"><span class="material-symbols-outlined">notifications_active</span>Chuông</button>
+    <button class="ga-abtn" id="ga-push"><span class="material-symbols-outlined">notification_add</span>Đẩy nền</button>
+    <button class="ga-abtn" id="ga-refresh"><span class="material-symbols-outlined">refresh</span>Làm mới</button>
   </div>
   <div class="ga-tabs">
     <button class="ga-tab on" data-v="orders"><span class="material-symbols-outlined">receipt_long</span>Đơn hàng</button>
