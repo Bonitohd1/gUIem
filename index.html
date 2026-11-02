@@ -2096,7 +2096,7 @@ img[alt="QR Code Tích Điểm"]{box-shadow:0 0 0 1.5px #ffd7e2;background:#fff 
       });
     }
 
-    const replayButtons = document.querySelectorAll('button:has(span:contains("replay")), article button');
+    const replayButtons = document.querySelectorAll('article button');
     replayButtons.forEach(btn => {
       if (btn.innerText.includes('Đặt lại')) {
         btn.addEventListener('click', () => {
